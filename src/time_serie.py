@@ -6,21 +6,15 @@ Created on Wed Mar 27 11:57:37 2019
 @author: sebastien@gardoll.fr
 """
 
-from abc import ABC, abstractmethod
 import xarray as xr
 import logging
-from variable import MultiLevelVariable, SingleLevelVariable,
-VariableNetcdfFilePathVisitor, VariableVisitor
+from variable import MultiLevelVariable, SingleLevelVariable,\
+ComputedVariable, VariableNetcdfFilePathVisitor, VariableVisitor
 import coordinate_utils as cu
 import time_utils as tu
-import re
-import xarray_utils as xu
+from xarray_utils import XarrayRpnCalculator
 
-class TimeSerie(ABC):
-
-  pass
-
-class XarrayTimeSerie(TimeSerie):
+class XarrayTimeSerie():
 
   DATE_TEMPLATE = "{year}-{month}-{day}T{hour}:{minute}:{second}:{microsecond}"
 
@@ -58,15 +52,25 @@ class XarrayTimeSerie(TimeSerie):
     variable_type = type(variable)
     if variable_type is MultiLevelVariable or \
        variable_type is SingleLevelVariable:
-      XarrayTimeSerie._extract_square_region(self.dataset, variable, date, lat, lon,
-                                             half_lat_frame, half_lon_frame)
+      result = XarrayTimeSerie._extract_square_region(self.dataset, variable,
+                                 date, lat, lon, half_lat_frame, half_lon_frame)
     else:
-      pass
+      if variable_type is ComputedVariable:
+        visitor = ExtractionComputeVariable(self.dataset, date, lat, lon,
+                                            half_lat_frame, half_lon_frame)
+        variable.accept(visitor)
+        result = visitor.result
+
+      else:
+        msg = f"unsupported variable type '{variable_type}'"
+        logging.error(msg)
+        raise Exception(msg)
+      return result
 
   # Extract the region that centers the given lat/lon location. Variable must be
   # SingleLevelVariable or MultiLevelVariable.
   @staticmethod
-  def extract_square_region(dataset, variable, date, lat, lon,
+  def _extract_square_region(dataset, variable, date, lat, lon,
                             half_lat_frame, half_lon_frame):
     rounded_lat = cu.round_nearest(lat, variable.lat_resolution, variable.nb_lat_decimal)
     rounded_lon = cu.round_nearest(lon, variable.lon_resolution, variable.nb_lon_decimal)
@@ -117,26 +121,28 @@ class XarrayTimeSerie(TimeSerie):
 
 class ExtractionComputeVariable(VariableVisitor):
 
-  def __init__(self, dataset, variable, date, lat, lon, half_lat_frame,
+  def __init__(self, dataset, date, lat, lon, half_lat_frame,
                half_lon_frame):
-    self.result         = dict()
-    self.dataset        = dataset
-    self.date           = date
-    self.lat            = lat
-    self.lon            = lon
-    self.half_lat_frame = half_lat_frame
-    self.half_lon_frame = half_lon_frame
+    self.data_array_mapping = dict()
+    self.dataset            = dataset
+    self.date               = date
+    self.lat                = lat
+    self.lon                = lon
+    self.half_lat_frame     = half_lat_frame
+    self.half_lon_frame     = half_lon_frame
+    self.result             = None
 
   def visit_SingleLevelVariable(self, variable):
-    region = XarrayTimeSerie.extract_square_region(self.dataset, variable,
-                                                   self.date, self.lat, self.lon,
-                                                   self.half_lat_frame,
-                                                   self.half_lon_frame)
-    self.result[variable.str_id] = region
+    region = XarrayTimeSerie._extract_square_region(self.dataset, variable,
+                                                    self.date, self.lat, self.lon,
+                                                    self.half_lat_frame,
+                                                    self.half_lon_frame)
+    self.data_array_mapping[variable.str_id] = region
 
   def visit_MultiLevelVariable(self, variable):
     self.visit_SingleLevelVariable(variable)
 
   def visit_ComputedVariable(self, variable):
-    todo
-
+    calulator = XarrayRpnCalculator(variable.computation_expression,
+                                    self.data_array_mapping)
+    self.result = calulator.compute()
