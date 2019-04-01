@@ -69,9 +69,8 @@ class XarrayTimeSerie():
 
   # Extract the region that centers the given lat/lon location. Variable must be
   # SingleLevelVariable or MultiLevelVariable.
-  @staticmethod
-  def _extract_square_region(dataset, variable, date, lat, lon,
-                            half_lat_frame, half_lon_frame):
+  def _extract_square_region(self, variable, date, lat, lon,
+                             half_lat_frame, half_lon_frame):
     rounded_lat = cu.round_nearest(lat, variable.lat_resolution, variable.nb_lat_decimal)
     rounded_lon = cu.round_nearest(lon, variable.lon_resolution, variable.nb_lon_decimal)
 
@@ -85,18 +84,19 @@ class XarrayTimeSerie():
     kwargs = tu.build_date_dictionary(date)
     formatted_date = XarrayTimeSerie.DATE_TEMPLATE.format(**kwargs)
 
-    if type(variable) is MultiLevelVariable:
-      tmp_result = dataset.sel(time=formatted_date,
-                               level=variable.level,
-                               latitude=slice(lat_max, lat_min),
-                               longitude=slice(lon_min, lon_max))
+    variable_type = type(variable)
+    if variable_type is MultiLevelVariable:
+      tmp_result = self.dataset.sel(time=formatted_date,
+                                    level=variable.level,
+                                    latitude=slice(lat_max, lat_min),
+                                    longitude=slice(lon_min, lon_max))
     else:
-      if type(variable) is SingleLevelVariable:
-        tmp_result = dataset.sel(time=formatted_date,
-                                 latitude=slice(lat_max, lat_min),
-                                 longitude=slice(lon_min, lon_max))
+      if variable_type is SingleLevelVariable:
+        tmp_result = self.dataset.sel(time=formatted_date,
+                                      latitude=slice(lat_max, lat_min),
+                                      longitude=slice(lon_min, lon_max))
       else:
-        msg = 'cannot extract directly computed variables'
+        msg = f"unsupported direct extraction for variable type '{variable_type}'"
         logging.error(msg)
         raise Exception(msg)
 
@@ -121,10 +121,10 @@ class XarrayTimeSerie():
 
 class ExtractionComputeVariable(VariableVisitor):
 
-  def __init__(self, dataset, date, lat, lon, half_lat_frame,
+  def __init__(self, time_serie, date, lat, lon, half_lat_frame,
                half_lon_frame):
     self.data_array_mapping = dict()
-    self.dataset            = dataset
+    self.time_serie         = time_serie
     self.date               = date
     self.lat                = lat
     self.lon                = lon
@@ -133,10 +133,10 @@ class ExtractionComputeVariable(VariableVisitor):
     self.result             = None
 
   def visit_SingleLevelVariable(self, variable):
-    region = XarrayTimeSerie._extract_square_region(self.dataset, variable,
-                                                    self.date, self.lat, self.lon,
-                                                    self.half_lat_frame,
-                                                    self.half_lon_frame)
+    region = self.time_serie.extract_square_region(variable, self.date,
+                                                   self.lat, self.lon,
+                                                   self.half_lat_frame,
+                                                   self.half_lon_frame)
     self.data_array_mapping[variable.str_id] = region
 
   def visit_MultiLevelVariable(self, variable):
