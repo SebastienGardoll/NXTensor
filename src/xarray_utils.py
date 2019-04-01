@@ -66,7 +66,7 @@ class XarrayRpnCalculator():
 
   def get_result(self):
     result_id = self._stack[0]
-    result = self._intermediate_results[result_id]
+    result = self._intermediate_results.get(result_id, None)
     if result is None:
       raise Exception("None result")
     else: return result
