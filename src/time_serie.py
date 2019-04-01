@@ -30,6 +30,7 @@ class XarrayTimeSeries:
   # Options is a dictionary of named parameters for the methods open_mfdataset or
   # open_dataset.
   def _open_netcdf(self, netcdf_file_paths, options = None):
+    logging.info(f"opening netcdf files: {netcdf_file_paths}")
     try:
       if len(netcdf_file_paths) > 1:
         if options is not None:
@@ -49,13 +50,16 @@ class XarrayTimeSeries:
   # Extract the region that centers the given lat/lon location.
   def extract_square_region(self, variable, date, lat, lon,
                             half_lat_frame, half_lon_frame):
+    logging.info(f"extracting subregion {date}, {lat}, {lon} for variable '{variable.str_id}'")
     variable_type = type(variable)
     if variable_type is MultiLevelVariable or \
        variable_type is SingleLevelVariable:
+      logging.debug(f"starting the extraction of the {variable_type} variable '{variable.str_id}'")
       result = self._extract_square_region( variable, date, lat, lon,
                                             half_lat_frame, half_lon_frame)
     else:
       if variable_type is ComputedVariable:
+        logging.debug(f"starting the extraction of the computed variable '{variable.str_id}'")
         visitor = ExtractionComputeVariable(self.dataset, date, lat, lon,
                                             half_lat_frame, half_lon_frame)
         variable.accept(visitor)
@@ -71,6 +75,7 @@ class XarrayTimeSeries:
   # SingleLevelVariable or MultiLevelVariable.
   def _extract_square_region(self, variable, date, lat, lon,
                              half_lat_frame, half_lon_frame):
+    logging.debug(f"extracting subregion {date}, {lat}, {lon} for variable '{variable.str_id}'")
     rounded_lat = cu.round_nearest(lat, variable.lat_resolution, variable.nb_lat_decimal)
     rounded_lon = cu.round_nearest(lon, variable.lon_resolution, variable.nb_lon_decimal)
 
@@ -145,4 +150,5 @@ class ExtractionComputeVariable(VariableVisitor):
   def visit_ComputedVariable(self, variable):
     calculator = XarrayRpnCalculator(variable.computation_expression,
                                     self.data_array_mapping)
+    logging.debug('starting a xarray RPN calculator')
     self.result = calculator.compute()

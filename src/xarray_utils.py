@@ -83,6 +83,7 @@ class XarrayRpnCalculator():
   def _compute(self):
     operator = self._stack.pop()
     nb_operand, operation = XarrayRpnCalculator.OPERATORS[operator]
+    logging.debug(f"computing operator '{operator}' with arity of '{nb_operand}'")
 
     if nb_operand == 1:
       operand_literal = self._stack.pop()
@@ -90,9 +91,12 @@ class XarrayRpnCalculator():
       # (e.g. 13124234) as hash function return a scalar.
       label = str(hash(f"{operator}#{operand_literal}"))
       if label in self._intermediate_results:
+        logging.debug(f"getting already computed intermediate result for label '{label}'")
         intermediate_result = self._intermediate_results[label]
       else:
+        logging.debug(f"resolving operand_literal '{operand_literal}'")
         resolved_operand = self._resolve_operand(operand_literal)
+        logging.debug(f"computing intermediate with label '{label}' and operand '{resolved_operand}'")
         intermediate_result = operation(resolved_operand)
     else:
       right_operand_literal = self._stack.pop()
@@ -101,20 +105,27 @@ class XarrayRpnCalculator():
       # (e.g. 13124234) as hash function return a scalar.
       label = str(hash(f"{left_operand_literal}#{operator}#{right_operand_literal}"))
       if label in self._intermediate_results:
+        logging.debug(f"getting already computed intermediate result for label '{label}'")
         intermediate_result = self._intermediate_results[label]
       else:
+        logging.debug(f"resolving operand_literal '{right_operand_literal}'")
         right_resolved_operand = self._resolve_operand(right_operand_literal)
+        logging.debug(f"resolving operand_literal '{left_operand_literal}'")
         left_resolved_operand  = self._resolve_operand(left_operand_literal)
+        logging.debug(f"computing intermediate with label '{label}', left operand '{left_resolved_operand}' and right operand '{right_resolved_operand}'")
         intermediate_result    = operation(left_resolved_operand, right_resolved_operand)
 
+    logging.debug(f"staking result with a shape of {intermediate_result.shape} and label {label}")
     self._stack.append(label)
     self._intermediate_results[label] = intermediate_result
 
   def compute(self):
     tokens = XarrayRpnCalculator.TOKENIZER.split(self._expression)
     tokens = self._check_tokens(tokens)
+    logging.debug(f"computing tokens: {tokens}")
     for token in tokens:
       self._stack.append(token)
+      logging.debug(f"appending token '{token}' on the stack")
       if token in XarrayRpnCalculator.OPERATORS:
         self._compute()
     return self.get_result()
