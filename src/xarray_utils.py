@@ -40,6 +40,12 @@ class XarrayRpnCalculator():
                '*': (2, multiplication),
                '/': (2, division)}
 
+  def __init__(self, expression, data_array_mapping):
+    self._expression
+    self._stack = list()
+    self._intermediate_results = dict()
+    self._data_array_mapping = data_array_mapping
+
   def _check_tokens(self, tokens):
     for index in range(0, len(tokens)):
       token = tokens[index]
@@ -58,14 +64,12 @@ class XarrayRpnCalculator():
 
     return tokens
 
-  def __init__(self, expression, data_array_mapping):
-    self._expression
-    self._stack = list()
-    self._intermediate_results = dict()
-    self._data_array_mapping = data_array_mapping
-
   def get_result(self):
-    return self._stack[0]
+    result_id = self._stack[0]
+    result = self._intermediate_results[result_id]
+    if result is None:
+      raise Exception("None result")
+    else: return result
 
   # Return a xarray's DataArray instance from the given mapping
   # (self.data_array_mapping) or intermediate_results.
@@ -113,3 +117,4 @@ class XarrayRpnCalculator():
       self._stack.append(token)
       if token in XarrayRpnCalculator.OPERATORS:
         self._compute()
+    return self.get_result()
