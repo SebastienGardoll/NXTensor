@@ -16,7 +16,8 @@ from xarray_utils import XarrayRpnCalculator
 
 class XarrayTimeSeries:
 
-  DATE_TEMPLATE = "{year}-{month}-{day}T{hour}:{minute}:{second}:{microsecond}"
+  DATE_TEMPLATE      = "{year}-{month}-{day}T{hour}:{minute}:{second}:{microsecond}"
+  LAT_ATTRIBUTE_NAME = 'latitude'
 
   # Date is expected to be a datetime instance.
   def __init_(self, variable, date):
@@ -89,18 +90,27 @@ class XarrayTimeSeries:
     kwargs = tu.build_date_dictionary(date)
     formatted_date = XarrayTimeSeries.DATE_TEMPLATE.format(**kwargs)
 
+    lat_series = self.dataset[XarrayTimeSeries.LAT_ATTRIBUTE_NAME]
+
+    if lat_series[0] > lat_series[-1]:
+        logging.debug('swap lat min and max')
+        tmp = lat_min
+        lat_min = lat_max
+        lat_max = tmp
+        del tmp
+
     variable_type = type(variable)
     if variable_type is MultiLevelVariable:
       tmp_result = self.dataset[variable.netcdf_attribute_name].sel(
                                     time=formatted_date,
                                     level=variable.level,
-                                    latitude=slice(lat_max, lat_min),
+                                    latitude=slice(lat_min, lat_max),
                                     longitude=slice(lon_min, lon_max))
     else:
       if variable_type is SingleLevelVariable:
         tmp_result = self.dataset[variable.netcdf_attribute_name].sel(
                                     time=formatted_date,
-                                    latitude=slice(lat_max, lat_min),
+                                    latitude=slice(lat_min, lat_max),
                                     longitude=slice(lon_min, lon_max))
       else:
         msg = f"unsupported direct extraction for variable type '{variable_type}'"
