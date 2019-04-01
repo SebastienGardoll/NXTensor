@@ -52,8 +52,8 @@ class XarrayTimeSeries:
     variable_type = type(variable)
     if variable_type is MultiLevelVariable or \
        variable_type is SingleLevelVariable:
-      result = self._extract_square_region(self.dataset, variable,
-                                 date, lat, lon, half_lat_frame, half_lon_frame)
+      result = self._extract_square_region( variable, date, lat, lon,
+                                            half_lat_frame, half_lon_frame)
     else:
       if variable_type is ComputedVariable:
         visitor = ExtractionComputeVariable(self.dataset, date, lat, lon,

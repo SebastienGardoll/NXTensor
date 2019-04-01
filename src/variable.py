@@ -15,6 +15,8 @@ class Variable(YamlSerializable, ABC):
 
   def __init__(self):
 
+    super().__init__()
+
     # Public class members:
     self.is_computed = False
 
@@ -118,7 +120,7 @@ class VariableNetcdfFilePathVisitor(VariableVisitor):
 
   def visit_SingleLevelVariable(self, variable):
     current_dict = {variable.str_id: variable.compute_netcdf_file_path(self.date)}
-    self.dict.update(current_dict)
+    self.result.update(current_dict)
 
   def visit_MultiLevelVariable(self, variable):
     self.visit_SingleLevelVariable(variable)

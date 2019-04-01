@@ -9,7 +9,7 @@ Created on Wed Mar 27 13:35:52 2019
 import yaml
 import logging
 
-class YamlSerializable():
+class YamlSerializable:
 
   # YAML_FILENAME_EXT = 'yml'
 
@@ -18,7 +18,7 @@ class YamlSerializable():
     # Public class members:
     self.str_id = None
 
-  # Save this intance to the given path (override if it already exists)
+  # Save this instance to the given path (override if it already exists)
   def save(self, file_path):
     try:
       logging.info(f"saving {self.__class__.__name__} '{self.str_id}' to '{file_path}'")

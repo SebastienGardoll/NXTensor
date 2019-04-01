@@ -23,6 +23,7 @@ class Tensor(YamlSerializable):
                index_to_localisation, lazy_loading = False, data = None,
                data_file_path = None):
 
+    super().__init__()
     self.is_channels_last = is_channels_last
 
     # Dictionary that maps channel'str_id and their index in the tensor.

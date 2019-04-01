@@ -41,7 +41,7 @@ class XarrayRpnCalculator():
                '/': (2, division)}
 
   def __init__(self, expression, data_array_mapping):
-    self._expression
+    self._expression = expression
     self._stack = list()
     self._intermediate_results = dict()
     self._data_array_mapping = data_array_mapping
