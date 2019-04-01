@@ -6,26 +6,29 @@ Created on Wed Mar 27 11:57:37 2019
 @author: sebastien@gardoll.fr
 """
 
+import dask
 import xarray as xr
 import logging
 from variable import MultiLevelVariable, SingleLevelVariable,\
 ComputedVariable, VariableNetcdfFilePathVisitor, VariableVisitor
 import coordinate_utils as cu
 import time_utils as tu
-from xarray_utils import XarrayRpnCalculator
+from xarray_utils import XarrayRpnCalculator, DEFAULT_DASK_SCHEDULER
 
 class XarrayTimeSeries:
 
-  DATE_TEMPLATE      = "{year}-{month}-{day}T{hour}:{minute}:{second}:{microsecond}"
+  DATE_TEMPLATE = "{year}-{month}-{day}T{hour}:{minute}:{second}:{microsecond}"
   LAT_ATTRIBUTE_NAME = 'latitude'
 
   # Date is expected to be a datetime instance.
-  def __init_(self, variable, date):
+  def __init_(self, variable, date):#, dask_scheduler, nb_workers):
+
     visitor = VariableNetcdfFilePathVisitor(date)
     variable.accept(visitor)
     netcdf_file_path_dict = visitor.result
     self.variables = variable
     self.date = date
+    self.dask_scheduler = DEFAULT_DASK_SCHEDULER
     self._open_netcdf(netcdf_file_path_dict.values)
 
   # Options is a dictionary of named parameters for the methods open_mfdataset or
@@ -99,29 +102,32 @@ class XarrayTimeSeries:
         lat_max = tmp
         del tmp
 
-    variable_type = type(variable)
-    if variable_type is MultiLevelVariable:
-      tmp_result = self.dataset[variable.netcdf_attribute_name].sel(
-                                    time=formatted_date,
-                                    level=variable.level,
-                                    latitude=slice(lat_min, lat_max),
-                                    longitude=slice(lon_min, lon_max))
-    else:
-      if variable_type is SingleLevelVariable:
+    with dask.config.set(scheduler=self.dask_scheduler):
+      variable_type = type(variable)
+      if variable_type is MultiLevelVariable:
         tmp_result = self.dataset[variable.netcdf_attribute_name].sel(
-                                    time=formatted_date,
-                                    latitude=slice(lat_min, lat_max),
-                                    longitude=slice(lon_min, lon_max))
+                                      time=formatted_date,
+                                      level=variable.level,
+                                      latitude=slice(lat_min, lat_max),
+                                      longitude=slice(lon_min, lon_max))
       else:
-        msg = f"unsupported direct extraction for variable type '{variable_type}'"
-        logging.error(msg)
-        raise Exception(msg)
+        if variable_type is SingleLevelVariable:
+          tmp_result = self.dataset[variable.netcdf_attribute_name].sel(
+                                      time=formatted_date,
+                                      latitude=slice(lat_min, lat_max),
+                                      longitude=slice(lon_min, lon_max))
+        else:
+          msg = f"unsupported direct extraction for variable type '{variable_type}'"
+          logging.error(msg)
+          raise Exception(msg)
+      result = tmp_result.compute()
+      return result
 
     # Drop netcdf behavior so as to stack the subregions without Na filling
     # (concat netcdf default behavior is to concatenate the subregions on a
     # wilder region that includes all the subregions).
-    result = xr.DataArray(data=tmp_result.to_array().data)
-    return result
+    #result = xr.DataArray(data=tmp_result.to_array().data)
+    #return result
 
   def close(self):
     try:

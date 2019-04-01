@@ -8,29 +8,32 @@ Created on Fri Mar 29 15:29:43 2019
 
 import re
 import logging
+import dask
+
+DEFAULT_DASK_SCHEDULER = 'single-threaded'
 
 # This class implement RPN calculator for Xarray's DataArray and scalars.
-class XarrayRpnCalculator():
+class XarrayRpnCalculator:
 
   @staticmethod
   # Return left_operand + right_operand
   def addition(left_operand, right_operand):
-    return (left_operand + right_operand)
+    return (left_operand + right_operand).compute()
 
   @staticmethod
   # Return left_operand - right_operand
   def subtraction(left_operand, right_operand):
-    return (left_operand - right_operand)
+    return (left_operand - right_operand).compute()
 
   @staticmethod
   # Return left_operand *
   def multiplication(left_operand, right_operand):
-    return (left_operand * right_operand)
+    return (left_operand * right_operand).compute()
 
   @staticmethod
   # Return left_operand / right_operand
   def division(left_operand, right_operand):
-    return (left_operand / right_operand)
+    return (left_operand / right_operand).compute()
 
   TOKENIZER = re.compile(r'\s+')
 
@@ -40,11 +43,12 @@ class XarrayRpnCalculator():
                '*': (2, multiplication),
                '/': (2, division)}
 
-  def __init__(self, expression, data_array_mapping):
+  def __init__(self, expression, data_array_mapping):#, dask_scheduler, nb_workers):
     self._expression = expression
     self._stack = list()
     self._intermediate_results = dict()
     self._data_array_mapping = data_array_mapping
+    self.dask_scheduler = DEFAULT_DASK_SCHEDULER
 
   def _check_tokens(self, tokens):
     for index in range(0, len(tokens)):
@@ -127,5 +131,6 @@ class XarrayRpnCalculator():
       self._stack.append(token)
       logging.debug(f"appending token '{token}' on the stack")
       if token in XarrayRpnCalculator.OPERATORS:
-        self._compute()
+        with dask.config.set(scheduler=self.dask_scheduler):
+          self._compute()
     return self.get_result()
