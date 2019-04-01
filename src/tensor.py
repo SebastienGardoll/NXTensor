@@ -36,7 +36,7 @@ class Tensor(YamlSerializable):
     else:
       self.index_to_channel = None
 
-    # Array that map index of data row to their geolocalisation.
+    # Array that map index of data row to their geo-localisation.
     self.index_to_localisation = index_to_localisation
 
     self.data_file_path = data_file_path # Should be set after calling save or load.
@@ -125,7 +125,7 @@ class Tensor(YamlSerializable):
     return self._data
 
   # Return a new instance of Tensor with its data shuffled (keep geolocalisation
-  # concistent)
+  # consistent)
   def shuffle(self):
     msg = 'Tensor.shuffle is not implemented yet'
     logging.error(msg)

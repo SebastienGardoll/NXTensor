@@ -14,7 +14,7 @@ import coordinate_utils as cu
 import time_utils as tu
 from xarray_utils import XarrayRpnCalculator
 
-class XarrayTimeSerie():
+class XarrayTimeSeries:
 
   DATE_TEMPLATE = "{year}-{month}-{day}T{hour}:{minute}:{second}:{microsecond}"
 
@@ -23,7 +23,7 @@ class XarrayTimeSerie():
     visitor = VariableNetcdfFilePathVisitor(date)
     variable.accept(visitor)
     netcdf_file_path_dict = visitor.result
-    self.variables = (variable)
+    self.variables = variable
     self.date = date
     self._open_netcdf(netcdf_file_path_dict.values)
 
@@ -52,7 +52,7 @@ class XarrayTimeSerie():
     variable_type = type(variable)
     if variable_type is MultiLevelVariable or \
        variable_type is SingleLevelVariable:
-      result = XarrayTimeSerie._extract_square_region(self.dataset, variable,
+      result = self._extract_square_region(self.dataset, variable,
                                  date, lat, lon, half_lat_frame, half_lon_frame)
     else:
       if variable_type is ComputedVariable:
@@ -65,7 +65,7 @@ class XarrayTimeSerie():
         msg = f"unsupported variable type '{variable_type}'"
         logging.error(msg)
         raise Exception(msg)
-      return result
+    return result
 
   # Extract the region that centers the given lat/lon location. Variable must be
   # SingleLevelVariable or MultiLevelVariable.
@@ -82,7 +82,7 @@ class XarrayTimeSerie():
     lon_max  = (rounded_lon + half_lon_frame - variable.lon_resolution)
 
     kwargs = tu.build_date_dictionary(date)
-    formatted_date = XarrayTimeSerie.DATE_TEMPLATE.format(**kwargs)
+    formatted_date = XarrayTimeSeries.DATE_TEMPLATE.format(**kwargs)
 
     variable_type = type(variable)
     if variable_type is MultiLevelVariable:
@@ -121,10 +121,10 @@ class XarrayTimeSerie():
 
 class ExtractionComputeVariable(VariableVisitor):
 
-  def __init__(self, time_serie, date, lat, lon, half_lat_frame,
+  def __init__(self, time_series, date, lat, lon, half_lat_frame,
                half_lon_frame):
     self.data_array_mapping = dict()
-    self.time_serie         = time_serie
+    self.time_series         = time_series
     self.date               = date
     self.lat                = lat
     self.lon                = lon
@@ -133,7 +133,7 @@ class ExtractionComputeVariable(VariableVisitor):
     self.result             = None
 
   def visit_SingleLevelVariable(self, variable):
-    region = self.time_serie.extract_square_region(variable, self.date,
+    region = self.time_series.extract_square_region(variable, self.date,
                                                    self.lat, self.lon,
                                                    self.half_lat_frame,
                                                    self.half_lon_frame)
@@ -143,6 +143,6 @@ class ExtractionComputeVariable(VariableVisitor):
     self.visit_SingleLevelVariable(variable)
 
   def visit_ComputedVariable(self, variable):
-    calulator = XarrayRpnCalculator(variable.computation_expression,
+    calculator = XarrayRpnCalculator(variable.computation_expression,
                                     self.data_array_mapping)
-    self.result = calulator.compute()
+    self.result = calculator.compute()
