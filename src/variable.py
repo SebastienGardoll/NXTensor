@@ -37,15 +37,15 @@ class SingleLevelVariable(Variable):
 
   def __init__(self):
     super().__init__()
-    self.root_dir_path        = None
-    self.attribute_name       = None
-    self.time_resolution      = None
-    self.coord_format         = None
-    self.netcdf_path_template = None
-    self.lat_resolution       = None
-    self.lon_resolution       = None
-    self.nb_lat_decimal       = None
-    self.nb_lon_decimal       = None
+    self.root_dir_path         = None
+    self.netcdf_attribute_name = None
+    self.time_resolution       = None
+    self.coord_format          = None
+    self.netcdf_path_template  = None
+    self.lat_resolution        = None
+    self.lon_resolution        = None
+    self.nb_lat_decimal        = None
+    self.nb_lon_decimal        = None
 
   # Date is expected to be a datetime instance.
   def compute_netcdf_file_path(self, date):

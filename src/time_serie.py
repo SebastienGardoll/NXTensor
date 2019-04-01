@@ -91,15 +91,17 @@ class XarrayTimeSeries:
 
     variable_type = type(variable)
     if variable_type is MultiLevelVariable:
-      tmp_result = self.dataset.sel(time=formatted_date,
+      tmp_result = self.dataset[variable.netcdf_attribute_name].sel(
+                                    time=formatted_date,
                                     level=variable.level,
                                     latitude=slice(lat_max, lat_min),
                                     longitude=slice(lon_min, lon_max))
     else:
       if variable_type is SingleLevelVariable:
-        tmp_result = self.dataset.sel(time=formatted_date,
-                                      latitude=slice(lat_max, lat_min),
-                                      longitude=slice(lon_min, lon_max))
+        tmp_result = self.dataset[variable.netcdf_attribute_name].sel(
+                                    time=formatted_date,
+                                    latitude=slice(lat_max, lat_min),
+                                    longitude=slice(lon_min, lon_max))
       else:
         msg = f"unsupported direct extraction for variable type '{variable_type}'"
         logging.error(msg)
