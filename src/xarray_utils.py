@@ -99,7 +99,7 @@ class XarrayRpnCalculator():
       left_operand_literal  = self._stack.pop()
       # Convert the label into string so as to avoid confusion with scalar literal
       # (e.g. 13124234) as hash function return a scalar.
-      label = str(hash(f"{operator}#{right_operand_literal}#{left_operand_literal}"))
+      label = str(hash(f"{left_operand_literal}#{operator}#{right_operand_literal}"))
       if label in self._intermediate_results:
         intermediate_result = self._intermediate_results[label]
       else:
