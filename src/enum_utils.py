@@ -21,7 +21,5 @@ class TimeResolution(Enum):
 
 class CoordinateFormat(Enum):
 
-  SIGNED_DEGREE_NORTH = 'signed_degrees_north'
-  SIGNED_DEGREE_SOUTH = 'signed_degrees_south'
-  SIGNED_DEGREE_EAST  = 'signed_degrees_east'
-  SIGNED_DEGREE_WEST  = 'signed_degrees_west'
+  DECREASING_DEGREE_NORTH = 'decreasing_degree_north'
+  AMERICAN_DEGREE_EAST    = 'american_degree_east'

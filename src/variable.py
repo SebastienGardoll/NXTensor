@@ -11,6 +11,7 @@ import logging
 import time_utils as tu
 from enum_utils import TimeResolution, CoordinateFormat
 from abc import ABC, abstractmethod
+import os.path as path
 
 class Variable(YamlSerializable, ABC):
 
@@ -51,6 +52,9 @@ class SingleLevelVariable(Variable):
   def compute_netcdf_file_path(self, date):
     kwargs = tu.build_date_dictionary(date)
     return self.netcdf_path_template.format(**kwargs)
+
+  def compute_yaml_filename(self):
+    return f"{self.str_id}_variable.yml"
 
   def accept(self, visitor):
     visitor.visit_SingleLevelVariable(self)
@@ -126,3 +130,42 @@ class VariableNetcdfFilePathVisitor(VariableVisitor):
 
   def visit_ComputedVariable(self, variable):
     pass
+
+
+def bootstrap_era5_variable(variable_parent_dir_path, str_id, attribute_name, time_resolution, level = None):
+  if level is None:
+    variable = SingleLevelVariable()
+  else:
+    variable = MultiLevelVariable()
+    variable.level = level
+
+  variable.str_id = str_id
+  variable.netcdf_attribute_name = attribute_name
+  variable.time_resolution = time_resolution
+  variable.date_template = '{year}-{month}-{day}T{hour}:{minute}:{second}:{microsecond}'
+  variable.lat_attribute_name = 'latitude'
+  variable.lon_attribute_name = 'longitude'
+  variable.lat_format = CoordinateFormat.DECREASING_DEGREE_NORTH
+  variable.lon_format = CoordinateFormat.AMERICAN_DEGREE_EAST
+  variable.netcdf_path_template = '/bdd/ERA5/NETCDF/GLOBAL_025/hourly/AN_SF/{year}/%s.{year}{month2d}.as1e5.GLOBAL_025.nc' % (
+    attribute_name)
+  variable.lat_resolution = 0.25
+  variable.lon_resolution = 0.25
+  variable.nb_lat_decimal = 2
+  variable.nb_lon_decimal = 2
+
+  variable_file_path = path.join(variable_parent_dir_path, variable.compute_yaml_filename())
+  variable.save(variable_file_path)
+
+def bootstrap_era5_variables(variable_parent_dir_path):
+  era5_single_level_variables = ['msl', 'tcwv','u10', 'v10']
+  time_resolution = TimeResolution.HOUR
+  for str_id in era5_single_level_variables:
+    bootstrap_era5_variable(variable_parent_dir_path, str_id, str_id, time_resolution)
+
+  era5_multi_level_variables = [('ta200', 'ta', 200), ('ta500', 'ta', 500), ('u850', 'u', 850), ('v850', 'v', 850)]
+  time_resolution = TimeResolution.SIX_HOURS
+  for str_id, attr_name, level in era5_multi_level_variables:
+    bootstrap_era5_variable(variable_parent_dir_path, str_id, attr_name, time_resolution, level)
+
+
