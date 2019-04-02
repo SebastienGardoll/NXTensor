@@ -20,10 +20,11 @@ class XarrayTimeSeries:
   # Date is expected to be a datetime instance.
   def __init_(self, variable, date):#, dask_scheduler, nb_workers):
 
+    logging.debug(f"visiting the file paths of the variable '{variable.str_id}'")
     visitor = VariableNetcdfFilePathVisitor(date)
     variable.accept(visitor)
     netcdf_file_path_dict = visitor.result
-    self.variables = variable
+    self.variable = variable
     self.date = date
     self.dask_scheduler = DEFAULT_DASK_SCHEDULER
     self._open_netcdf(netcdf_file_path_dict.values)
@@ -56,16 +57,15 @@ class XarrayTimeSeries:
     if variable_type is MultiLevelVariable or \
        variable_type is SingleLevelVariable:
       logging.debug(f"starting the extraction of the {variable_type} variable '{variable.str_id}'")
-      result = self._extract_square_region( variable, date, lat, lon,
-                                            half_lat_frame, half_lon_frame)
+      result = self._extract_square_region(variable, date, lat, lon,
+                                           half_lat_frame, half_lon_frame)
     else:
       if variable_type is ComputedVariable:
         logging.debug(f"starting the extraction of the computed variable '{variable.str_id}'")
-        visitor = ExtractionComputeVariable(self.dataset, date, lat, lon,
-                                            half_lat_frame, half_lon_frame)
+        visitor = ExtractionComputedVariable(self, date, lat, lon,
+                                             half_lat_frame, half_lon_frame)
         variable.accept(visitor)
         result = visitor.result
-
       else:
         msg = f"unsupported variable type '{variable_type}'"
         logging.error(msg)
@@ -93,7 +93,7 @@ class XarrayTimeSeries:
     lat_series = self.dataset[variable.lat_attribute_name]
 
     if lat_series[0] > lat_series[-1]:
-        logging.debug('swap lat min and max')
+        logging.debug('switching lat min and max')
         tmp = lat_min
         lat_min = lat_max
         lat_max = tmp
@@ -120,12 +120,6 @@ class XarrayTimeSeries:
       result = tmp_result.compute()
       return result
 
-    # Drop netcdf behavior so as to stack the subregions without Na filling
-    # (concat netcdf default behavior is to concatenate the subregions on a
-    # wilder region that includes all the subregions).
-    #result = xr.DataArray(data=tmp_result.to_array().data)
-    #return result
-
   def close(self):
     try:
       self.dataset.close()
@@ -139,12 +133,12 @@ class XarrayTimeSeries:
     self.close()
 
 
-class ExtractionComputeVariable(VariableVisitor):
+class ExtractionComputedVariable(VariableVisitor):
 
   def __init__(self, time_series, date, lat, lon, half_lat_frame,
                half_lon_frame):
     self.data_array_mapping = dict()
-    self.time_series         = time_series
+    self.time_series        = time_series
     self.date               = date
     self.lat                = lat
     self.lon                = lon
@@ -154,9 +148,9 @@ class ExtractionComputeVariable(VariableVisitor):
 
   def visit_SingleLevelVariable(self, variable):
     region = self.time_series.extract_square_region(variable, self.date,
-                                                   self.lat, self.lon,
-                                                   self.half_lat_frame,
-                                                   self.half_lon_frame)
+                                                    self.lat, self.lon,
+                                                    self.half_lat_frame,
+                                                    self.half_lon_frame)
     self.data_array_mapping[variable.str_id] = region
 
   def visit_MultiLevelVariable(self, variable):
@@ -164,6 +158,6 @@ class ExtractionComputeVariable(VariableVisitor):
 
   def visit_ComputedVariable(self, variable):
     calculator = XarrayRpnCalculator(variable.computation_expression,
-                                    self.data_array_mapping)
+                                     self.data_array_mapping)
     logging.debug('starting a xarray RPN calculator')
     self.result = calculator.compute()
