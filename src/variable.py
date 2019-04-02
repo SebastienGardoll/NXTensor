@@ -146,7 +146,7 @@ def bootstrap_era5_variable(variable_parent_dir_path, str_id, attribute_name, ti
   variable.str_id = str_id
   variable.netcdf_attribute_name = attribute_name
   variable.time_resolution = time_resolution
-  variable.date_template = '{year}-{month}-{day}T{hour}:{minute}:{second}:{microsecond}'
+  variable.date_template = '{year}-{month}-{day}T{hour}:{minute}:{second}.{microsecond}'
   variable.lat_attribute_name = 'latitude'
   variable.lon_attribute_name = 'longitude'
   variable.lat_format = CoordinateFormat.DECREASING_DEGREE_NORTH
@@ -161,6 +161,18 @@ def bootstrap_era5_variable(variable_parent_dir_path, str_id, attribute_name, ti
   variable_file_path = path.join(variable_parent_dir_path, variable.compute_yaml_filename())
   variable.save(variable_file_path)
 
+"""
+import logging
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
+from variable import bootstrap_era5_variables
+bootstrap_era5_variables('...')
+"""
 def bootstrap_era5_variables(variable_parent_dir_path):
   era5_single_level_variables = ['msl', 'tcwv','u10', 'v10']
   time_resolution = TimeResolution.HOUR
@@ -173,6 +185,18 @@ def bootstrap_era5_variables(variable_parent_dir_path):
   for str_id, attr_name, level in era5_multi_level_variables:
     bootstrap_era5_variable(variable_parent_dir_path, str_id, attr_name, time_resolution, level)
 
+"""
+import logging
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
+from variable import test_load
+test_load('...')
+"""
 def test_load(variable_parent_dir_path):
   era5_single_level_variables = ['msl', 'tcwv','u10', 'v10', 'ta200', 'ta500',
                                  'u850', 'v850']
