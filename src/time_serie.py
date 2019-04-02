@@ -175,7 +175,7 @@ logger.setLevel(logging.DEBUG)
 
 from time_series import unit_test
 """
-def unit_test():
+def unit_test_single_multi_level():
   from datetime import datetime
   half_lat_frame = 4
   half_lon_frame = 4
@@ -200,6 +200,18 @@ def unit_test():
   hour   = 18
   lat    = 26.5
   lon    = 282.8 # Equivalent to -77.2 .
+  date   = datetime(year, month, day, hour)
+
+  unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
+                       half_lat_frame, half_lon_frame)
+
+  str_id = 'msl'
+  year   = 2011
+  month  = 8
+  day    = 21
+  hour   = 0
+  lat    = 15
+  lon    = 301 # Equivalent to -59 .
   date   = datetime(year, month, day, hour)
 
   unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
