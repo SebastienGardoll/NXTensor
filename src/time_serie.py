@@ -100,6 +100,7 @@ class XarrayTimeSeries:
         lat_max = tmp
         del tmp
 
+    #logging.debug(f"lat_min={lat_min}, lat_max={lat_max}, lon_min={lon_min}, lon_max={lon_max}")
     with dask.config.set(scheduler=self.dask_scheduler):
       if isinstance(variable, MultiLevelVariable):
         tmp_result = self.dataset[variable.netcdf_attribute_name].sel(
@@ -180,15 +181,15 @@ def unit_test():
   str_id = 'msl'
   date = datetime(2000, 10, 1, 0)
   lat = 39.7
-  lon = -47.9
-  half_lat_frame = 16
-  half_lon_frame = 16
+  lon = 312 # (equivalent to -48)
+  half_lat_frame = 4
+  half_lon_frame = 4
 
   var = Variable.load(path.join(variable_parent_dir_path, f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
   with XarrayTimeSeries(var, date) as ts:
     subregion = ts.extract_square_region(var, date, lat, lon, half_lat_frame, half_lon_frame)
     print(subregion.shape)
-    #plt.figure()
-    #plt.imshow(subregion,cmap='gist_rainbow_r',interpolation="none")
-    #plt.show()
+    plt.figure()
+    plt.imshow(subregion,cmap='gist_rainbow_r',interpolation="none")
+    plt.show()
 
