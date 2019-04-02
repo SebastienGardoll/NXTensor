@@ -26,14 +26,14 @@ class Tensor(YamlSerializable):
     super().__init__(str_id)
     self.is_channels_last = is_channels_last
 
-    # Dictionary that maps channel'str_id and their index in the tensor.
+    # Dictionary that maps channel'str_id to their index in the tensor.
     self.channel_to_index = channel_to_index
 
     # Array that maps index of channel in data to their str_id.
     if channel_to_index is not None:
       self.index_to_channel = list()
       for k, v in channel_to_index.items():
-        self.index_to_channel[k] = v
+        self.index_to_channel[v] = k
     else:
       self.index_to_channel = None
 
