@@ -14,11 +14,7 @@ from abc import ABC, abstractmethod
 class Variable(YamlSerializable, ABC):
 
   def __init__(self):
-
     super().__init__()
-
-    # Public class members:
-    self.is_computed = False
 
   def __repr__(self):
     return f"{self.__class__.__name__}(str_id={self.str_id})"
@@ -69,7 +65,6 @@ class ComputedVariable(Variable):
 
   def __init__(self):
     super().__init__()
-    self.is_computed            = True
     self.variable_file_paths    = None
     self.computation_expression = None # Using Reverse Polish Notation !
     self._variables             = None # Transient for yaml serialization.
