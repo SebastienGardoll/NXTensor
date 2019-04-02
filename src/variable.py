@@ -82,7 +82,8 @@ class ComputedVariable(Variable):
     self._variables             = None # Transient for yaml serialization.
 
   def get_variables(self):
-    if self._variables is None:
+    variables_value = getattr(self, '_variables', None)
+    if variables_value is None:
       logging.debug('loading the variables of {self.str_id}:')
       self._variables = dict()
       for var_file_path in self.variable_file_paths:
@@ -202,9 +203,8 @@ from variable import test_load
 test_load('...')
 """
 def test_load(variable_parent_dir_path):
-  era5_single_level_variables = ['msl', 'tcwv','u10', 'v10', 'ta200', 'ta500',
-                                 'u850', 'v850']
-  for str_id in era5_single_level_variables:
+  era5_variables = ['msl', 'tcwv','u10', 'v10', 'ta200', 'ta500', 'u850', 'v850']
+  for str_id in era5_variables:
     var = Variable.load(path.join(variable_parent_dir_path, f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
     print(var)
 
