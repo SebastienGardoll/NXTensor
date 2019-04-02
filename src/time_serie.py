@@ -10,7 +10,7 @@ import dask
 import xarray as xr
 import logging
 from variable import MultiLevelVariable, SingleLevelVariable,\
-ComputedVariable, VariableNetcdfFilePathVisitor, VariableVisitor
+ComputedVariable, VariableNetcdfFilePathVisitor, VariableVisitor, Variable
 import coordinate_utils as cu
 import time_utils as tu
 from xarray_utils import XarrayRpnCalculator, DEFAULT_DASK_SCHEDULER
@@ -18,8 +18,7 @@ from xarray_utils import XarrayRpnCalculator, DEFAULT_DASK_SCHEDULER
 class XarrayTimeSeries:
 
   # Date is expected to be a datetime instance.
-  def __init_(self, variable, date):#, dask_scheduler, nb_workers):
-
+  def __init__(self, variable, date):#, dask_scheduler, nb_workers):
     logging.debug(f"visiting the file paths of the variable '{variable.str_id}'")
     visitor = VariableNetcdfFilePathVisitor(date)
     variable.accept(visitor)
@@ -27,7 +26,7 @@ class XarrayTimeSeries:
     self.variable = variable
     self.date = date
     self.dask_scheduler = DEFAULT_DASK_SCHEDULER
-    self._open_netcdf(netcdf_file_path_dict.values)
+    self._open_netcdf(list(netcdf_file_path_dict.values()))
 
   # Options is a dictionary of named parameters for the methods open_mfdataset or
   # open_dataset.
@@ -49,25 +48,27 @@ class XarrayTimeSeries:
       logging.error(msg)
       raise e
 
+  def __repr__(self):
+    return f"{self.__class__.__name__}(variable={self.variable}, date={self.date})"
+
   # Extract the region that centers the given lat/lon location.
   def extract_square_region(self, variable, date, lat, lon,
                             half_lat_frame, half_lon_frame):
     logging.info(f"extracting subregion {date}, {lat}, {lon} for variable '{variable.str_id}'")
-    variable_type = type(variable)
-    if variable_type is MultiLevelVariable or \
-       variable_type is SingleLevelVariable:
-      logging.debug(f"starting the extraction of the {variable_type} variable '{variable.str_id}'")
+    if isinstance(variable, MultiLevelVariable) or \
+       isinstance(variable, SingleLevelVariable):
+      logging.debug(f"starting the extraction of the variable '{variable.str_id}'")
       result = self._extract_square_region(variable, date, lat, lon,
                                            half_lat_frame, half_lon_frame)
     else:
-      if variable_type is ComputedVariable:
+      if isinstance(variable, ComputedVariable):
         logging.debug(f"starting the extraction of the computed variable '{variable.str_id}'")
         visitor = ExtractionComputedVariable(self, date, lat, lon,
                                              half_lat_frame, half_lon_frame)
         variable.accept(visitor)
         result = visitor.result
       else:
-        msg = f"unsupported variable type '{variable_type}'"
+        msg = f"unsupported variable type '{type(variable)}'"
         logging.error(msg)
         raise Exception(msg)
     return result
@@ -100,21 +101,20 @@ class XarrayTimeSeries:
         del tmp
 
     with dask.config.set(scheduler=self.dask_scheduler):
-      variable_type = type(variable)
-      if variable_type is MultiLevelVariable:
+      if isinstance(variable, MultiLevelVariable):
         tmp_result = self.dataset[variable.netcdf_attribute_name].sel(
                                       time=formatted_date,
                                       level=variable.level,
                                       latitude=slice(lat_min, lat_max),
                                       longitude=slice(lon_min, lon_max))
       else:
-        if variable_type is SingleLevelVariable:
+        if isinstance(variable, SingleLevelVariable):
           tmp_result = self.dataset[variable.netcdf_attribute_name].sel(
                                       time=formatted_date,
                                       latitude=slice(lat_min, lat_max),
                                       longitude=slice(lon_min, lon_max))
         else:
-          msg = f"unsupported direct extraction for variable type '{variable_type}'"
+          msg = f"unsupported direct extraction for variable type '{type(variable)}'"
           logging.error(msg)
           raise Exception(msg)
       result = tmp_result.compute()
@@ -161,3 +161,29 @@ class ExtractionComputedVariable(VariableVisitor):
                                      self.data_array_mapping)
     logging.debug('starting a xarray RPN calculator')
     self.result = calculator.compute()
+
+"""
+import logging
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+"""
+def unit_test():
+  import os.path as path
+  from datetime import datetime
+  variable_parent_dir_path = '/home/sgardoll/cyclone/variables'
+  str_id = 'msl'
+  date = datetime(2000, 10, 1, 0)
+  lat = 39.7
+  lon = -47.9
+  half_lat_frame = 16
+  half_lon_frame = 16
+
+  var = Variable.load(path.join(variable_parent_dir_path, f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
+  ts = XarrayTimeSeries(var, date)
+  subregion = ts.extract_square_region(var, date, lat, lon, half_lat_frame, half_lon_frame)
+  print(subregion.shape)
+
