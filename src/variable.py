@@ -9,6 +9,7 @@ Created on Tue Mar 26 11:58:46 2019
 from yaml_class import YamlSerializable
 import logging
 import time_utils as tu
+from enum_utils import TimeResolution, CoordinateFormat
 from abc import ABC, abstractmethod
 
 class Variable(YamlSerializable, ABC):
@@ -38,7 +39,8 @@ class SingleLevelVariable(Variable):
     self.date_template         = None
     self.lat_attribute_name    = None
     self.lon_attribute_name    = None
-    self.coord_format          = None
+    self.lat_format            = None
+    self.lon_format            = None
     self.netcdf_path_template  = None
     self.lat_resolution        = None
     self.lon_resolution        = None
