@@ -10,13 +10,13 @@ from enum import Enum
 
 class TimeResolution(Enum):
 
-  YEAR    = 'year'
-  MONTH   = 'month'
-  DAY     = 'day'
+  YEAR      = 'year'
+  MONTH     = 'month'
+  DAY       = 'day'
   SIX_HOURS = 'six_hours'
-  HOUR    = 'hour'
-  MINUTE  = 'minute'
-  SECOND  = 'second'
+  HOUR      = 'hour'
+  MINUTE    = 'minute'
+  SECOND    = 'second'
 
 
 class CoordinateFormat(Enum):
