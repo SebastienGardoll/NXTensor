@@ -127,9 +127,9 @@ class XarrayTimeSeries:
       pass
 
   def __enter__(self):
-    pass
+    return self
 
-  def __exit__(self) :
+  def __exit__(self, type, value, traceback):
     self.close()
 
 
@@ -174,6 +174,8 @@ logger.setLevel(logging.DEBUG)
 def unit_test():
   import os.path as path
   from datetime import datetime
+  from matplotlib import pyplot as plt
+
   variable_parent_dir_path = '/home/sgardoll/cyclone/variables'
   str_id = 'msl'
   date = datetime(2000, 10, 1, 0)
@@ -183,7 +185,10 @@ def unit_test():
   half_lon_frame = 16
 
   var = Variable.load(path.join(variable_parent_dir_path, f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
-  ts = XarrayTimeSeries(var, date)
-  subregion = ts.extract_square_region(var, date, lat, lon, half_lat_frame, half_lon_frame)
-  print(subregion.shape)
+  with XarrayTimeSeries(var, date) as ts:
+    subregion = ts.extract_square_region(var, date, lat, lon, half_lat_frame, half_lon_frame)
+    print(subregion.shape)
+    #plt.figure()
+    #plt.imshow(subregion,cmap='gist_rainbow_r',interpolation="none")
+    #plt.show()
 
