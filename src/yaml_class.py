@@ -11,7 +11,7 @@ import logging
 
 class YamlSerializable:
 
-  # YAML_FILENAME_EXT = 'yml'
+  YAML_FILENAME_EXT = 'yml'
 
   def __init__(self):
 
@@ -37,7 +37,7 @@ class YamlSerializable:
   @staticmethod
   def load(file_path):
     try:
-      logging.info(f"deserialize from '{file_path}'")
+      logging.info(f"read file from '{file_path}'")
       with open(file_path, 'r') as file:
         yml_content = file.read()
     except Exception as e:
