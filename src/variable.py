@@ -31,8 +31,8 @@ class Variable(YamlSerializable, ABC):
 
 class SingleLevelVariable(Variable):
 
-  def __init__(self):
-    super().__init__()
+  def __init__(self, str_id=None):
+    super().__init__(str_id)
     self.root_dir_path         = None
     self.netcdf_attribute_name = None
     self.time_resolution       = None
@@ -57,8 +57,8 @@ class SingleLevelVariable(Variable):
 
 class MultiLevelVariable(SingleLevelVariable):
 
-  def __init__(self):
-    super().__init__()
+  def __init__(self, str_id=None):
+    super().__init__(str_id)
     self.level    = None
 
   def accept(self, visitor):
@@ -66,8 +66,8 @@ class MultiLevelVariable(SingleLevelVariable):
 
 class ComputedVariable(Variable):
 
-  def __init__(self):
-    super().__init__()
+  def __init__(self, str_id=None):
+    super().__init__(str_id)
     self.variable_file_paths    = None
     self.computation_expression = None # Using Reverse Polish Notation !
     self._variables             = None # Transient for yaml serialization.
