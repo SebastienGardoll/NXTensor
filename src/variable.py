@@ -23,6 +23,9 @@ class Variable(YamlSerializable, ABC):
   def __repr__(self):
     return f"{self.__class__.__name__}(str_id={self.str_id})"
 
+  def compute_yaml_filename(self):
+    return f"{self.str_id}{Variable.FILE_NAME_POSTFIX}"
+
   @abstractmethod
   def accept(self, visitor):
     pass
@@ -57,9 +60,6 @@ class SingleLevelVariable(Variable):
   def compute_netcdf_file_path(self, date):
     kwargs = tu.build_date_dictionary(date)
     return self.netcdf_path_template.format(**kwargs)
-
-  def compute_yaml_filename(self):
-    return f"{self.str_id}{Variable.FILE_NAME_POSTFIX}"
 
   def accept(self, visitor):
     visitor.visit_SingleLevelVariable(self)
@@ -207,3 +207,27 @@ def test_load(variable_parent_dir_path):
   for str_id in era5_single_level_variables:
     var = Variable.load(path.join(variable_parent_dir_path, f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
     print(var)
+
+"""
+import logging
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
+from variable import create_computed_variables
+create_computed_variables('...')
+"""
+def create_computed_variables(variable_parent_dir_path):
+  variable = ComputedVariable()
+  variable.str_id = 'wsl'
+  variable.computation_expression = 'u10 v10 +'
+  variable.variable_file_paths = [path.join(variable_parent_dir_path,
+                                            f"u10{Variable.FILE_NAME_POSTFIX}"),
+                                  path.join(variable_parent_dir_path,
+                                            f"v10{Variable.FILE_NAME_POSTFIX}")]
+  variable.get_variables()
+  variable_file_path = path.join(variable_parent_dir_path, variable.compute_yaml_filename())
+  variable.save(variable_file_path)
