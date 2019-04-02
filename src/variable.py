@@ -165,7 +165,8 @@ def bootstrap_era5_variables(variable_parent_dir_path):
   for str_id in era5_single_level_variables:
     bootstrap_era5_variable(variable_parent_dir_path, str_id, str_id, time_resolution)
 
-  era5_multi_level_variables = [('ta200', 'ta', 200), ('ta500', 'ta', 500), ('u850', 'u', 850), ('v850', 'v', 850)]
+  era5_multi_level_variables = [('ta200', 'ta', 200), ('ta500', 'ta', 500),
+                                ('u850', 'u', 850), ('v850', 'v', 850)]
   time_resolution = TimeResolution.SIX_HOURS
   for str_id, attr_name, level in era5_multi_level_variables:
     bootstrap_era5_variable(variable_parent_dir_path, str_id, attr_name, time_resolution, level)
