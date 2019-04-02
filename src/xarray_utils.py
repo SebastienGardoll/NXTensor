@@ -72,7 +72,7 @@ class XarrayRpnCalculator:
     result_id = self._stack[0]
     result = self._intermediate_results.get(result_id, None)
     if result is None:
-      raise Exception("None result")
+      raise Exception("missing result")
     else: return result
 
   # Return a xarray's DataArray instance from the given mapping
