@@ -57,6 +57,7 @@ class XarrayRpnCalculator:
         if not token in XarrayRpnCalculator.OPERATORS and\
            not token in self._data_array_mapping:
           try:
+            logging.debug(f"trying to convert '{token}' into a float at index {index}")
             new_token = float(token)
             tokens[index] = new_token
           except:
@@ -91,8 +92,8 @@ class XarrayRpnCalculator:
 
     if nb_operand == 1:
       operand_literal = self._stack.pop()
-      # Convert the label into string so as to avoid confusion with scalar literal
-      # (e.g. 13124234) as hash function return a scalar.
+      # Convert the label into string so as to avoid confusion with scalar
+      # (float) as hash function return an integer value.
       label = str(hash(f"{operator}#{operand_literal}"))
       if label in self._intermediate_results:
         logging.debug(f"getting already computed intermediate result for label '{label}'")
@@ -105,8 +106,8 @@ class XarrayRpnCalculator:
     else:
       right_operand_literal = self._stack.pop()
       left_operand_literal  = self._stack.pop()
-      # Convert the label into string so as to avoid confusion with scalar literal
-      # (e.g. 13124234) as hash function return a scalar.
+      # Convert the label into string so as to avoid confusion with scalar
+      # (float) as hash function return an integer value.
       label = str(hash(f"{left_operand_literal}#{operator}#{right_operand_literal}"))
       if label in self._intermediate_results:
         logging.debug(f"getting already computed intermediate result for label '{label}'")
@@ -128,8 +129,8 @@ class XarrayRpnCalculator:
     tokens = self._check_tokens(tokens)
     logging.debug(f"computing tokens: {tokens}")
     for token in tokens:
-      self._stack.append(token)
       logging.debug(f"appending token '{token}' on the stack")
+      self._stack.append(token)
       if token in XarrayRpnCalculator.OPERATORS:
         with dask.config.set(scheduler=self.dask_scheduler):
           self._compute()
