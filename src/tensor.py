@@ -120,7 +120,7 @@ class Tensor(YamlSerializable):
         data = Tensor._load_data(self.data_file_path)
         self.set_data(data)
       else:
-        msg = "unknown data file path"
+        msg = "missing data file path"
         logging.error(msg)
         raise Exception(msg)
     return self._data
