@@ -55,6 +55,7 @@ class XarrayTimeSeries:
   def extract_square_region(self, variable, date, lat, lon,
                             half_lat_frame, half_lon_frame):
     logging.info(f"extracting subregion {date}, {lat}, {lon} for variable '{variable.str_id}'")
+
     if isinstance(variable, MultiLevelVariable) or \
        isinstance(variable, SingleLevelVariable):
       logging.debug(f"starting the extraction of the variable '{variable.str_id}'")
@@ -171,25 +172,49 @@ formatter = logging.Formatter('%(levelname)-8s %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
+
+from time_series import unit_test
 """
 def unit_test():
-  import os.path as path
   from datetime import datetime
-  from matplotlib import pyplot as plt
-
-  variable_parent_dir_path = '/home/sgardoll/cyclone/variables'
-  str_id = 'msl'
-  date = datetime(2000, 10, 1, 0)
-  lat = 39.7
-  lon = 312 # (equivalent to -48)
   half_lat_frame = 4
   half_lon_frame = 4
+  variable_parent_dir_path = '/home/sgardoll/cyclone/variables'
 
-  var = Variable.load(path.join(variable_parent_dir_path, f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
+  str_id = 'msl'
+  year   = 2000
+  month  = 10
+  day    = 1
+  hour   = 0
+  date   = datetime(year, month, day, hour)
+  lat    = 39.7
+  lon    = 312 # Equivalent to -48 .
+
+  unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
+                       half_lat_frame, half_lon_frame)
+
+  str_id = 'ta200'
+  year   = 2011
+  month  = 8
+  day    = 25
+  hour   = 18
+  lat    = 26.5
+  lon    = 282.8 # Equivalent to -77.2 .
+  date   = datetime(year, month, day, hour)
+
+  unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
+                       half_lat_frame, half_lon_frame)
+
+def unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
+                         half_lat_frame, half_lon_frame):
+  import os.path as path
+  from matplotlib import pyplot as plt
+  var = Variable.load(path.join(variable_parent_dir_path,
+                      f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
   with XarrayTimeSeries(var, date) as ts:
-    subregion = ts.extract_square_region(var, date, lat, lon, half_lat_frame, half_lon_frame)
+    subregion = ts.extract_square_region(var, date, lat, lon, half_lat_frame,
+                                         half_lon_frame)
     print(subregion.shape)
     plt.figure()
     plt.imshow(subregion,cmap='gist_rainbow_r',interpolation="none")
     plt.show()
-
