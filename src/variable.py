@@ -16,6 +16,9 @@ class Variable(YamlSerializable, ABC):
   def __init__(self):
     super().__init__()
 
+  def __init__(self, str_id):
+    super().__init__(str_id)
+
   def __repr__(self):
     return f"{self.__class__.__name__}(str_id={self.str_id})"
 

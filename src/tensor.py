@@ -19,11 +19,11 @@ class Tensor(YamlSerializable):
 
   HDF5_FILENAME_EXTENSION = 'h5'
 
-  def __init__(self, is_channels_last, channel_to_index,
+  def __init__(self, str_id, is_channels_last, channel_to_index,
                index_to_localisation, lazy_loading = False, data = None,
                data_file_path = None):
 
-    super().__init__()
+    super().__init__(str_id)
     self.is_channels_last = is_channels_last
 
     # Dictionary that maps channel'str_id and their index in the tensor.
