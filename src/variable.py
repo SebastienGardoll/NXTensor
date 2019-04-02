@@ -13,10 +13,7 @@ from abc import ABC, abstractmethod
 
 class Variable(YamlSerializable, ABC):
 
-  def __init__(self):
-    super().__init__()
-
-  def __init__(self, str_id):
+  def __init__(self, str_id=None):
     super().__init__(str_id)
 
   def __repr__(self):

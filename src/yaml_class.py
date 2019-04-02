@@ -13,11 +13,6 @@ class YamlSerializable:
 
   YAML_FILENAME_EXT = 'yml'
 
-  def __init__(self):
-
-    # Public class members:
-    self.str_id = None
-
   def __init__(self, str_id):
     self.str_id = str_id
 
