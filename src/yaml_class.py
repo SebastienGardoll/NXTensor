@@ -18,7 +18,10 @@ class YamlSerializable:
     # Public class members:
     self.str_id = None
 
-  # Save this instance to the given path (override if it already exists)
+  def __init__(self, str_id):
+    self.str_id = str_id
+
+    # Save this instance to the given path (override if it already exists)
   def save(self, file_path):
     try:
       logging.info(f"saving {self.__class__.__name__} '{self.str_id}' to '{file_path}'")
