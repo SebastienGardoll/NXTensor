@@ -33,7 +33,6 @@ class SingleLevelVariable(Variable):
 
   def __init__(self, str_id=None):
     super().__init__(str_id)
-    self.root_dir_path         = None
     self.netcdf_attribute_name = None
     self.time_resolution       = None
     self.date_template         = None
