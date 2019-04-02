@@ -15,6 +15,8 @@ import os.path as path
 
 class Variable(YamlSerializable, ABC):
 
+  FILE_NAME_POSTFIX = '_variable.yml'
+
   def __init__(self, str_id=None):
     super().__init__(str_id)
 
@@ -57,7 +59,7 @@ class SingleLevelVariable(Variable):
     return self.netcdf_path_template.format(**kwargs)
 
   def compute_yaml_filename(self):
-    return f"{self.str_id}_variable.yml"
+    return f"{self.str_id}{Variable.FILE_NAME_POSTFIX}"
 
   def accept(self, visitor):
     visitor.visit_SingleLevelVariable(self)
@@ -171,4 +173,9 @@ def bootstrap_era5_variables(variable_parent_dir_path):
   for str_id, attr_name, level in era5_multi_level_variables:
     bootstrap_era5_variable(variable_parent_dir_path, str_id, attr_name, time_resolution, level)
 
-
+def test_load(variable_parent_dir_path):
+  era5_single_level_variables = ['msl', 'tcwv','u10', 'v10', 'ta200', 'ta500',
+                                 'u850', 'v850']
+  for str_id in era5_single_level_variables:
+    var = Variable.load(path.join(variable_parent_dir_path, f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
+    print(var)
