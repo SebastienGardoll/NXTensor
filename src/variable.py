@@ -39,6 +39,9 @@ class SingleLevelVariable(Variable):
     self.root_dir_path         = None
     self.netcdf_attribute_name = None
     self.time_resolution       = None
+    self.date_template         = None
+    self.lat_attribute_name    = None
+    self.lon_attribute_name    = None
     self.coord_format          = None
     self.netcdf_path_template  = None
     self.lat_resolution        = None

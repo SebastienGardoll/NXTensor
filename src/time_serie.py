@@ -17,9 +17,6 @@ from xarray_utils import XarrayRpnCalculator, DEFAULT_DASK_SCHEDULER
 
 class XarrayTimeSeries:
 
-  DATE_TEMPLATE = "{year}-{month}-{day}T{hour}:{minute}:{second}:{microsecond}"
-  LAT_ATTRIBUTE_NAME = 'latitude'
-
   # Date is expected to be a datetime instance.
   def __init_(self, variable, date):#, dask_scheduler, nb_workers):
 
@@ -91,9 +88,9 @@ class XarrayTimeSeries:
     lon_max  = (rounded_lon + half_lon_frame - variable.lon_resolution)
 
     kwargs = tu.build_date_dictionary(date)
-    formatted_date = XarrayTimeSeries.DATE_TEMPLATE.format(**kwargs)
+    formatted_date = variable.date_template.format(**kwargs)
 
-    lat_series = self.dataset[XarrayTimeSeries.LAT_ATTRIBUTE_NAME]
+    lat_series = self.dataset[variable.lat_attribute_name]
 
     if lat_series[0] > lat_series[-1]:
         logging.debug('swap lat min and max')
