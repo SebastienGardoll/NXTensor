@@ -190,8 +190,10 @@ def unit_test_computed_variable():
   lat    = 39.7
   lon    = 312 # Equivalent to -48 .
 
-  unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
-                       half_lat_frame, half_lon_frame)
+  subregion = unit_test_extraction(str_id, variable_parent_dir_path, date, lat,
+                                   lon, half_lat_frame, half_lon_frame,
+                                   has_to_plot = False)
+  print(subregion)
 
 """
 import logging
@@ -247,7 +249,7 @@ def unit_test_single_multi_level():
                        half_lat_frame, half_lon_frame)
 
 def unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
-                         half_lat_frame, half_lon_frame):
+                         half_lat_frame, half_lon_frame, has_to_plot=True):
   import os.path as path
   from matplotlib import pyplot as plt
   var = Variable.load(path.join(variable_parent_dir_path,
@@ -256,6 +258,8 @@ def unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
     subregion = ts.extract_square_region(var, date, lat, lon, half_lat_frame,
                                          half_lon_frame)
     print(subregion.shape)
-    plt.figure()
-    plt.imshow(subregion,cmap='gist_rainbow_r',interpolation="none")
-    plt.show()
+    if has_to_plot:
+      plt.figure()
+      plt.imshow(subregion,cmap='gist_rainbow_r',interpolation="none")
+      plt.show()
+    return subregion
