@@ -107,9 +107,8 @@ class Tensor(YamlSerializable):
   def _save_data(self):
     try:
       logging.debug(f"saving tensor data to {self.data_file_path}")
-      hdf5_file = h5py.File(self.data_file_path, 'w')
-      hdf5_file.create_dataset('dataset', data=self._data)
-      hdf5_file.close()
+      with h5py.File(self.data_file_path, 'w') as hdf5_file:
+        hdf5_file.create_dataset('dataset', data=self._data)
     except Exception as e:
       logging.error(f"cannot save the tensor data to '{self.data_file_path}': {str(e)}")
       raise e
@@ -180,9 +179,9 @@ class Tensor(YamlSerializable):
   def _load_data(data_file_path):
     try:
       logging.debug(f"loading tensor data from {data_file_path}")
-      hdf5_file = h5py.File(data_file_path, 'r')
-      data = hdf5_file.get('dataset')
-      return np.array(data)
+      with h5py.File(data_file_path, 'r') as hdf5_file:
+        data = hdf5_file.get('dataset')
+        return np.array(data)
     except Exception as e:
       logging.error(f"cannot load tensor data from '{data_file_path}': {str(e)}")
       raise e
