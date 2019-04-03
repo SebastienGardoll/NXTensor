@@ -16,6 +16,9 @@ class YamlSerializable:
   def __init__(self, str_id):
     self.str_id = str_id
 
+  def __repr__(self):
+    return f"{self.__class__.__name__}(str_id={self.str_id})"
+
     # Save this instance to the given path (override if it already exists)
   def save(self, file_path):
     try:
