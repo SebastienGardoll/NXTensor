@@ -112,41 +112,43 @@ class XarrayRpnCalculator:
       return self._data_array_mapping.get(operand_literal, operand_literal)
 
   def _compute(self):
-    operator = self._stack.pop()
-    nb_operand, operation = XarrayRpnCalculator.OPERATORS[operator]
-    logging.debug(f"computing operator '{operator}' with arity of '{nb_operand}'")
+    operator_literal = self._stack.pop()
+    nb_operand, operation = XarrayRpnCalculator.OPERATORS[operator_literal]
+    logging.debug(f"poping operator '{operator_literal}' with arity of '{nb_operand}'")
 
     if nb_operand == 1:
       operand_literal = self._stack.pop()
       # Convert the label into string so as to avoid confusion with scalar
       # (float) as hash function return an integer value.
-      label = str(hash(f"{operator}#{operand_literal}"))
+      raw_label = f"{operator_literal}#{operand_literal}"
+      label = str(hash(raw_label))
       if label in self._intermediate_results:
-        logging.debug(f"getting already computed intermediate result for label '{label}'")
+        logging.debug(f"getting already computed intermediate result for label '{raw_label}'")
         intermediate_result = self._intermediate_results[label]
       else:
         logging.debug(f"resolving operand_literal '{operand_literal}'")
         resolved_operand = self._resolve_operand(operand_literal)
-        logging.debug(f"computing intermediate with label '{label}' and operand '{operand_literal}'")
+        logging.debug(f"computing intermediate with label '{raw_label}', operator '{operator_literal}' and operand '{operand_literal}'")
         intermediate_result = operation(resolved_operand)
     else:
       right_operand_literal = self._stack.pop()
       left_operand_literal  = self._stack.pop()
       # Convert the label into string so as to avoid confusion with scalar
       # (float) as hash function return an integer value.
-      label = str(hash(f"{left_operand_literal}#{operator}#{right_operand_literal}"))
+      raw_label = f"{left_operand_literal}#{operator_literal}#{right_operand_literal}"
+      label = str(hash(raw_label))
       if label in self._intermediate_results:
-        logging.debug(f"getting already computed intermediate result for label '{label}'")
+        logging.debug(f"getting already computed intermediate result for label '{raw_label}'")
         intermediate_result = self._intermediate_results[label]
       else:
         logging.debug(f"resolving operand_literal '{right_operand_literal}'")
         right_resolved_operand = self._resolve_operand(right_operand_literal)
         logging.debug(f"resolving operand_literal '{left_operand_literal}'")
         left_resolved_operand  = self._resolve_operand(left_operand_literal)
-        logging.debug(f"computing intermediate with label '{label}', left operand '{left_operand_literal}' and right operand '{right_operand_literal}'")
+        logging.debug(f"computing intermediate with label '{raw_label}', operator '{operator_literal}', left operand '{left_operand_literal}' and right operand '{right_operand_literal}'")
         intermediate_result    = operation(left_resolved_operand, right_resolved_operand)
 
-    logging.debug(f"staking result with a shape of {intermediate_result.shape} and label {label}")
+    logging.debug(f"staking result with a shape of {intermediate_result.shape} and label '{raw_label}'")
     self._stack.append(label)
     self._intermediate_results[label] = intermediate_result
 

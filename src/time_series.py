@@ -54,7 +54,7 @@ class XarrayTimeSeries:
   # Extract the region that centers the given lat/lon location.
   def extract_square_region(self, variable, date, lat, lon,
                             half_lat_frame, half_lon_frame):
-    logging.info(f"extracting subregion {date}, {lat}, {lon} for variable '{variable.str_id}'")
+    logging.info(f"extraction of the subregion {date}, {lat}, {lon} of the variable '{variable.str_id}'")
 
     if isinstance(variable, MultiLevelVariable) or \
        isinstance(variable, SingleLevelVariable):
