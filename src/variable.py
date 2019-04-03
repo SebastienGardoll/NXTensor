@@ -100,7 +100,7 @@ class ComputedVariable(Variable):
     self._variables = variables
 
   def accept(self, visitor):
-    for variable in self.get_variables():
+    for variable in self.get_variables().values():
       variable.accept(visitor)
 
     visitor.visit_ComputedVariable(self)
