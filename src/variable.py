@@ -84,10 +84,10 @@ class ComputedVariable(Variable):
   def get_variables(self):
     variables_value = getattr(self, '_variables', None)
     if variables_value is None:
-      logging.debug('loading the variables of {self.str_id}:')
+      logging.debug(f"loading the variables of {self.str_id}:")
       self._variables = dict()
       for var_file_path in self.variable_file_paths:
-        logging.debug('  loading the variable {var_file_path}')
+        logging.debug(f"loading the variable {var_file_path}")
         var = Variable.load(var_file_path)
         self._variables[var.str_id] = var
 
