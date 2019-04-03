@@ -223,7 +223,7 @@ create_computed_variables('...')
 def create_computed_variables(variable_parent_dir_path):
   variable = ComputedVariable()
   variable.str_id = 'wsl'
-  variable.computation_expression = 'u10 v10 +'
+  variable.computation_expression = 'u10 2 pow v10 2 pow + sqrt'
   variable.variable_file_paths = [path.join(variable_parent_dir_path,
                                             f"u10{Variable.FILE_NAME_POSTFIX}"),
                                   path.join(variable_parent_dir_path,
