@@ -20,11 +20,12 @@ class Variable(YamlSerializable, ABC):
   def __init__(self, str_id=None):
     super().__init__(str_id)
 
-  def __repr__(self):
-    return f"{self.__class__.__name__}(str_id={self.str_id})"
+  def compute_filename(self):
+    return Variable.generate_filename(self.str_id)
 
-  def compute_yaml_filename(self):
-    return f"{self.str_id}{Variable.FILE_NAME_POSTFIX}"
+  @staticmethod
+  def generate_filename(str_id):
+    return f"{str_id}{Variable.FILE_NAME_POSTFIX}"
 
   @abstractmethod
   def accept(self, visitor):
@@ -159,7 +160,7 @@ def bootstrap_era5_variable(variable_parent_dir_path, str_id, attribute_name,
   variable.nb_lat_decimal = 2
   variable.nb_lon_decimal = 2
 
-  variable_file_path = path.join(variable_parent_dir_path, variable.compute_yaml_filename())
+  variable_file_path = path.join(variable_parent_dir_path, variable.compute_filename())
   variable.save(variable_file_path)
 
 """
@@ -229,5 +230,5 @@ def create_computed_variables(variable_parent_dir_path):
                                   path.join(variable_parent_dir_path,
                                             f"v10{Variable.FILE_NAME_POSTFIX}")]
   variable.get_variables()
-  variable_file_path = path.join(variable_parent_dir_path, variable.compute_yaml_filename())
+  variable_file_path = path.join(variable_parent_dir_path, variable.compute_filename())
   variable.save(variable_file_path)
