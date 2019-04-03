@@ -22,7 +22,7 @@ class YamlSerializable:
     # Save this instance to the given path (override if it already exists)
   def save(self, file_path):
     try:
-      logging.info(f"saving {self.__class__.__name__} '{self.str_id}' to '{file_path}'")
+      logging.debug(f"saving {self.__class__.__name__} '{self.str_id}' to '{file_path}'")
       yml_content = yaml.dump(self, default_flow_style=False, indent=2)
     except Exception as e:
       logging.error(f"cannot serialize {self.__class__.__name__}: {str(e)}")
@@ -38,7 +38,7 @@ class YamlSerializable:
   @staticmethod
   def load(file_path):
     try:
-      logging.info(f"read file from '{file_path}'")
+      logging.debug(f"read file from '{file_path}'")
       with open(file_path, 'r') as file:
         yml_content = file.read()
     except Exception as e:
