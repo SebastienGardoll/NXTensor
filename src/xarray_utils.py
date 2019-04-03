@@ -9,6 +9,8 @@ Created on Fri Mar 29 15:29:43 2019
 import re
 import logging
 import dask
+import numpy as np
+import xarray as xr
 
 DEFAULT_DASK_SCHEDULER = 'single-threaded'
 
@@ -35,13 +37,36 @@ class XarrayRpnCalculator:
   def division(left_operand, right_operand):
     return (left_operand / right_operand).compute()
 
+  @staticmethod
+  # Return the square root of operand
+  # Compliant only with numpy > 1.13
+  def square(operand):
+    result = np.square(operand)
+    return xr.DataArray(data=result)
+
+  @staticmethod
+  # Return the log base 10 of operand
+  # Compliant only with numpy > 1.13
+  def log10(operand):
+    result = np.log10(operand)
+    return xr.DataArray(data=result)
+
+  @staticmethod
+  # Return the raise of left_operand to the power of right_operand
+  def power(left_operand, right_operand):
+    result = np.power(left_operand, right_operand)
+    return xr.DataArray(data=result)
+
   TOKENIZER = re.compile(r'\s+')
 
                     # Arity, static method.
-  OPERATORS = {'+': (2, addition),
-               '-': (2, subtraction),
-               '*': (2, multiplication),
-               '/': (2, division)}
+  OPERATORS = {'+'    : (2, addition),
+               '-'    : (2, subtraction),
+               '*'    : (2, multiplication),
+               '/'    : (2, division),
+               'log10': (1, log10),
+               'sqrt' : (1, square),
+               'pow'  : (2, power)}
 
   def __init__(self, expression, data_array_mapping):#, dask_scheduler, nb_workers):
     self._expression = expression
