@@ -23,3 +23,9 @@ class CoordinateFormat(Enum):
 
   DECREASING_DEGREE_NORTH = 'decreasing_degree_north'
   AMERICAN_DEGREE_EAST    = 'american_degree_east'
+
+class DbFormat(Enum):
+  CSV = 'csv'
+
+class RegionGeometry(Enum):
+  SQUARE = 'square'
