@@ -38,14 +38,21 @@ class XarrayRpnCalculator:
     return (left_operand / right_operand).compute()
 
   @staticmethod
-  # Return the square root of operand
+  # Return the square root of the operand (√x)
+  # Compliant only with numpy > 1.13
+  def sqrt(operand):
+    result = np.sqrt(operand)
+    return xr.DataArray(data=result)
+
+  @staticmethod
+  # Return the square of the operand (x²)
   # Compliant only with numpy > 1.13
   def square(operand):
     result = np.square(operand)
     return xr.DataArray(data=result)
 
   @staticmethod
-  # Return the log base 10 of operand
+  # Return the log base 10 of the operand
   # Compliant only with numpy > 1.13
   def log10(operand):
     result = np.log10(operand)
@@ -61,13 +68,14 @@ class XarrayRpnCalculator:
 
   # Adding .__func__ is mandatory otherwise: ''staticmethod' object is not callable'.
                      # Arity, static method.
-  OPERATORS = {'+'    : (2, addition.__func__),
-               '-'    : (2, subtraction.__func__),
-               '*'    : (2, multiplication.__func__),
-               '/'    : (2, division.__func__),
-               'log10': (1, log10.__func__),
-               'sqrt' : (1, square.__func__),
-               'pow'  : (2, power.__func__)}
+  OPERATORS = {'+'      : (2, addition.__func__),
+               '-'      : (2, subtraction.__func__),
+               '*'      : (2, multiplication.__func__),
+               '/'      : (2, division.__func__),
+               'log10'  : (1, log10.__func__),
+               'square' : (1, square.__func__), # x²
+               'sqrt'   : (1, sqrt.__func__),   # √x
+               'pow'    : (2, power.__func__)}
 
   def __init__(self, expression, data_array_mapping):#, dask_scheduler, nb_workers):
     self._expression = expression
