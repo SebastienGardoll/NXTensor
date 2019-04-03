@@ -59,7 +59,7 @@ class XarrayRpnCalculator:
 
   TOKENIZER = re.compile(r'\s+')
 
-                    # Arity, static method.
+                     # Arity, static method.
   OPERATORS = {'+'    : (2, addition),
                '-'    : (2, subtraction),
                '*'    : (2, multiplication),
