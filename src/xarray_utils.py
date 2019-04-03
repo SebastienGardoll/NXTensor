@@ -107,9 +107,15 @@ class XarrayRpnCalculator:
   # Otherwise return the literal as it is a scalar (i.e. a float).
   def _resolve_operand(self, operand_literal):
     if operand_literal in self._intermediate_results:
+      logging.debug(f"resolve '{operand_literal}' as an intermediate result")
       return self._intermediate_results[operand_literal]
     else:
-      return self._data_array_mapping.get(operand_literal, operand_literal)
+      if operand_literal in self._data_array_mapping:
+        logging.debug(f"resolve '{operand_literal}' as a input array")
+        return self._data_array_mapping[operand_literal]
+      else:
+        logging.debug(f"resolve '{operand_literal}' as a constant")
+        return operand_literal
 
   def _compute(self):
     operator_literal = self._stack.pop()
