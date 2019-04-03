@@ -191,8 +191,7 @@ def unit_test_computed_variable():
   lon    = 312 # Equivalent to -48 .
 
   subregion = unit_test_extraction(str_id, variable_parent_dir_path, date, lat,
-                                   lon, half_lat_frame, half_lon_frame,
-                                   has_to_plot = False)
+                                   lon, half_lat_frame, half_lon_frame)
   print(subregion)
 
 """
