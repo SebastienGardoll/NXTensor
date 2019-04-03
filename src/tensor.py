@@ -54,16 +54,26 @@ class Tensor(YamlSerializable):
   # None Proof
   def __init_data_properties(self, shape):
     if shape is not None:
-      if self.is_channels_last:
-        x_size     = shape[1]
-        y_size     = shape[2]
-        nb_channel = shape[3]
+      if len(shape) == 4:
+        if self.is_channels_last:
+          x_size     = shape[1]
+          y_size     = shape[2]
+          nb_channel = shape[3]
+        else:
+          x_size     = shape[2]
+          y_size     = shape[3]
+          nb_channel = shape[1]
       else:
-        x_size     = shape[2]
-        y_size     = shape[3]
-        nb_channel = shape[1]
+        if len(shape) == 3:
+          x_size = shape[1]
+          y_size = shape[2]
+          nb_channel = 1
+        else:
+          msg = 'unsupported shape of data'
+          logging.error(msg)
+          raise Exception(msg)
 
-      nb_img       = shape[0]
+      nb_img = shape[0]
     else:
       x_size     = None
       y_size     = None
