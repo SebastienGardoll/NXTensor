@@ -59,14 +59,15 @@ class XarrayRpnCalculator:
 
   TOKENIZER = re.compile(r'\s+')
 
+  # Adding .__func__ is mandatory otherwise: ''staticmethod' object is not callable'.
                      # Arity, static method.
-  OPERATORS = {'+'    : (2, addition),
-               '-'    : (2, subtraction),
-               '*'    : (2, multiplication),
-               '/'    : (2, division),
-               'log10': (1, log10),
-               'sqrt' : (1, square),
-               'pow'  : (2, power)}
+  OPERATORS = {'+'    : (2, addition.__func__),
+               '-'    : (2, subtraction.__func__),
+               '*'    : (2, multiplication.__func__),
+               '/'    : (2, division.__func__),
+               'log10': (1, log10.__func__),
+               'sqrt' : (1, square.__func__),
+               'pow'  : (2, power.__func__)}
 
   def __init__(self, expression, data_array_mapping):#, dask_scheduler, nb_workers):
     self._expression = expression
