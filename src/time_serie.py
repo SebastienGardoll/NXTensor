@@ -173,7 +173,36 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-from time_series import unit_test
+from time_series import unit_test_computed_variable
+"""
+def unit_test_computed_variable():
+  from datetime import datetime
+  half_lat_frame = 4
+  half_lon_frame = 4
+  variable_parent_dir_path = '/home/sgardoll/cyclone/variables'
+
+  str_id = 'wsl'
+  year   = 2000
+  month  = 10
+  day    = 1
+  hour   = 0
+  date   = datetime(year, month, day, hour)
+  lat    = 39.7
+  lon    = 312 # Equivalent to -48 .
+
+  unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
+                       half_lat_frame, half_lon_frame)
+
+"""
+import logging
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
+from time_series import unit_test_single_multi_level
 """
 def unit_test_single_multi_level():
   from datetime import datetime
