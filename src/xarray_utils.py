@@ -142,7 +142,8 @@ class XarrayRpnCalculator:
       else:
         logging.debug(f"resolving operand_literal '{operand_literal}'")
         resolved_operand = self._resolve_operand(operand_literal)
-        logging.debug(f"computing intermediate with label '{raw_label}', operator '{operator_literal}' and operand '{operand_literal}'")
+        logging.debug(f"computing intermediate with label '{raw_label}', \
+operator '{operator_literal}' and operand '{operand_literal}'")
         intermediate_result = operation(resolved_operand)
     else:
       right_operand_literal = self._stack.pop()
@@ -159,10 +160,13 @@ class XarrayRpnCalculator:
         right_resolved_operand = self._resolve_operand(right_operand_literal)
         logging.debug(f"resolving operand_literal '{left_operand_literal}'")
         left_resolved_operand  = self._resolve_operand(left_operand_literal)
-        logging.debug(f"computing intermediate with label '{raw_label}', operator '{operator_literal}', left operand '{left_operand_literal}' and right operand '{right_operand_literal}'")
+        logging.debug(f"computing intermediate with label '{raw_label}', \
+operator '{operator_literal}', left operand '{left_operand_literal}' and \
+right operand '{right_operand_literal}'")
         intermediate_result    = operation(left_resolved_operand, right_resolved_operand)
 
-    logging.debug(f"staking result with a shape of {intermediate_result.shape} and label '{raw_label}'")
+    logging.debug(f"staking result with a shape of {intermediate_result.shape} \
+and label '{raw_label}'")
     self._stack.append(label)
     self._intermediate_results[label] = intermediate_result
 
