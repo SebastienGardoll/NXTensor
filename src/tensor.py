@@ -93,7 +93,7 @@ class Tensor(YamlSerializable):
       raise Exception(msg)
 
     # Making self._data transient for yaml serialization.
-    data = self._data()
+    data = self._data
     del self._data
 
     if self.data_file_path is None:
@@ -102,7 +102,7 @@ class Tensor(YamlSerializable):
     super().save(yaml_file_path)
 
     self._data = data
-    self._save_data(self.data_file_path)
+    self._save_data()
 
   def _save_data(self):
     try:
@@ -160,6 +160,9 @@ class Tensor(YamlSerializable):
     logging.error(msg)
     raise NotImplementedError(msg)
 
+  def __repr__(self):
+    return f"{self.__class__.__name__}(str_id={self.str_id}, shape={self.shape})"
+
   @staticmethod
   def _compute_data_from_yaml_file_path(yaml_file_path):
     parent_dir_path = path.dirname(yaml_file_path)
@@ -185,3 +188,38 @@ class Tensor(YamlSerializable):
     except Exception as e:
       logging.error(f"cannot load tensor data from '{data_file_path}': {str(e)}")
       raise e
+
+"""
+import logging
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
+from tensor import unit_test
+"""
+def unit_test():
+  # Don't do that !
+  data = Tensor._load_data('/data/sgardoll/cyclone_data/tensor/test_2kb_tensor.h5')
+  str_id = 'test_2kb'
+  is_channels_last = True
+  channel_to_index = None
+  index_to_localisation = None
+  lazy_loading = False
+  tensor = Tensor(str_id, is_channels_last, channel_to_index, index_to_localisation,
+                  lazy_loading, data)
+  print(tensor)
+  print(tensor.shape)
+  print(tensor.x_size)
+  print(tensor.y_size)
+  print(tensor.nb_channel)
+  print(tensor.nb_img)
+  print(tensor.get_data().shape)
+
+  yaml_file_path = '/home/sgardoll/tmp/test.yml'
+  tensor.save(yaml_file_path)
+
+  tensor = Tensor.load(yaml_file_path)
+  print(tensor)
