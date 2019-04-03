@@ -10,6 +10,7 @@ from yaml_class import YamlSerializable
 from enum_utils import DbFormat, CoordinateFormat, SelectionShape
 from os import path
 from variable import Variable
+import logging
 
 class ExtractionConfig(YamlSerializable):
 
@@ -29,14 +30,51 @@ class ExtractionConfig(YamlSerializable):
     self.x_size = None
     self.y_size = None
     # Ordered list of variable file path descriptions.
-    self.variable_paths = None
+    self.variable_file_paths = None
     # List of label file path descriptions.
-    self.labels = None
+    self.label_file_paths = None
     self.selection_shape = None
     # Dictionary that contains the path of required elements for an extraction.
     self.tensor_dir_path = None
     self.channel_dir_path = None
     self.tmp_dir_path = None
+
+    self._variables = None # Transient for yaml serialization.
+    self._labels = None # Transient for yaml serialization.
+
+  def save(self, file_path):
+    variables = self._variables
+    labels = self._labels
+    del self._variables
+    del self._labels
+    super().save(file_path)
+    self._variables = variables
+    self._labels = labels
+
+  def get_variables(self):
+    variables_value = getattr(self, '_variables', None)
+    if variables_value is None:
+      logging.debug(f"loading the variables of {self.str_id}:")
+      self._variables = dict()
+      for var_file_path in self.variable_file_paths:
+        logging.debug(f"loading the variable {var_file_path}")
+        var = Variable.load(var_file_path)
+        self._variables[var.str_id] = var
+
+    return self._variables
+
+  def get_labels(self):
+    labels_value = getattr(self, '_labels', None)
+    if labels_value is None:
+      logging.debug(f"loading the labels of {self.str_id}:")
+      self._labels = dict()
+      for label_file_path in self.label_file_paths:
+        logging.debug(f"loading the label {label_file_path}")
+        label = ClassificationLabel.load(label_file_path)
+        self._labels[label.str_id] = label
+
+    return self._labels
+
 
 class ClassificationLabel(YamlSerializable):
 
@@ -150,10 +188,10 @@ def bootstrap_cyclone_extraction_configs():
   tensor_dir_path = path.join(output_parent_dir, 'tensor')
   channel_dir_path = path.join(output_parent_dir, 'channel')
   tmp_dir_path = path.join(output_parent_dir, 'tmp')
-  variable_paths = list()
+  variable_file_paths = list()
   for var_str_id in era5_variables:
     var_filename = Variable.generate_filename(var_str_id)
-    variable_paths.append(path.join(config_parent_dir, var_filename))
+    variable_file_paths.append(path.join(config_parent_dir, var_filename))
 
   for str_id in dataset:
     labels = [f"{config_parent_dir}/{ClassificationLabel.generate_filename(str_id, 'cyclone')}",
@@ -162,8 +200,8 @@ def bootstrap_cyclone_extraction_configs():
     extract_config.str_id = str_id
     extract_config.x_size = x_size
     extract_config.y_size = y_size
-    extract_config.variable_paths = variable_paths
-    extract_config.labels = labels
+    extract_config.variable_file_paths = variable_file_paths
+    extract_config.label_file_paths = labels
     extract_config.selection_shape = selection_shape
     extract_config.tensor_dir_path = tensor_dir_path
     extract_config.channel_dir_path = channel_dir_path
@@ -171,3 +209,24 @@ def bootstrap_cyclone_extraction_configs():
 
     file_path = path.join(config_parent_dir, ExtractionConfig.generate_filename(str_id))
     extract_config.save(file_path)
+
+  """
+  import logging
+  logger = logging.getLogger()
+  handler = logging.StreamHandler()
+  formatter = logging.Formatter('%(levelname)-8s %(message)s')
+  handler.setFormatter(formatter)
+  logger.addHandler(handler)
+  logger.setLevel(logging.DEBUG)
+
+  from extraction import test_load
+  test_load()
+  """
+def test_load():
+  config_parent_dir = '/home/sgardoll/cyclone/extraction_config'
+  dataset = ['2ka', '2kb', '2000', '2000_10', 'all']
+  for str_id in dataset:
+    filename = ExtractionConfig.generate_filename(str_id)
+    conf = ExtractionConfig.load(path.join(config_parent_dir, filename))
+    conf.get_variables()
+    conf.get_labels()
