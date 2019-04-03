@@ -174,12 +174,13 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 from time_series import unit_test_computed_variable
+unit_test_computed_variable()
 """
 def unit_test_computed_variable():
   from datetime import datetime
   half_lat_frame = 4
   half_lon_frame = 4
-  variable_parent_dir_path = '/home/sgardoll/cyclone/variables'
+  variable_parent_dir_path = '/home/sgardoll/cyclone/extraction_config'
 
   str_id = 'wsl'
   year   = 2000
@@ -204,12 +205,13 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 from time_series import unit_test_single_multi_level
+unit_test_single_multi_level()
 """
 def unit_test_single_multi_level():
   from datetime import datetime
   half_lat_frame = 4
   half_lon_frame = 4
-  variable_parent_dir_path = '/home/sgardoll/cyclone/variables'
+  variable_parent_dir_path = '/home/sgardoll/cyclone/extraction_config'
 
   str_id = 'msl'
   year   = 2000
