@@ -15,7 +15,7 @@ import os.path as path
 
 class Variable(YamlSerializable, ABC):
 
-  FILE_NAME_POSTFIX = '_variable.yml'
+  FILE_NAME_POSTFIX = 'variable.yml'
 
   def __init__(self, str_id=None):
     super().__init__(str_id)
@@ -25,7 +25,7 @@ class Variable(YamlSerializable, ABC):
 
   @staticmethod
   def generate_filename(str_id):
-    return f"{str_id}{Variable.FILE_NAME_POSTFIX}"
+    return f"{str_id}_{Variable.FILE_NAME_POSTFIX}"
 
   @abstractmethod
   def accept(self, visitor):
@@ -138,31 +138,6 @@ class VariableNetcdfFilePathVisitor(VariableVisitor):
     pass
 
 
-def bootstrap_era5_variable(variable_parent_dir_path, str_id, attribute_name,
-                            time_resolution, netcdf_path_template, level = None):
-  if level is None:
-    variable = SingleLevelVariable()
-  else:
-    variable = MultiLevelVariable()
-    variable.level = level
-
-  variable.str_id = str_id
-  variable.netcdf_attribute_name = attribute_name
-  variable.time_resolution = time_resolution
-  variable.date_template = '{year}-{month}-{day}T{hour}:{minute}:{second}.{microsecond}'
-  variable.lat_attribute_name = 'latitude'
-  variable.lon_attribute_name = 'longitude'
-  variable.lat_format = CoordinateFormat.DECREASING_DEGREE_NORTH
-  variable.lon_format = CoordinateFormat.AMERICAN_DEGREE_EAST
-  variable.netcdf_path_template = netcdf_path_template
-  variable.lat_resolution = 0.25
-  variable.lon_resolution = 0.25
-  variable.nb_lat_decimal = 2
-  variable.nb_lon_decimal = 2
-
-  variable_file_path = path.join(variable_parent_dir_path, variable.compute_filename())
-  variable.save(variable_file_path)
-
 """
 import logging
 logger = logging.getLogger()
@@ -178,6 +153,32 @@ bootstrap_era5_variables('...')
 def bootstrap_era5_variables(variable_parent_dir_path):
   era5_single_level_variables = ['msl', 'tcwv','u10', 'v10']
   time_resolution = TimeResolution.HOUR
+
+  def bootstrap_era5_variable(variable_parent_dir_path, str_id, attribute_name,
+                            time_resolution, netcdf_path_template, level = None):
+    if level is None:
+      variable = SingleLevelVariable()
+    else:
+      variable = MultiLevelVariable()
+      variable.level = level
+
+    variable.str_id = str_id
+    variable.netcdf_attribute_name = attribute_name
+    variable.time_resolution = time_resolution
+    variable.date_template = '{year}-{month}-{day}T{hour}:{minute}:{second}.{microsecond}'
+    variable.lat_attribute_name = 'latitude'
+    variable.lon_attribute_name = 'longitude'
+    variable.lat_format = CoordinateFormat.DECREASING_DEGREE_NORTH
+    variable.lon_format = CoordinateFormat.AMERICAN_DEGREE_EAST
+    variable.netcdf_path_template = netcdf_path_template
+    variable.lat_resolution = 0.25
+    variable.lon_resolution = 0.25
+    variable.nb_lat_decimal = 2
+    variable.nb_lon_decimal = 2
+
+    variable_file_path = path.join(variable_parent_dir_path, variable.compute_filename())
+    variable.save(variable_file_path)
+
   for str_id in era5_single_level_variables:
     netcdf_path_template = '/bdd/ERA5/NETCDF/GLOBAL_025/hourly/AN_SF/{year}/%s.{year}{month2d}.as1e5.GLOBAL_025.nc' % (str_id)
     bootstrap_era5_variable(variable_parent_dir_path, str_id, str_id,
