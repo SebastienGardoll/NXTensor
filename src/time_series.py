@@ -233,8 +233,9 @@ def unit_test_single_multi_level():
   lon    = 282.8 # Equivalent to -77.2 .
   date   = datetime(year, month, day, hour)
 
-  unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
-                       half_lat_frame, half_lon_frame)
+  subregion = unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
+                                   half_lat_frame, half_lon_frame)
+  print(subregion)
 
   str_id = 'msl'
   year   = 2011
@@ -245,8 +246,9 @@ def unit_test_single_multi_level():
   lon    = 301 # Equivalent to -59 .
   date   = datetime(year, month, day, hour)
 
-  unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
-                       half_lat_frame, half_lon_frame)
+  subregion = unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
+                                   half_lat_frame, half_lon_frame)
+  print(subregion)
 
 def unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
                          half_lat_frame, half_lon_frame, has_to_plot=True):
@@ -257,7 +259,6 @@ def unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
   with XarrayTimeSeries(var, date) as ts:
     subregion = ts.extract_square_region(var, date, lat, lon, half_lat_frame,
                                          half_lon_frame)
-    print(subregion.shape)
     if has_to_plot:
       plt.figure()
       plt.imshow(subregion,cmap='gist_rainbow_r',interpolation="none")
