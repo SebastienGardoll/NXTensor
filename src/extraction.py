@@ -34,13 +34,20 @@ class ExtractionConfig(YamlSerializable):
     # List of label file path descriptions.
     self.label_file_paths = None
     self.selection_shape = None
-    # Dictionary that contains the path of required elements for an extraction.
+    # The path of required directories for an extraction.
     self.tensor_dir_path = None
     self.channel_dir_path = None
     self.tmp_dir_path = None
 
+    # The number of netcdf files extracted per cycle of extractions.
+    self.batch_size = None
+
+    # The number of process per cycle of extractions.
+    self.nb_process = None
+
     self._variables = None # Transient for yaml serialization.
     self._labels = None # Transient for yaml serialization.
+
 
   def save(self, file_path):
     variables = self._variables
@@ -188,6 +195,9 @@ def bootstrap_cyclone_extraction_configs():
   tensor_dir_path = path.join(output_parent_dir, 'tensor')
   channel_dir_path = path.join(output_parent_dir, 'channel')
   tmp_dir_path = path.join(output_parent_dir, 'tmp')
+  batch_size = 12
+  nb_process = 4
+
   variable_file_paths = list()
   for var_str_id in era5_variables:
     var_filename = Variable.generate_filename(var_str_id)
@@ -206,6 +216,8 @@ def bootstrap_cyclone_extraction_configs():
     extract_config.tensor_dir_path = tensor_dir_path
     extract_config.channel_dir_path = channel_dir_path
     extract_config.tmp_dir_path = tmp_dir_path
+    extract_config.batch_size = batch_size
+    extract_config.nb_process = nb_process
 
     file_path = path.join(config_parent_dir, ExtractionConfig.generate_filename(str_id))
     extract_config.save(file_path)

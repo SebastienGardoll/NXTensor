@@ -11,7 +11,7 @@ import xarray as xr
 import logging
 from variable import MultiLevelVariable, SingleLevelVariable,\
 ComputedVariable, VariableNetcdfFilePathVisitor, VariableVisitor, Variable
-import coordinate_utils as cu
+from coordinate_utils import CoordinateUtils
 import time_utils as tu
 from xarray_utils import XarrayRpnCalculator, DEFAULT_DASK_SCHEDULER
 
@@ -79,8 +79,8 @@ class XarrayTimeSeries:
   def _extract_square_region(self, variable, date, lat, lon,
                              half_lat_frame, half_lon_frame):
     logging.debug(f"extracting subregion {date}, {lat}, {lon} for variable '{variable.str_id}'")
-    rounded_lat = cu.round_nearest(lat, variable.lat_resolution, variable.nb_lat_decimal)
-    rounded_lon = cu.round_nearest(lon, variable.lon_resolution, variable.nb_lon_decimal)
+    rounded_lat = CoordinateUtils.round_nearest(lat, variable.lat_resolution, variable.nb_lat_decimal)
+    rounded_lon = CoordinateUtils.round_nearest(lon, variable.lon_resolution, variable.nb_lon_decimal)
 
     # Minus LAT_RESOLUTION because the upper bound in slice is included.
     lat_min  = (rounded_lat - half_lat_frame + variable.lat_resolution)
