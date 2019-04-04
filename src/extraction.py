@@ -55,11 +55,11 @@ class ExtractionConfig(YamlSerializable):
     variables_value = getattr(self, '_variables', None)
     if variables_value is None:
       logging.debug(f"loading the variables of {self.str_id}:")
-      self._variables = dict()
+      self._variables = list() # Preserve the order.
       for var_file_path in self.variable_file_paths:
         logging.debug(f"loading the variable {var_file_path}")
         var = Variable.load(var_file_path)
-        self._variables[var.str_id] = var
+        self._variables.append(var)
 
     return self._variables
 
@@ -67,11 +67,11 @@ class ExtractionConfig(YamlSerializable):
     labels_value = getattr(self, '_labels', None)
     if labels_value is None:
       logging.debug(f"loading the labels of {self.str_id}:")
-      self._labels = dict()
+      self._labels = list() # Preserve the order.
       for label_file_path in self.label_file_paths:
         logging.debug(f"loading the label {label_file_path}")
         label = ClassificationLabel.load(label_file_path)
-        self._labels[label.str_id] = label
+        self._labels.append(label)
 
     return self._labels
 

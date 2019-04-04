@@ -86,11 +86,11 @@ class ComputedVariable(Variable):
     variables_value = getattr(self, '_variables', None)
     if variables_value is None:
       logging.debug(f"loading the variables of {self.str_id}:")
-      self._variables = dict()
+      self._variables = list() # Preserve the order.
       for var_file_path in self.variable_file_paths:
         logging.debug(f"loading the variable {var_file_path}")
         var = Variable.load(var_file_path)
-        self._variables[var.str_id] = var
+        self._variables.append(var)
 
     return self._variables
 
@@ -101,7 +101,7 @@ class ComputedVariable(Variable):
     self._variables = variables
 
   def accept(self, visitor):
-    for variable in self.get_variables().values():
+    for variable in self.get_variables():
       variable.accept(visitor)
 
     visitor.visit_ComputedVariable(self)
