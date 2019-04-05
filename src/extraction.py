@@ -7,10 +7,12 @@ Created on Wed Apr  3 13:26:39 2019
 """
 
 from yaml_class import YamlSerializable
-from enum_utils import DbFormat, CoordinateFormat, SelectionShape
+from enum_utils import DbFormat, CoordinateFormat, SelectionShape, CoordinateKey,\
+                       TimeKey
 from os import path
 from variable import Variable
 import logging
+
 
 class ExtractionConfig(YamlSerializable):
 
@@ -85,13 +87,6 @@ class ExtractionConfig(YamlSerializable):
 
 class ClassificationLabel(YamlSerializable):
 
-  YEAR_KEY  = 'year'
-  MONTH_KEY = 'month'
-  DAY_KEY   = 'day'
-  HOUR_KEY  = 'hour'
-  LAT_KEY   = 'lat'
-  LON_KEY   = 'lon'
-
   FILE_NAME_POSTFIX = 'label.yml'
 
   def compute_filename(self):
@@ -105,19 +100,19 @@ class ClassificationLabel(YamlSerializable):
     super().__init__(str_id)
 
     # Numerical id that encode the label.
-    self.num_id          = None
+    self.num_id               = None
     # The name of the label to be displayed to the user.
-    self.display_name    = None
+    self.display_name         = None
     # The path to the db that contains the information of the labels.
-    self.db_file_path    = None
+    self.db_file_path         = None
     # The format of the data base of labels (CSV, etc.)
-    self.db_format       = None
+    self.db_format            = None
     # Dictionary that maps required information about the labels (see keys).
-    self.db_mapping      = None
+    self.db_meta_data_mapping = None
     # The format of the latitudes.
-    self.lat_format      = None
+    self.lat_format           = None
     # The format of the longitudes.
-    self.lon_format      = None
+    self.lon_format           = None
 
   def __repr__(self):
     return f"{self.__class__.__name__}(str_id={self.str_id}, name={self.display_name}, " \
@@ -144,12 +139,12 @@ def bootstrap_cyclone_labels():
   lat_format = CoordinateFormat.INCREASING_DEGREE_NORTH
   lon_format = CoordinateFormat.EUROPEAN_DEGREE_EAST
   db_format = DbFormat.CSV
-  db_mapping = {ClassificationLabel.YEAR_KEY: 'year',
-                ClassificationLabel.MONTH_KEY: 'month',
-                ClassificationLabel.DAY_KEY: 'day',
-                ClassificationLabel.HOUR_KEY: 'hour',
-                ClassificationLabel.LAT_KEY: 'lat',
-                ClassificationLabel.LON_KEY: 'lon'}
+  db_mapping = {TimeKey.YEAR: 'year',
+                TimeKey.MONTH:'month',
+                TimeKey.DAY:  'day',
+                TimeKey.HOUR: 'hour',
+                CoordinateKey.LAT: 'lat',
+                CoordinateKey.LON: 'lon'}
 
   def create_label(str_id, num_id, display_name):
     label = ClassificationLabel()

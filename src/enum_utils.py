@@ -26,7 +26,21 @@ class CoordinateFormat(Enum):
   EUROPEAN_DEGREE_EAST    = 'european_degree_east'    # From -180° to  180°
 
 class DbFormat(Enum):
+
   CSV = 'csv'
 
 class SelectionShape(Enum):
+
   SQUARE = 'square'
+
+class TimeKey:
+
+  YEAR  = 'year'
+  MONTH = 'month'
+  DAY   = 'day'
+  HOUR  = 'hour'
+
+class CoordinateKey(Enum):
+
+  LAT   = 'lat'
+  LON   = 'lon'

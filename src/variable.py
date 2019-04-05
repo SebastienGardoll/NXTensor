@@ -154,8 +154,7 @@ def bootstrap_era5_variables(variable_parent_dir_path):
   era5_single_level_variables = ['msl', 'tcwv','u10', 'v10']
   time_resolution = TimeResolution.HOUR
 
-  def bootstrap_era5_variable(variable_parent_dir_path, str_id, attribute_name,
-                            time_resolution, netcdf_path_template, level = None):
+  def bootstrap_era5_variable(str_id, attribute_name, netcdf_path_template, level = None):
     if level is None:
       variable = SingleLevelVariable()
     else:
@@ -181,16 +180,14 @@ def bootstrap_era5_variables(variable_parent_dir_path):
 
   for str_id in era5_single_level_variables:
     netcdf_path_template = '/bdd/ERA5/NETCDF/GLOBAL_025/hourly/AN_SF/{year}/%s.{year}{month2d}.as1e5.GLOBAL_025.nc' % (str_id)
-    bootstrap_era5_variable(variable_parent_dir_path, str_id, str_id,
-                            time_resolution, netcdf_path_template)
+    bootstrap_era5_variable(str_id, str_id, netcdf_path_template)
 
   era5_multi_level_variables = [('ta200', 'ta', 200), ('ta500', 'ta', 500),
                                 ('u850', 'u', 850), ('v850', 'v', 850)]
   time_resolution = TimeResolution.SIX_HOURS
   for str_id, attr_name, level in era5_multi_level_variables:
     netcdf_path_template = '/bdd/ERA5/NETCDF/GLOBAL_025/4xdaily/AN_PL/{year}/%s.{year}{month2d}.aphe5.GLOBAL_025.nc' % (attr_name)
-    bootstrap_era5_variable(variable_parent_dir_path, str_id, attr_name,
-                            time_resolution, netcdf_path_template, level)
+    bootstrap_era5_variable(str_id, attr_name, netcdf_path_template, level)
 
 """
 import logging
