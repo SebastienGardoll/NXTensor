@@ -6,9 +6,7 @@ Created on Tue Mar 26 12:13:52 2019
 @author: sebastien@gardoll.fr
 """
 
-from enum import Enum
-
-class TimeResolution(Enum):
+class TimeResolution:
 
   YEAR      = 'year'
   MONTH     = 'month'
@@ -18,18 +16,18 @@ class TimeResolution(Enum):
   MINUTE    = 'minute'
   SECOND    = 'second'
 
-class CoordinateFormat(Enum):
+class CoordinateFormat:
 
   DECREASING_DEGREE_NORTH = 'decreasing_degree_north' # From   90° to  -90°
   INCREASING_DEGREE_NORTH = 'increasing_degree_north' # From  -90° to   90°
   AMERICAN_DEGREE_EAST    = 'american_degree_east'    # From    0° to  360°
   EUROPEAN_DEGREE_EAST    = 'european_degree_east'    # From -180° to  180°
 
-class DbFormat(Enum):
+class DbFormat:
 
   CSV = 'csv'
 
-class SelectionShape(Enum):
+class SelectionShape:
 
   SQUARE = 'square'
 
@@ -40,7 +38,7 @@ class TimeKey:
   DAY   = 'day'
   HOUR  = 'hour'
 
-class CoordinateKey(Enum):
+class CoordinateKey:
 
   LAT   = 'lat'
   LON   = 'lon'

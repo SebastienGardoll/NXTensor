@@ -105,10 +105,15 @@ class ClassificationLabel(YamlSerializable):
     self.display_name         = None
     # The path to the db that contains the information of the labels.
     self.db_file_path         = None
-    # The format of the data base of labels (CSV, etc.)
+    # The format of the data base of labels (CSV, etc.).
     self.db_format            = None
+
+    # the description of the db options (dictionary).
+    self.db_format_options    = None
+
     # Dictionary that maps required information about the labels (see keys).
     self.db_meta_data_mapping = None
+
     # The format of the latitudes.
     self.lat_format           = None
     # The format of the longitudes.
