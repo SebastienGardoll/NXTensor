@@ -5,9 +5,11 @@ Created on Thu Mar 28 16:14:08 2019
 
 @author: sebastien@gardoll.fr
 """
-import math
 
+import math
+import logging
 from enum_utils import CoordinateFormat
+
 
 class CoordinateUtils:
 
@@ -18,7 +20,7 @@ class CoordinateUtils:
     return round(round(value / resolution) * resolution, num_decimal)
 
   @staticmethod
-  def generate_convert_mapping(from_format, to_format, resolution):
+  def get_convert_mapping(from_format, to_format, resolution):
     if from_format in CoordinateUtils._CONVERT_MAPPING:
       from_format_dict = CoordinateUtils._CONVERT_MAPPING[from_format]
       if to_format in from_format_dict:
@@ -43,9 +45,14 @@ class CoordinateUtils:
 
   @staticmethod
   def _compute_mapping(from_format, to_format, resolution, parent_mapping):
-    result = CoordinateUtils._GENERATOR[from_format][to_format](resolution)
-    parent_mapping[resolution] = result
-    return result
+    try:
+      result = CoordinateUtils._GENERATOR[from_format][to_format](resolution)
+      parent_mapping[resolution] = result
+      return result
+    except:
+      msg = f"the conversion of coordinates from '{from_format}' to '{to_format}' is not supported"
+      logging.error(msg)
+      raise Exception(msg)
 
   @staticmethod
   def _generate_mapping_degrees_east_european_to_american(resolution):
@@ -83,7 +90,7 @@ from coordinate_utils import unit_test
 unit_test()
 """
 def unit_test():
-  mapping = CoordinateUtils.generate_convert_mapping(CoordinateFormat.EUROPEAN_DEGREE_EAST,
+  mapping = CoordinateUtils.get_convert_mapping(CoordinateFormat.EUROPEAN_DEGREE_EAST,
                                            CoordinateFormat.AMERICAN_DEGREE_EAST,
-                                           0.25)
+                                           0.25 )
   return mapping
