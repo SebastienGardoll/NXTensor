@@ -8,7 +8,7 @@ Created on Wed Apr  3 13:26:39 2019
 
 from yaml_class import YamlSerializable
 from enum_utils import DbFormat, CoordinateFormat, SelectionShape, CoordinateKey,\
-                       TimeKey
+                       TimeKey, CsvKey
 from os import path
 from variable import Variable
 import logging
@@ -144,6 +144,10 @@ def bootstrap_cyclone_labels():
   lat_format = CoordinateFormat.INCREASING_DEGREE_NORTH
   lon_format = CoordinateFormat.EUROPEAN_DEGREE_EAST
   db_format = DbFormat.CSV
+  db_format_options = {CsvKey.SEPARATOR: ',',
+                       CsvKey.HEADER: 0,
+                       CsvKey.NA_SYMBOL: ''}
+
   db_mapping = {TimeKey.YEAR: 'year',
                 TimeKey.MONTH:'month',
                 TimeKey.DAY:  'day',
@@ -158,6 +162,7 @@ def bootstrap_cyclone_labels():
     label.db_file_path = ''
     label.display_name = display_name
     label.db_format = db_format
+    label.db_format_options = db_format_options
     label.db_mapping = db_mapping
     label.lat_format = lat_format
     label.lon_format = lon_format
@@ -222,18 +227,18 @@ def bootstrap_cyclone_extraction_configs():
     file_path = path.join(config_parent_dir, ExtractionConfig.generate_filename(str_id))
     extract_config.save(file_path)
 
-  """
-  import logging
-  logger = logging.getLogger()
-  handler = logging.StreamHandler()
-  formatter = logging.Formatter('%(levelname)-8s %(message)s')
-  handler.setFormatter(formatter)
-  logger.addHandler(handler)
-  logger.setLevel(logging.DEBUG)
+"""
+import logging
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
 
-  from extraction import test_load
-  test_load()
-  """
+from extraction import test_load
+test_load()
+"""
 def test_load():
   config_parent_dir = '/home/sgardoll/cyclone/extraction_config'
   dataset = ['2ka', '2kb', '2000', '2000_10', 'all']
