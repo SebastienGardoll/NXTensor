@@ -27,6 +27,12 @@ class DbFormat:
 
   CSV = 'csv'
 
+class CsvKey:
+
+  SEPARATOR = 'separator'
+  HEADER    = 'header_line_number'
+  NA_SYMBOL = 'na_symbol'
+
 class SelectionShape:
 
   SQUARE = 'square'
