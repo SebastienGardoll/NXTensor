@@ -148,7 +148,7 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 from variable import bootstrap_era5_variables
-bootstrap_era5_variables('...')
+bootstrap_era5_variables('/home/sgardoll/cyclone/extraction_config')
 """
 def bootstrap_era5_variables(variable_parent_dir_path):
   era5_single_level_variables = ['msl', 'tcwv','u10', 'v10']
@@ -199,12 +199,12 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 from variable import test_load
-test_load('...')
+test_load('/home/sgardoll/cyclone/extraction_config')
 """
 def test_load(variable_parent_dir_path):
   era5_variables = ['msl', 'tcwv','u10', 'v10', 'ta200', 'ta500', 'u850', 'v850']
   for str_id in era5_variables:
-    var = Variable.load(path.join(variable_parent_dir_path, f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
+    var = Variable.load(path.join(variable_parent_dir_path, Variable.generate_filename(str_id)))
     print(var)
 
 """
