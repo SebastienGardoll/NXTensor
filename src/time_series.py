@@ -77,17 +77,19 @@ class XarrayTimeSeries:
   # Extract the region that centers the given lat/lon location. Variable must be
   # SingleLevelVariable or MultiLevelVariable.
   def _extract_square_region(self, variable, date, lat, lon,
-                             half_lat_frame, half_lon_frame):
+                             half_lat_frame, half_lon_frame, has_to_round=True):
     logging.debug(f"extracting subregion {date}, {lat}, {lon} for variable '{variable.str_id}'")
-    rounded_lat = CoordinateUtils.round_nearest(lat, variable.lat_resolution, variable.nb_lat_decimal)
-    rounded_lon = CoordinateUtils.round_nearest(lon, variable.lon_resolution, variable.nb_lon_decimal)
+
+    if has_to_round:
+      lat = CoordinateUtils.round_nearest(lat, variable.lat_resolution, variable.nb_lat_decimal)
+      lon = CoordinateUtils.round_nearest(lon, variable.lon_resolution, variable.nb_lon_decimal)
 
     # Minus LAT_RESOLUTION because the upper bound in slice is included.
-    lat_min  = (rounded_lat - half_lat_frame + variable.lat_resolution)
-    lat_max  = (rounded_lat + half_lat_frame)
+    lat_min  = (lat - half_lat_frame + variable.lat_resolution)
+    lat_max  = (lat + half_lat_frame)
     # Minus LON_RESOLUTION because the upper bound in slice is included.
-    lon_min  = (rounded_lon - half_lon_frame)
-    lon_max  = (rounded_lon + half_lon_frame - variable.lon_resolution)
+    lon_min  = (lon - half_lon_frame)
+    lon_max  = (lon + half_lon_frame - variable.lon_resolution)
 
     kwargs = tu.build_date_dictionary(date)
     formatted_date = variable.date_template.format(**kwargs)
