@@ -45,7 +45,6 @@ class DbHandler:
         raise Exception(msg)
     return DbHandler(dataset, db_meta_data_mapping)
 
-
   def reformat_coordinates(self, coordinate_key, from_format, to_format,
                            resolution, nb_decimal):
     logging.info(f"reformat '{coordinate_key}' from format 'from_format' to 'to_format'")

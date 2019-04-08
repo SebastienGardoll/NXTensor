@@ -25,8 +25,21 @@ class ChannelExtraction:
       self._label_dbs.append(current_db)
 
   def extract(self):
-    pass
 
+    # Match the format of the varibale to be extracted and the format of the
+    # label dbs.
+
+    # Build the list of tasks to be processed.
+
+    # Instanciate the channel buffer.
+
+    # Process the list of tasks.
+
+    # Merge the blocks and build a tensor object composed of 1 channel.
+
+    # Compute the statistics on the channel.
+
+    pass
 """
 import logging
 logger = logging.getLogger()
