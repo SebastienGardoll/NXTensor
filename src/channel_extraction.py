@@ -8,6 +8,8 @@ Created on Wed Apr  3 17:27:08 2019
 
 from extraction import ExtractionConfig
 from db_handler import DbHandler
+from enum_utils import CoordinateKey, CoordinatePropertyKey
+import logging
 
 class ChannelExtraction:
 
@@ -18,20 +20,56 @@ class ChannelExtraction:
     self._label_dbs = list()
 
     for label in self._extraction_conf.get_labels():
-      current_db = DbHandler.load(label.db_file_path,
-                                  label.db_format,
-                                  label.db_meta_data_mapping,
-                                  label.db_format_options)
+      current_db = DbHandler.load(label)
       self._label_dbs.append(current_db)
+
+  def check_format(self):
+    var_format = dict()
+    var_format[CoordinateKey.LAT] =\
+      {CoordinatePropertyKey.FORMAT    : self.extracted_variable.lat_format,
+       CoordinatePropertyKey.RESOLUTION: self.extracted_variable.lat_resolution,
+       CoordinatePropertyKey.NB_DECIMAL: self.extracted_variable.nb_lat_decimal}
+
+    var_format[CoordinateKey.LON] = \
+      {CoordinatePropertyKey.FORMAT    : self.extracted_variable.lon_format,
+       CoordinatePropertyKey.RESOLUTION: self.extracted_variable.lon_resolution,
+       CoordinatePropertyKey.NB_DECIMAL: self.extracted_variable.nb_lon_decimal}
+
+    label_formats = dict()
+    label_db_dict = dict()
+    for label_db in self._label_dbs:
+      curr_label = label_db.label
+      curr_format = dict()
+      curr_format[CoordinateKey.LAT] = curr_label.lat_format
+      curr_format[CoordinateKey.LON] = curr_label.lon_format
+      label_formats[curr_label] = curr_format
+      label_db_dict[curr_label.str_id] = label_db
+
+    for curr_label, curr_format in label_formats.items():
+      for curr_key in CoordinateKey.KEYS:
+        curr_var_format = var_format[curr_key]
+        curr_label_format = curr_format[curr_key]
+        curr_db = label_db_dict[curr_label.str_id]
+        curr_resolution = var_format[curr_key][CoordinatePropertyKey.RESOLUTION]
+        curr_nb_decimal = var_format[curr_key][CoordinatePropertyKey.NB_DECIMAL]
+
+        if curr_var_format != curr_label_format:
+          curr_db.reformat_coordinates(curr_key, curr_label_format,
+                                       curr_var_format, curr_resolution,
+                                       curr_nb_decimal)
+        else:
+          curr_db.round_coordinates(curr_key, curr_resolution, curr_nb_decimal)
+
 
   def extract(self):
 
-    # Match the format of the varibale to be extracted and the format of the
+    # Match the format of the variable to be extracted and the format of the
     # label dbs.
+    self.check_format()
 
     # Build the list of tasks to be processed.
 
-    # Instanciate the channel buffer.
+    # Instantiate the channel buffer.
 
     # Process the list of tasks.
 

@@ -111,7 +111,8 @@ class ClassificationLabel(YamlSerializable):
     # the description of the db options (dictionary).
     self.db_format_options    = None
 
-    # Dictionary that maps required information about the labels (see keys).
+    # Dictionary that maps required information about the labels:
+    # convert keys (see enum_utils) into db column names.
     self.db_meta_data_mapping = None
 
     # The format of the latitudes.
@@ -148,12 +149,12 @@ def bootstrap_cyclone_labels():
                        CsvKey.HEADER: 0,
                        CsvKey.NA_SYMBOL: ''}
 
-  db_mapping = {TimeKey.YEAR: 'year',
-                TimeKey.MONTH:'month',
-                TimeKey.DAY:  'day',
-                TimeKey.HOUR: 'hour',
-                CoordinateKey.LAT: 'lat',
-                CoordinateKey.LON: 'lon'}
+  db_meta_data_mapping = {TimeKey.YEAR: 'year',
+                          TimeKey.MONTH:'month',
+                          TimeKey.DAY:  'day',
+                          TimeKey.HOUR: 'hour',
+                          CoordinateKey.LAT: 'lat',
+                          CoordinateKey.LON: 'lon'}
 
   def create_label(str_id, num_id, display_name):
     label = ClassificationLabel()
@@ -163,7 +164,7 @@ def bootstrap_cyclone_labels():
     label.display_name = display_name
     label.db_format = db_format
     label.db_format_options = db_format_options
-    label.db_mapping = db_mapping
+    label.db_mapping = db_meta_data_mapping
     label.lat_format = lat_format
     label.lon_format = lon_format
     db_filename = db_filename_template.format(str_id=str_id,

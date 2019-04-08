@@ -48,9 +48,25 @@ class DbHandler:
         raise Exception(msg)
     return DbHandler(dataset, label)
 
+  def round_coordinates(self, coordinate_key, resolution, nb_decimal):
+    column_name = self.label.db_meta_data_mapping[coordinate_key]
+    logging.info(
+      f"round column '{column_name}' "
+      f"in the db of label '{self.label.str_id}'")
+
+    def _round_coordinates(value):
+      rounded_value = CoordinateUtils.round_nearest(value, resolution, nb_decimal)
+      return rounded_value
+
+    self.dataset[column_name] = \
+      np.vectorize(_round_coordinates)(self.dataset[column_name])
+
   def reformat_coordinates(self, coordinate_key, from_format, to_format,
                            resolution, nb_decimal):
-    logging.info(f"reformat '{coordinate_key}' from format 'from_format' to 'to_format'")
+    column_name = self.label.db_meta_data_mapping[coordinate_key]
+    logging.info(f"reformat column '{column_name}' from format "
+                 f"'from_format' to 'to_format' in the db of label"
+                 f" '{self.label.str_id}'")
     coordinate_mapping = CoordinateUtils.get_convert_mapping(from_format,
                                                              to_format,
                                                              resolution)
@@ -58,7 +74,7 @@ class DbHandler:
       rounded_value = CoordinateUtils.round_nearest(value, resolution, nb_decimal)
       return coordinate_mapping[rounded_value]
 
-    self.dataset[coordinate_key] = \
-                   np.vectorize(_convert_coordinates) (self.dataset[coordinate_key])
+    self.dataset[column_name] = \
+      np.vectorize(_convert_coordinates) (self.dataset[column_name])
 
   _LOAD_FORMAT_METHODS = {DbFormat.CSV: _load_csv_db.__func__}

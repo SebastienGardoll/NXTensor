@@ -48,3 +48,11 @@ class CoordinateKey:
 
   LAT   = 'lat'
   LON   = 'lon'
+
+  KEYS  = (LAT, LON)
+
+class CoordinatePropertyKey:
+
+  FORMAT     = 'format'
+  RESOLUTION = 'resolution'
+  NB_DECIMAL = 'nb_decimal'
