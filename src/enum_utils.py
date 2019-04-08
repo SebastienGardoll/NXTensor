@@ -39,10 +39,14 @@ class SelectionShape:
 
 class TimeKey:
 
-  YEAR  = 'year'
-  MONTH = 'month'
-  DAY   = 'day'
-  HOUR  = 'hour'
+  YEAR   = 'year'
+  MONTH  = 'month'
+  DAY    = 'day'
+  HOUR   = 'hour'
+  MINUTE = 'minute'
+  SECOND = 'second'
+
+  KEYS   = (YEAR, MONTH, DAY, HOUR, MINUTE, SECOND)
 
 class CoordinateKey:
 
