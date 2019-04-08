@@ -184,7 +184,7 @@ def bootstrap_era5_variables(variable_parent_dir_path):
 
   era5_multi_level_variables = [('ta200', 'ta', 200), ('ta500', 'ta', 500),
                                 ('u850', 'u', 850), ('v850', 'v', 850)]
-  time_resolution = TimeResolution.SIX_HOURS
+  time_resolution = TimeResolution.HOUR
   for str_id, attr_name, level in era5_multi_level_variables:
     netcdf_path_template = '/bdd/ERA5/NETCDF/GLOBAL_025/4xdaily/AN_PL/{year}/%s.{year}{month2d}.aphe5.GLOBAL_025.nc' % (attr_name)
     bootstrap_era5_variable(str_id, attr_name, netcdf_path_template, level)

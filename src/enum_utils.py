@@ -11,7 +11,6 @@ class TimeResolution:
   YEAR      = 'year'
   MONTH     = 'month'
   DAY       = 'day'
-  SIX_HOURS = 'six_hours'
   HOUR      = 'hour'
   MINUTE    = 'minute'
   SECOND    = 'second'
@@ -39,12 +38,12 @@ class SelectionShape:
 
 class TimeKey:
 
-  YEAR   = 'year'
-  MONTH  = 'month'
-  DAY    = 'day'
-  HOUR   = 'hour'
-  MINUTE = 'minute'
-  SECOND = 'second'
+  YEAR   = TimeResolution.YEAR
+  MONTH  = TimeResolution.MONTH
+  DAY    = TimeResolution.DAY
+  HOUR   = TimeResolution.HOUR
+  MINUTE = TimeResolution.MINUTE
+  SECOND = TimeResolution.SECOND
 
   KEYS   = (YEAR, MONTH, DAY, HOUR, MINUTE, SECOND)
 
