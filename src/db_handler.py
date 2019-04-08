@@ -14,12 +14,13 @@ from enum_utils import DbFormat, CsvKey
 
 class DbHandler:
 
-  def __init__(self, dataset, meta_data_mapping):
+  def __init__(self, dataset, label):
     self.dataset = dataset
-    self.meta_data_mapping = meta_data_mapping
+    self.label = label
 
   @staticmethod
-  def load(db_file_path, db_format, db_meta_data_mapping, db_format_options):
+  def load(label):
+    db_format = label.db_format
     try:
       static_method = DbHandler._LOAD_FORMAT_METHODS[db_format]
     except KeyError:
@@ -27,10 +28,12 @@ class DbHandler:
       logging.error(msg)
       raise Exception(msg)
 
-    return static_method(db_file_path, db_meta_data_mapping, db_format_options)
+    return static_method(label)
 
   @staticmethod
-  def _load_csv_db(db_file_path, db_meta_data_mapping, db_format_options):
+  def _load_csv_db(label):
+    db_file_path = label.db_file_path
+    db_format_options = label.db_format_options
     logging.info(f"opening label db '{db_file_path}'")
     with open(db_file_path, 'r') as db_file:
       try:
@@ -43,7 +46,7 @@ class DbHandler:
         msg = 'missing csv option(s)'
         logging.error(msg)
         raise Exception(msg)
-    return DbHandler(dataset, db_meta_data_mapping)
+    return DbHandler(dataset, label)
 
   def reformat_coordinates(self, coordinate_key, from_format, to_format,
                            resolution, nb_decimal):
