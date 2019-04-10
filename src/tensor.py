@@ -6,10 +6,10 @@ Created on Wed Mar 27 11:58:30 2019
 @author: sebastien@gardoll.fr
 """
 
-from xarray_wrapper import XarrayWrapper
+from data_wrapper import DataWrapper
 import logging
 
-class Tensor(XarrayWrapper):
+class Tensor(DataWrapper ):
 
   def __init__(self, str_id, is_channels_last, channel_to_index,
                index_to_localisation, data = None, data_file_path = None):
