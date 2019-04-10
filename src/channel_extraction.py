@@ -10,6 +10,8 @@ from extraction import ExtractionConfig
 from db_handler import DbHandler
 from enum_utils import CoordinateKey, CoordinatePropertyKey
 import logging
+import multiprocessing as mp
+from multiprocessing import Pool
 
 class ChannelExtraction:
 
@@ -66,7 +68,7 @@ class ChannelExtraction:
       for group_mapping in group_mappings:
         groups.append(group_mapping.get(group_key, None))
       current_task_dict[group_key] = groups
-      if len(current_task_dict) > self.extraction_conf.batch_size:
+      if len(current_task_dict) > self.extraction_conf.nb_block:
         block_list.append(current_task_dict)
         current_task_dict = dict()
         nb_dict = nb_dict + 1
@@ -78,13 +80,13 @@ class ChannelExtraction:
     return block_list
 
   def _preprocess_block(self, block):
-    pass
+    return None, None
 
   def _process_block(self, block):
     # Compute mapping between buffer index and the indexes in the groups.
     grp_index_to_buffer_index_list, buffer_index_to_tensor_label_data_list =\
                                                   self._preprocess_block(block)
-    
+
     pass
 
   def extract(self):
@@ -96,8 +98,8 @@ class ChannelExtraction:
     block_list = self._build_block_list()
 
     # Process the list of blocks.
-    for block in block_list:
-      self._process_block(block)
+    with Pool(processes=self.extraction_conf.nb_process) as pool:
+      pool.map(func=self._process_block, iterable=block_list, chunksize=1)
 
     # Merge the blocks and build a tensor object composed of 1 channel.
 

@@ -41,11 +41,12 @@ class ExtractionConfig(YamlSerializable):
     self.channel_dir_path = None
     self.tmp_dir_path = None
 
-    # The number of netcdf files extracted per cycle of extractions.
-    self.batch_size = None
-
-    # The number of process per cycle of extractions.
+    # The number of process spawn during the extraction.
+    # Each process treats one block.
     self.nb_process = None
+
+    # The number of block per extraction.
+    self.nb_block = None
 
     self._variables = None # Transient for yaml serialization.
     self._labels = None # Transient for yaml serialization.
