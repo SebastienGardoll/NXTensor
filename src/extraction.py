@@ -115,11 +115,8 @@ class ClassificationLabel(YamlSerializable):
     # convert keys (see enum_utils) into db column names.
     self.db_meta_data_mapping = None
 
-    # The format of the latitudes.
-    self.lat_format           = None
-    # The format of the longitudes.
-    self.lon_format           = None
-
+    self.coordinate_format = {CoordinateKey.LAT: CoordinateFormat.UNKNOWN,
+                              CoordinateKey.LON: CoordinateFormat.UNKNOWN}
   def __repr__(self):
     return f"{self.__class__.__name__}(str_id={self.str_id}, name={self.display_name}, " \
       f"num_id={self.num_id}, db={self.db_file_path})"
@@ -165,8 +162,8 @@ def bootstrap_cyclone_labels():
     label.db_format = db_format
     label.db_format_options = db_format_options
     label.db_mapping = db_meta_data_mapping
-    label.lat_format = lat_format
-    label.lon_format = lon_format
+    label.coordinate_format[CoordinateKey.LAT] = lat_format
+    label.coordinate_format[CoordinateKey.LON] = lon_format
     db_filename = db_filename_template.format(str_id=str_id,
                                               display_name=display_name,
                                               filename_postfix=filename_postfix)

@@ -18,3 +18,7 @@ def build_date_dictionary(date):
     msg = f"the given date '{date}', is not an instance of datetime"
     logging.error(msg)
     raise Exception(msg)
+
+# Time_list is a list that contains the value of the TimeKey'KEYS (see enum_utils.py).
+def from_time_list_to_date(time_list, resolution_degree):
+  pass

@@ -21,6 +21,7 @@ class CoordinateFormat:
   INCREASING_DEGREE_NORTH = 'increasing_degree_north' # From  -90° to   90°
   AMERICAN_DEGREE_EAST    = 'american_degree_east'    # From    0° to  360°
   EUROPEAN_DEGREE_EAST    = 'european_degree_east'    # From -180° to  180°
+  UNKNOWN                 = 'unknown'
 
 class DbFormat:
 
@@ -56,6 +57,7 @@ class CoordinateKey:
 
 class CoordinatePropertyKey:
 
-  FORMAT     = 'format'
-  RESOLUTION = 'resolution'
-  NB_DECIMAL = 'nb_decimal'
+  FORMAT           = 'format'
+  RESOLUTION       = 'resolution'
+  NB_DECIMAL       = 'nb_decimal'
+  NETCDF_ATTR_NAME = 'netcdf_attr_name'

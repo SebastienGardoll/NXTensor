@@ -24,25 +24,12 @@ class ChannelExtraction:
       self._label_dbs.append(current_db)
 
   def _check_format(self):
-    var_format = dict()
-    var_format[CoordinateKey.LAT] =\
-      {CoordinatePropertyKey.FORMAT    : self.extracted_variable.lat_format,
-       CoordinatePropertyKey.RESOLUTION: self.extracted_variable.lat_resolution,
-       CoordinatePropertyKey.NB_DECIMAL: self.extracted_variable.nb_lat_decimal}
-
-    var_format[CoordinateKey.LON] = \
-      {CoordinatePropertyKey.FORMAT    : self.extracted_variable.lon_format,
-       CoordinatePropertyKey.RESOLUTION: self.extracted_variable.lon_resolution,
-       CoordinatePropertyKey.NB_DECIMAL: self.extracted_variable.nb_lon_decimal}
-
+    var_format = self.extracted_variable
     label_formats = dict()
     label_db_dict = dict()
     for label_db in self._label_dbs:
       curr_label = label_db.label
-      curr_format = dict()
-      curr_format[CoordinateKey.LAT] = curr_label.lat_format
-      curr_format[CoordinateKey.LON] = curr_label.lon_format
-      label_formats[curr_label] = curr_format
+      label_formats[curr_label] = curr_label.coordinate_format
       label_db_dict[curr_label.str_id] = label_db
 
     for curr_label, curr_format in label_formats.items():
@@ -60,7 +47,7 @@ class ChannelExtraction:
         else:
           curr_db.round_coordinates(curr_key, curr_resolution, curr_nb_decimal)
 
-  def _build_cycle_list(self):
+  def _build_block_list(self):
     group_mappings = list()
     variable_time_resolution = self.extracted_variable.time_resolution
     for label_db in self._label_dbs:
@@ -71,7 +58,7 @@ class ChannelExtraction:
     for group_mapping in group_mappings:
       set_group_keys.update(group_mapping.keys())
 
-    cycle_list = list()
+    block_list = list()
     current_task_dict = dict()
     nb_dict = 1
     for group_key in set_group_keys:
@@ -80,20 +67,24 @@ class ChannelExtraction:
         groups.append(group_mapping.get(group_key, None))
       current_task_dict[group_key] = groups
       if len(current_task_dict) > self.extraction_conf.batch_size:
-        cycle_list.append(current_task_dict)
+        block_list.append(current_task_dict)
         current_task_dict = dict()
         nb_dict = nb_dict + 1
 
-    if len(cycle_list) < nb_dict:
+    if len(block_list) < nb_dict:
       # Append the last instantiated dictionary.
-      cycle_list.append(current_task_dict)
+      block_list.append(current_task_dict)
 
-    return cycle_list
+    return block_list
 
-  def _process_cycle(self, task_dict):
+  def _preprocess_block(self, block):
+    pass
+
+  def _process_block(self, block):
     # Compute mapping between buffer index and the indexes in the groups.
-    # Compute the reverse mapping.
-    # Instantiate the channel buffer.
+    grp_index_to_buffer_index_list, buffer_index_to_tensor_label_data_list =\
+                                                  self._preprocess_block(block)
+    
     pass
 
   def extract(self):
@@ -101,12 +92,12 @@ class ChannelExtraction:
     # label dbs.
     self._check_format()
 
-    # Build the list of tasks to be processed. Each task is a cycle.
-    cycle_list = self._build_cycle_list()
+    # Build the list of blocks to be processed.
+    block_list = self._build_block_list()
 
-    # Process the list of cycles.
-    for cycle in cycle_list:
-      self._process_cycle(cycle)
+    # Process the list of blocks.
+    for block in block_list:
+      self._process_block(block)
 
     # Merge the blocks and build a tensor object composed of 1 channel.
 

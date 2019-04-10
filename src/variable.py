@@ -9,7 +9,8 @@ Created on Tue Mar 26 11:58:46 2019
 from yaml_class import YamlSerializable
 import logging
 import time_utils as tu
-from enum_utils import TimeResolution, CoordinateFormat
+from enum_utils import TimeResolution, CoordinateFormat, CoordinatePropertyKey,\
+                       CoordinateKey
 from abc import ABC, abstractmethod
 import os.path as path
 
@@ -47,15 +48,18 @@ class SingleLevelVariable(Variable):
     self.time_resolution       = None
     self.date_template         = None
 
-    self.lat_attribute_name    = None
-    self.lat_format            = None
-    self.lat_resolution        = None
-    self.nb_lat_decimal        = None
+    self.coordinate_metadata = dict()
+    self.coordinate_metadata[CoordinateKey.LAT] =\
+      {CoordinatePropertyKey.FORMAT    : CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.RESOLUTION: CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.NB_DECIMAL: CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.NETCDF_ATTR_NAME: None}
 
-    self.lon_attribute_name    = None
-    self.lon_format            = None
-    self.lon_resolution        = None
-    self.nb_lon_decimal        = None
+    self.coordinate_metadata[CoordinateKey.LON] = \
+      {CoordinatePropertyKey.FORMAT    : CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.RESOLUTION: CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.NB_DECIMAL: CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.NETCDF_ATTR_NAME: None}
 
   # Date is expected to be a datetime instance.
   def compute_netcdf_file_path(self, date):
@@ -165,15 +169,21 @@ def bootstrap_era5_variables(variable_parent_dir_path):
     variable.netcdf_attribute_name = attribute_name
     variable.time_resolution = time_resolution
     variable.date_template = '{year}-{month}-{day}T{hour}:{minute}:{second}.{microsecond}'
-    variable.lat_attribute_name = 'latitude'
-    variable.lon_attribute_name = 'longitude'
-    variable.lat_format = CoordinateFormat.DECREASING_DEGREE_NORTH
-    variable.lon_format = CoordinateFormat.AMERICAN_DEGREE_EAST
     variable.netcdf_path_template = netcdf_path_template
-    variable.lat_resolution = 0.25
-    variable.lon_resolution = 0.25
-    variable.nb_lat_decimal = 2
-    variable.nb_lon_decimal = 2
+
+    cmdata = variable.coordinate_metadata
+
+    lat_cmdata = cmdata[CoordinateKey.LAT]
+    lat_cmdata[CoordinatePropertyKey.FORMAT] = CoordinateFormat.DECREASING_DEGREE_NORTH
+    lat_cmdata[CoordinatePropertyKey.RESOLUTION] = 0.25
+    lat_cmdata[CoordinatePropertyKey.NB_DECIMAL] = 2
+    lat_cmdata[CoordinatePropertyKey.NETCDF_ATTR_NAME] = 'latitude'
+
+    lon_cmdata = cmdata[CoordinateKey.LON]
+    lon_cmdata[CoordinatePropertyKey.FORMAT] = CoordinateFormat.AMERICAN_DEGREE_EAST
+    lon_cmdata[CoordinatePropertyKey.RESOLUTION] = 0.25
+    lon_cmdata[CoordinatePropertyKey.NB_DECIMAL] = 2
+    lon_cmdata[CoordinatePropertyKey.NETCDF_ATTR_NAME] = 'longitude'
 
     variable_file_path = path.join(variable_parent_dir_path, variable.compute_filename())
     variable.save(variable_file_path)

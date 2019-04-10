@@ -10,7 +10,6 @@ import math
 import logging
 from enum_utils import CoordinateFormat
 
-
 class CoordinateUtils:
 
   _CONVERT_MAPPING = dict()

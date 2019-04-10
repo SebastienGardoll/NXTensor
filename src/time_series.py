@@ -14,6 +14,7 @@ ComputedVariable, VariableNetcdfFilePathVisitor, VariableVisitor, Variable
 from coordinate_utils import CoordinateUtils
 import time_utils as tu
 from xarray_utils import XarrayRpnCalculator, DEFAULT_DASK_SCHEDULER
+from enum_utils import CoordinateKey, CoordinatePropertyKey
 
 class XarrayTimeSeries:
 
@@ -81,8 +82,13 @@ class XarrayTimeSeries:
     logging.debug(f"extracting subregion {date}, {lat}, {lon} for variable '{variable.str_id}'")
 
     if has_to_round:
-      lat = CoordinateUtils.round_nearest(lat, variable.lat_resolution, variable.nb_lat_decimal)
-      lon = CoordinateUtils.round_nearest(lon, variable.lon_resolution, variable.nb_lon_decimal)
+      lat_resolution = variable.coordinate_metadata[CoordinateKey.LAT][CoordinatePropertyKey.RESOLUTION]
+      lat_nb_decimal = variable.coordinate_metadata[CoordinateKey.LAT][CoordinatePropertyKey.NB_DECIMAL]
+      lon_resolution = variable.coordinate_metadata[CoordinateKey.LON][CoordinatePropertyKey.RESOLUTION]
+      lon_nb_decimal = variable.coordinate_metadata[CoordinateKey.LON][CoordinatePropertyKey.NB_DECIMAL]
+
+      lat = CoordinateUtils.round_nearest(lat, lat_resolution, lat_nb_decimal)
+      lon = CoordinateUtils.round_nearest(lon, lon_resolution, lon_nb_decimal)
 
     # Minus LAT_RESOLUTION because the upper bound in slice is included.
     lat_min  = (lat - half_lat_frame + variable.lat_resolution)

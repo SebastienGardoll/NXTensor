@@ -84,6 +84,9 @@ class DbHandler:
     coordinate_mapping = CoordinateUtils.get_convert_mapping(from_format,
                                                              to_format,
                                                              resolution)
+    # Update the format of the coordinate.
+    self.label.coordinate_format[coordinate_key] = to_format
+
     def _convert_coordinates(value):
       rounded_value = CoordinateUtils.round_nearest(value, resolution, nb_decimal)
       return coordinate_mapping[rounded_value]
