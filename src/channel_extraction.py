@@ -10,8 +10,10 @@ from extraction import ExtractionConfig
 from db_handler import DbHandler
 from enum_utils import CoordinateKey, CoordinatePropertyKey
 import logging
-import multiprocessing as mp
 from multiprocessing import Pool
+import time_utils as tu
+from time_series import XarrayTimeSeries
+import numpy as np
 
 class ChannelExtraction:
 
@@ -19,8 +21,9 @@ class ChannelExtraction:
     self.extraction_conf = ExtractionConfig.load(extraction_config_path)
     self.variable_index = variable_index
     self.extracted_variable = self.extraction_conf.get_variables()[variable_index]
+    self.half_lat_frame = self.extraction_conf.
+    self.half_lon_frame = # TODO
     self._label_dbs = list()
-
     for label in self.extraction_conf.get_labels():
       current_db = DbHandler.load(label)
       self._label_dbs.append(current_db)
@@ -61,33 +64,65 @@ class ChannelExtraction:
       set_group_keys.update(group_mapping.keys())
 
     block_list = list()
-    current_task_dict = dict()
-    nb_dict = 1
+    curr_block = dict()
+    nb_instantiated_block = 1
+
+    count_group_key_per_block = 0
+    nb_group_key_per_block = int(len(set_group_keys)/self.extraction_conf.nb_block) +1
+
     for group_key in set_group_keys:
+      count_group_key_per_block = count_group_key_per_block + 1
       groups = list()
       for group_mapping in group_mappings:
         groups.append(group_mapping.get(group_key, None))
-      current_task_dict[group_key] = groups
-      if len(current_task_dict) > self.extraction_conf.nb_block:
-        block_list.append(current_task_dict)
-        current_task_dict = dict()
-        nb_dict = nb_dict + 1
+      curr_block[group_key] = groups
+      if count_group_key_per_block >= nb_group_key_per_block:
+        block_list.append(curr_block)
+        curr_block = dict()
+        nb_instantiated_block = nb_instantiated_block + 1
 
-    if len(block_list) < nb_dict:
-      # Append the last instantiated dictionary.
-      block_list.append(current_task_dict)
+    if len(block_list) < nb_instantiated_block:
+      # Append the last instantiated block.
+      block_list.append(curr_block)
 
     return block_list
 
   def _preprocess_block(self, block):
-    return None, None
+    return None, None, None # TODO
+
+
+  # !!!!!!!!!!!!! utiliser tensor et tensor meta data !!!!!!!!!!!!!!!!!!!!!!!!
+  def _process_block_item(self, group_key, groups, buffer_list,
+                          grp_index_to_buffer_index_list):
+    ts_date = tu.from_time_list_to_date(group_key)
+    ts = XarrayTimeSeries(self.extracted_variable, ts_date)
+    for label_index in range(0, len(groups)):
+      curr_buffer = buffer_list[label_index]
+      curr_grp_index_to_buffer = grp_index_to_buffer_index_list[label_index]
+      for index in group.???:
+        # TODO : mapping index dataset to (date, lat, lon) in db_handler
+        curr_date, curr_lat, curr_lon = None, None, None
+        subregion = ts.extract_square_region(self.extracted_variable, curr_date,
+                                             curr_lat, curr_lon,
+                                             self.half_lat_frame,
+                                             self.half_lon_frame)
+        # Copy to buffer.
+        buffer_index = curr_grp_index_to_buffer[index]
+        np.copyto(dst=curr_buffer[buffer_index], src=subregion, casting='no')
+    ts.close()
 
   def _process_block(self, block):
     # Compute mapping between buffer index and the indexes in the groups.
-    grp_index_to_buffer_index_list, buffer_index_to_tensor_label_data_list =\
-                                                  self._preprocess_block(block)
+    buffer_list, grp_index_to_buffer_index_list,\
+    buffer_index_to_tensor_metadata_list = self._preprocess_block(block)
 
-    pass
+    # Extract the subregion.
+    for group_key, groups in block.items():
+      self._process_block_item(group_key, groups, buffer_list,
+                               grp_index_to_buffer_index_list)
+
+    # Save the buffers.
+    # TODO
 
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
