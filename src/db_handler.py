@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 import logging
 from coordinate_utils import CoordinateUtils
-from enum_utils import DbFormat, CsvKey
+from enum_utils import DbFormat, CsvKey, TimeKey
 
 class DbHandler:
 
@@ -47,6 +47,20 @@ class DbHandler:
         logging.error(msg)
         raise Exception(msg)
     return DbHandler(dataset, label)
+
+  # See pandas'dataset.groupby().groups
+  def get_group_mapping_by_time_resolution(self, variable_time_resolution):
+    try:
+      resolution_degree = TimeKey.KEYS.index(variable_time_resolution)
+    except ValueError as e:
+      msg = f"unknown '{variable_time_resolution}' mapping between time " \
+        f"resolutions and time keys"
+      logging.error(msg)
+      raise Exception(e)
+    list_keys = TimeKey.KEYS[0:(resolution_degree+1)]
+    list_column_names = [self.label.db_meta_data_mapping[key] for key in list_keys]
+    logging.debug(f"grouping dataset by '{list_column_names}'")
+    return self.dataset.groupby(list_column_names).groups
 
   def round_coordinates(self, coordinate_key, resolution, nb_decimal):
     column_name = self.label.db_meta_data_mapping[coordinate_key]
