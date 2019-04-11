@@ -10,7 +10,7 @@ from yaml_class import YamlSerializable
 import logging
 import xarray as xr
 import os.path as path
-
+from abc import abstractmethod
 
 class DataWrapper(YamlSerializable):
 
@@ -35,7 +35,14 @@ class DataWrapper(YamlSerializable):
         self.set_data(data)
 
   def append(self, other):
-    xr.concat(
+    new_data = xr.concat((self.get_data(), other.get_data()),
+                           dim=self.get_data().dims[0])
+    new_instance = self._copy_metadata(new_data)
+    return new_instance
+
+  @abstractmethod
+  def copy_metadata(self, data = None):
+    pass
 
   def set_data(self, data):
     self._data = data
