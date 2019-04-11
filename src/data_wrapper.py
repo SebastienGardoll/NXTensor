@@ -21,19 +21,21 @@ class DataWrapper(YamlSerializable):
   def __init__(self, str_id, data = None, data_file_path = None, shape = None):
     super().__init__(str_id)
 
-    self.data_file_path = data_file_path
-    self._data = None
+    self.data_file_path = None
     self.shape = None
+    self._data = None
 
     if data is not None:
       self.set_data(data)
     else:
       if data_file_path is not None:
         data = DataWrapper._load_data(self.data_file_path)
+        self.data_file_path = data_file_path
         self.set_data(data)
       else:
         if shape is not None:
           data = xr.DataArray(np.ndarray(shape, dtype=float))
+          self.shape = shape
           self.set_data(data)
         else:
           msg = 'one other parameter is necessary (data, data_file_path or shape)'

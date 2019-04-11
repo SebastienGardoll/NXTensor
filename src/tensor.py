@@ -11,10 +11,10 @@ import logging
 
 class Tensor(DataWrapper):
 
-  def __init__(self, str_id, is_channels_last, channel_to_index,
-               index_to_localisation, data = None, data_file_path = None):
+  def __init__(self, str_id, data = None, data_file_path = None, shape = None,
+               is_channels_last, channel_to_index, index_to_localisation):
 
-    super().__init__(str_id, data, data_file_path)
+    super().__init__(str_id, data, data_file_path, shape)
     self.is_channels_last = is_channels_last
 
     # Dictionary that maps channel'str_id to their index in the tensor.
