@@ -34,6 +34,9 @@ class DataWrapper(YamlSerializable):
       if data is not None:
         self.set_data(data)
 
+  def append(self, other):
+    xr.concat(
+
   def set_data(self, data):
     self._data = data
 
@@ -75,7 +78,7 @@ class DataWrapper(YamlSerializable):
   def _save_data(self, data_file_path):
     try:
       logging.debug(f"saving data to {self.data_file_path}")
-      self.data.to_netcdf(data_file_path)
+      self.data.to_netcdf(data_file_path, mode = 'w')
     except Exception as e:
       logging.error(f"cannot save the data to '{self.data_file_path}': {str(e)}")
       raise e
