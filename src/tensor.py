@@ -9,7 +9,7 @@ Created on Wed Mar 27 11:58:30 2019
 from data_wrapper import DataWrapper
 import logging
 
-class Tensor(DataWrapper ):
+class Tensor(DataWrapper):
 
   def __init__(self, str_id, is_channels_last, channel_to_index,
                index_to_localisation, data = None, data_file_path = None):
@@ -85,11 +85,6 @@ class Tensor(DataWrapper ):
   # specifications.
   def split(self, split_spec):
     msg = 'Tensor.split is not implemented yet'
-    logging.error(msg)
-    raise NotImplementedError(msg)
-
-  def concat(self, other_tensors):
-    msg = 'Tensor.concat is not implemented yet'
     logging.error(msg)
     raise NotImplementedError(msg)
 
