@@ -11,28 +11,34 @@ import logging
 import xarray as xr
 import os.path as path
 from abc import abstractmethod
+import numpy as np
 
 class DataWrapper(YamlSerializable):
 
   FILENAME_EXTENSION = 'nc'
   DEFAULT_DIM_NAMES  = ('dim_0', 'dim_1', 'dim_2', 'dim_3')
 
-  def __init__(self, str_id, data = None, data_file_path = None):
+  def __init__(self, str_id, data = None, data_file_path = None, shape = None):
     super().__init__(str_id)
 
     self.data_file_path = data_file_path
     self._data = None
+    self.shape = None
 
-    if data is not None and data_file_path is not None:
-      msg = 'parameter data and data_file_path are mutually exclusives'
-      logging.error(msg)
-      raise Exception(msg)
+    if data is not None:
+      self.set_data(data)
     else:
-      if self.data_file_path is not None:
+      if data_file_path is not None:
         data = DataWrapper._load_data(self.data_file_path)
-
-      if data is not None:
         self.set_data(data)
+      else:
+        if shape is not None:
+          data = xr.DataArray(np.ndarray(shape, dtype=float))
+          self.set_data(data)
+        else:
+          msg = 'one other parameter is necessary (data, data_file_path or shape)'
+          logging.error(msg)
+          raise Exception(msg)
 
   def append(self, other):
     new_data = xr.concat((self.get_data(), other.get_data()),
@@ -46,6 +52,7 @@ class DataWrapper(YamlSerializable):
 
   def set_data(self, data):
     self._data = data
+    self.shape = data.shape
 
   def get_data(self):
     return self._data
