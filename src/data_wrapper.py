@@ -34,7 +34,7 @@ class DataWrapper(YamlSerializable):
         self.set_data(data)
       else:
         if shape is not None:
-          data = xr.DataArray(np.ndarray(shape, dtype=float))
+          data = xr.DataArray(np.zeros(shape, dtype=float))
           self.shape = shape
           self.set_data(data)
         else:
