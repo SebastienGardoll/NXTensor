@@ -61,3 +61,8 @@ class CoordinatePropertyKey:
   RESOLUTION       = 'resolution'
   NB_DECIMAL       = 'nb_decimal'
   NETCDF_ATTR_NAME = 'netcdf_attr_name'
+
+class TensorKey:
+
+  IMG     = 'img'
+  CHANNEL = 'channel'

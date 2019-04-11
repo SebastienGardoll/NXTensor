@@ -12,11 +12,11 @@ import xarray as xr
 import os.path as path
 from abc import abstractmethod
 import numpy as np
+from enum_utils import TensorKey
 
 class DataWrapper(YamlSerializable):
 
   FILENAME_EXTENSION = 'nc'
-  DEFAULT_DIM_NAMES  = ('dim_0', 'dim_1', 'dim_2', 'dim_3')
 
   def __init__(self, str_id, data = None, data_file_path = None, shape = None):
     super().__init__(str_id)
@@ -43,8 +43,26 @@ class DataWrapper(YamlSerializable):
           raise Exception(msg)
 
   def append(self, other):
-    new_data = xr.concat((self.get_data(), other.get_data()),
-                           dim=self.get_data().dims[0])
+    nb_self_dim  = len(self.shape)
+    nb_other_dim = len(other.shape)
+
+    if nb_self_dim == nb_other_dim:
+      if nb_self_dim == 2:
+        dim = TensorKey.CHANNEL
+      else:
+        dim = TensorKey.IMG
+
+      new_data = xr.concat((self.get_data(), other.get_data()),
+                              dim=dim)
+    else:
+      if nb_self_dim == (nb_other_dim + 1):
+        new_data = xr.concat((self.get_data(), other.get_data()),
+                              dim=self.get_data().dims[0])
+      else:
+        msg = f"unsupported case of appending, nb_self_dim: {nb_self_dim}, nb_other_dim: {nb_other_dim}"
+        logging.error(msg)
+        raise Exception(msg)
+
     new_instance = self._copy_metadata(new_data)
     return new_instance
 
