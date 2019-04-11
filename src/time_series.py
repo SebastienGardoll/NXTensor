@@ -125,6 +125,9 @@ class XarrayTimeSeries:
           logging.error(msg)
           raise Exception(msg)
       result = tmp_result.compute()
+      # Drop the coordinates (time, latitude and longitude) so as to stack
+      # these subregion in order to form channel.
+      result = result.drop(result.coords)
       return result
 
   def close(self):
