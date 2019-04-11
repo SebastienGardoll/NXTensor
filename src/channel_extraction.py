@@ -114,10 +114,7 @@ class ChannelExtraction:
         # Copy to buffer.
         buffer_index = curr_grp_index_to_buffer[index]
         np.copyto(dst=curr_buffer[buffer_index], src=subregion, casting='no')
-
-    # Save the buffers.
-    # TODO
-
+        location.extend
     ts.close()
 
   def _process_block(self, block):
@@ -129,6 +126,9 @@ class ChannelExtraction:
     for group_key, groups in block.items():
       self._process_block_item(group_key, groups, buffer_list,
                                grp_index_to_buffer_index_list)
+
+    # Save the buffers.
+    # TODO
 
   def extract(self):
     # Match the format of the variable to be extracted and the format of the

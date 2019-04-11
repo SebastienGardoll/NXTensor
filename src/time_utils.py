@@ -22,6 +22,9 @@ def build_date_dictionary(date):
 # Time_list is a list that contains the value of the TimeKey'KEYS (see enum_utils.py).
 # We cannot instantiate a date without the day number. That's why this function
 # was created.
+# Python 3.7 elevates this implementation detail to a language specification,
+# so it is now mandatory that dict preserves order in all Python implementations
+# compatible with that version or newer.
 def from_time_list_to_dict(time_list):
   list_len = len(time_list)
   result = dict()
