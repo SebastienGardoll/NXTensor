@@ -15,6 +15,7 @@ import os.path as path
 class DataWrapper(YamlSerializable):
 
   FILENAME_EXTENSION = 'nc'
+  DEFAULT_DIM_NAMES  = ('dim_0', 'dim_1', 'dim_2', 'dim_3')
 
   def __init__(self, str_id, data = None, data_file_path = None):
     super().__init__(str_id)
@@ -38,6 +39,18 @@ class DataWrapper(YamlSerializable):
 
   def get_data(self):
     return self._data
+
+  def close(self):
+    try:
+      self._data.close()
+    except :
+      pass
+
+  def __enter__(self):
+    return self
+
+  def __exit__(self, type, value, traceback):
+    self.close()
 
   def save(self, yaml_file_path):
     logging.info(f"saving metadata to {yaml_file_path}")
