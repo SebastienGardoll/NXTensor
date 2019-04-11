@@ -21,8 +21,12 @@ class ChannelExtraction:
     self.extraction_conf = ExtractionConfig.load(extraction_config_path)
     self.variable_index = variable_index
     self.extracted_variable = self.extraction_conf.get_variables()[variable_index]
-    self.half_lat_frame = self.extraction_conf.
-    self.half_lon_frame = # TODO
+    self.half_lat_frame = (self.extraction_conf.y_size *
+            self.extracted_variable.coordinate_metadata[CoordinateKey.LAT]
+            [CoordinatePropertyKey.RESOLUTION])/2
+    self.half_lon_frame = (self.extraction_conf.x_size *
+            self.extracted_variable.coordinate_metadata[CoordinateKey.LON]
+            [CoordinatePropertyKey.RESOLUTION])/2
     self._label_dbs = list()
     for label in self.extraction_conf.get_labels():
       current_db = DbHandler.load(label)
@@ -88,7 +92,7 @@ class ChannelExtraction:
     return block_list
 
   def _preprocess_block(self, block):
-    return None, None, None # TODO
+    return None, None, None # TODO handle empty group.
 
 
   # !!!!!!!!!!!!! utiliser tensor et tensor meta data !!!!!!!!!!!!!!!!!!!!!!!!
@@ -99,7 +103,7 @@ class ChannelExtraction:
     for label_index in range(0, len(groups)):
       curr_buffer = buffer_list[label_index]
       curr_grp_index_to_buffer = grp_index_to_buffer_index_list[label_index]
-      for index in group.???:
+      for index in groups[label_index]:
         # TODO : mapping index dataset to (date, lat, lon) in db_handler
         curr_date, curr_lat, curr_lon = None, None, None
         subregion = ts.extract_square_region(self.extracted_variable, curr_date,
@@ -109,6 +113,10 @@ class ChannelExtraction:
         # Copy to buffer.
         buffer_index = curr_grp_index_to_buffer[index]
         np.copyto(dst=curr_buffer[buffer_index], src=subregion, casting='no')
+
+    # Save the buffers.
+    # TODO
+
     ts.close()
 
   def _process_block(self, block):
@@ -120,9 +128,6 @@ class ChannelExtraction:
     for group_key, groups in block.items():
       self._process_block_item(group_key, groups, buffer_list,
                                grp_index_to_buffer_index_list)
-
-    # Save the buffers.
-    # TODO
 
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
@@ -138,7 +143,7 @@ class ChannelExtraction:
 
     # Merge the blocks and build a tensor object composed of 1 channel.
 
-    # Compute the statistics on the channel.
+    # Compute the statistics on each label et the enter channel.
 
 """
 import logging
