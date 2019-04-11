@@ -20,5 +20,31 @@ def build_date_dictionary(date):
     raise Exception(msg)
 
 # Time_list is a list that contains the value of the TimeKey'KEYS (see enum_utils.py).
-def from_time_list_to_date(time_list, resolution_degree):
-  pass
+# We cannot instantiate a date without the day number. That's why this function
+# was created.
+def from_time_list_to_dict(time_list):
+  list_len = len(time_list)
+  result = dict()
+  if list_len >= 1:
+    result['year']        = time_list[0]
+
+  if list_len >= 2:
+    result['month']       = time_list[1]
+    result['month2d']     = f"{time_list[1]:02d}"
+
+  if list_len >= 3:
+    result['day']         = time_list[2]
+
+  if list_len >= 4:
+    result['hour']        = time_list[3]
+
+  if list_len >= 5:
+    result['minute']      = time_list[4]
+
+  if list_len >= 6:
+    result['second']      = time_list[5]
+
+  if list_len >= 7:
+    result['microsecond'] = time_list[6]
+
+  return result
