@@ -53,7 +53,7 @@ class DataWrapper(YamlSerializable):
     del self._data
 
     if self.data_file_path is None:
-      self.data_file_path = XarrayWrapper._compute_data_from_yaml_file_path(yaml_file_path)
+      self.data_file_path = DataWrapper._compute_data_from_yaml_file_path(yaml_file_path)
 
     super().save(yaml_file_path)
 
@@ -80,7 +80,7 @@ class DataWrapper(YamlSerializable):
   def load(yaml_file_path):
     logging.info(f"loading tensor from {yaml_file_path}")
     instance = YamlSerializable.load(yaml_file_path)
-    data = XarrayWrapper._load_data(instance.data_file_path)
+    data = DataWrapper._load_data(instance.data_file_path)
     instance.set_data(data)
     return instance
 
