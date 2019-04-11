@@ -12,20 +12,18 @@ import logging
 from variable import MultiLevelVariable, SingleLevelVariable,\
 ComputedVariable, VariableNetcdfFilePathVisitor, VariableVisitor, Variable
 from coordinate_utils import CoordinateUtils
-import time_utils as tu
 from xarray_utils import XarrayRpnCalculator, DEFAULT_DASK_SCHEDULER
 from enum_utils import CoordinateKey, CoordinatePropertyKey
 
 class XarrayTimeSeries:
 
-  # Date is expected to be a datetime instance.
-  def __init__(self, variable, date):#, dask_scheduler, nb_workers):
+  def __init__(self, variable, time_dict):#, dask_scheduler, nb_workers):
     logging.debug(f"visiting the file paths of the variable '{variable.str_id}'")
-    visitor = VariableNetcdfFilePathVisitor(date)
+    visitor = VariableNetcdfFilePathVisitor(time_dict)
     variable.accept(visitor)
     netcdf_file_path_dict = visitor.result
     self.variable = variable
-    self.date = date
+    self.time_dict = time_dict
     self.dask_scheduler = DEFAULT_DASK_SCHEDULER
     self._open_netcdf(list(netcdf_file_path_dict.values()))
 
@@ -50,22 +48,22 @@ class XarrayTimeSeries:
       raise e
 
   def __repr__(self):
-    return f"{self.__class__.__name__}(variable={self.variable}, date={self.date})"
+    return f"{self.__class__.__name__}(variable={self.variable}, time_dict={self.time_dict})"
 
   # Extract the region that centers the given lat/lon location.
-  def extract_square_region(self, variable, date, lat, lon,
+  def extract_square_region(self, variable, time_dict, lat, lon,
                             half_lat_frame, half_lon_frame):
-    logging.info(f"extraction of the subregion {date}, {lat}, {lon} of the variable '{variable.str_id}'")
+    logging.info(f"extraction of the subregion {time_dict}, {lat}, {lon} of the variable '{variable.str_id}'")
 
     if isinstance(variable, MultiLevelVariable) or \
        isinstance(variable, SingleLevelVariable):
       logging.debug(f"starting the extraction of the variable '{variable.str_id}'")
-      result = self._extract_square_region(variable, date, lat, lon,
+      result = self._extract_square_region(variable, time_dict, lat, lon,
                                            half_lat_frame, half_lon_frame)
     else:
       if isinstance(variable, ComputedVariable):
         logging.debug(f"starting the extraction of the computed variable '{variable.str_id}'")
-        visitor = ExtractionComputedVariable(self, date, lat, lon,
+        visitor = ExtractionComputedVariable(self, time_dict, lat, lon,
                                              half_lat_frame, half_lon_frame)
         variable.accept(visitor)
         result = visitor.result
@@ -77,9 +75,9 @@ class XarrayTimeSeries:
 
   # Extract the region that centers the given lat/lon location. Variable must be
   # SingleLevelVariable or MultiLevelVariable.
-  def _extract_square_region(self, variable, date, lat, lon,
+  def _extract_square_region(self, variable, time_dict, lat, lon,
                              half_lat_frame, half_lon_frame, has_to_round=True):
-    logging.debug(f"extracting subregion {date}, {lat}, {lon} for variable '{variable.str_id}'")
+    logging.debug(f"extracting subregion {time_dict}, {lat}, {lon} for variable '{variable.str_id}'")
 
     if has_to_round:
       lat_resolution = variable.coordinate_metadata[CoordinateKey.LAT][CoordinatePropertyKey.RESOLUTION]
@@ -97,8 +95,7 @@ class XarrayTimeSeries:
     lon_min  = (lon - half_lon_frame)
     lon_max  = (lon + half_lon_frame - variable.lon_resolution)
 
-    kwargs = tu.build_date_dictionary(date)
-    formatted_date = variable.date_template.format(**kwargs)
+    formatted_date = variable.date_template.format(**time_dict)
 
     lat_series = self.dataset[variable.lat_attribute_name]
 
@@ -145,11 +142,11 @@ class XarrayTimeSeries:
 
 class ExtractionComputedVariable(VariableVisitor):
 
-  def __init__(self, time_series, date, lat, lon, half_lat_frame,
+  def __init__(self, time_series, time_dict, lat, lon, half_lat_frame,
                half_lon_frame):
     self.data_array_mapping = dict()
     self.time_series        = time_series
-    self.date               = date
+    self.time_dict          = time_dict
     self.lat                = lat
     self.lon                = lon
     self.half_lat_frame     = half_lat_frame
@@ -157,7 +154,7 @@ class ExtractionComputedVariable(VariableVisitor):
     self.result             = None
 
   def visit_SingleLevelVariable(self, variable):
-    region = self.time_series.extract_square_region(variable, self.date,
+    region = self.time_series.extract_square_region(variable, self.time_dict,
                                                     self.lat, self.lon,
                                                     self.half_lat_frame,
                                                     self.half_lon_frame)
@@ -185,22 +182,22 @@ from time_series import unit_test_computed_variable
 unit_test_computed_variable()
 """
 def unit_test_computed_variable():
-  from datetime import datetime
+  from time_utils import from_time_list_to_dict
   half_lat_frame = 4
   half_lon_frame = 4
   variable_parent_dir_path = '/home/sgardoll/cyclone/extraction_config'
 
-  str_id = 'wsl'
-  year   = 2000
-  month  = 10
-  day    = 1
-  hour   = 0
-  date   = datetime(year, month, day, hour)
-  lat    = 39.7
-  lon    = 312 # Equivalent to -48 .
+  str_id    = 'wsl'
+  year      = 2000
+  month     = 10
+  day       = 1
+  hour      = 0
+  time_dict = from_time_list_to_dict((year, month, day, hour))
+  lat       = 39.7
+  lon       = 312 # Equivalent to -48 .
 
-  subregion = unit_test_extraction(str_id, variable_parent_dir_path, date, lat,
-                                   lon, half_lat_frame, half_lon_frame)
+  subregion = unit_test_extraction(str_id, variable_parent_dir_path, time_dict,
+                                   lat, lon, half_lat_frame, half_lon_frame)
   print(subregion)
 
 """
@@ -216,7 +213,7 @@ from time_series import unit_test_single_multi_level
 unit_test_single_multi_level()
 """
 def unit_test_single_multi_level():
-  from datetime import datetime
+  from time_utils import from_time_list_to_dict
   half_lat_frame = 4
   half_lon_frame = 4
   variable_parent_dir_path = '/home/sgardoll/cyclone/extraction_config'
@@ -226,11 +223,10 @@ def unit_test_single_multi_level():
   month  = 10
   day    = 1
   hour   = 0
-  date   = datetime(year, month, day, hour)
   lat    = 39.7
   lon    = 312 # Equivalent to -48 .
-
-  unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
+  time_dict = from_time_list_to_dict((year, month, day, hour))
+  unit_test_extraction(str_id, variable_parent_dir_path, time_dict, lat, lon,
                        half_lat_frame, half_lon_frame)
 
   str_id = 'ta200'
@@ -240,10 +236,9 @@ def unit_test_single_multi_level():
   hour   = 18
   lat    = 26.5
   lon    = 282.8 # Equivalent to -77.2 .
-  date   = datetime(year, month, day, hour)
-
-  subregion = unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
-                                   half_lat_frame, half_lon_frame)
+  time_dict = from_time_list_to_dict((year, month, day, hour))
+  subregion = unit_test_extraction(str_id, variable_parent_dir_path, time_dict,
+                                   lat, lon, half_lat_frame, half_lon_frame)
   print(subregion)
 
   str_id = 'msl'
@@ -253,20 +248,19 @@ def unit_test_single_multi_level():
   hour   = 0
   lat    = 15
   lon    = 301 # Equivalent to -59 .
-  date   = datetime(year, month, day, hour)
-
-  subregion = unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
-                                   half_lat_frame, half_lon_frame)
+  time_dict = from_time_list_to_dict((year, month, day, hour))
+  subregion = unit_test_extraction(str_id, variable_parent_dir_path, time_dict,
+                                   lat, lon, half_lat_frame, half_lon_frame)
   print(subregion)
 
-def unit_test_extraction(str_id, variable_parent_dir_path, date, lat, lon,
+def unit_test_extraction(str_id, variable_parent_dir_path, time_dict, lat, lon,
                          half_lat_frame, half_lon_frame, has_to_plot=True):
   import os.path as path
   from matplotlib import pyplot as plt
   var = Variable.load(path.join(variable_parent_dir_path,
                       f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
-  with XarrayTimeSeries(var, date) as ts:
-    subregion = ts.extract_square_region(var, date, lat, lon, half_lat_frame,
+  with XarrayTimeSeries(var, time_dict) as ts:
+    subregion = ts.extract_square_region(var, time_dict, lat, lon, half_lat_frame,
                                          half_lon_frame)
     if has_to_plot:
       plt.figure()

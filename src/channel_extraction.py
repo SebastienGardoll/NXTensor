@@ -98,15 +98,16 @@ class ChannelExtraction:
   # !!!!!!!!!!!!! utiliser tensor et tensor meta data !!!!!!!!!!!!!!!!!!!!!!!!
   def _process_block_item(self, group_key, groups, buffer_list,
                           grp_index_to_buffer_index_list):
-    ts_date = tu.from_time_list_to_date(group_key)
-    ts = XarrayTimeSeries(self.extracted_variable, ts_date)
+    ts_time_dict = tu.from_time_list_to_dict(group_key)
+    ts = XarrayTimeSeries(self.extracted_variable, ts_time_dict)
     for label_index in range(0, len(groups)):
       curr_buffer = buffer_list[label_index]
       curr_grp_index_to_buffer = grp_index_to_buffer_index_list[label_index]
       for index in groups[label_index]:
-        # TODO : mapping index dataset to (date, lat, lon) in db_handler
-        curr_date, curr_lat, curr_lon = None, None, None
-        subregion = ts.extract_square_region(self.extracted_variable, curr_date,
+        # TODO : mapping index dataset to (time_dict, lat, lon) in db_handler
+        curr_time_dict, curr_lat, curr_lon = None, None, None
+        subregion = ts.extract_square_region(self.extracted_variable,
+                                             curr_time_dict,
                                              curr_lat, curr_lon,
                                              self.half_lat_frame,
                                              self.half_lon_frame)

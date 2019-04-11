@@ -8,7 +8,6 @@ Created on Tue Mar 26 11:58:46 2019
 
 from yaml_class import YamlSerializable
 import logging
-import time_utils as tu
 from enum_utils import TimeResolution, CoordinateFormat, CoordinatePropertyKey,\
                        CoordinateKey
 from abc import ABC, abstractmethod
@@ -61,10 +60,8 @@ class SingleLevelVariable(Variable):
        CoordinatePropertyKey.NB_DECIMAL: CoordinateFormat.UNKNOWN,
        CoordinatePropertyKey.NETCDF_ATTR_NAME: None}
 
-  # Date is expected to be a datetime instance.
-  def compute_netcdf_file_path(self, date):
-    kwargs = tu.build_date_dictionary(date)
-    return self.netcdf_path_template.format(**kwargs)
+  def compute_netcdf_file_path(self, time_dict):
+    return self.netcdf_path_template.format(**time_dict)
 
   def accept(self, visitor):
     visitor.visit_SingleLevelVariable(self)
@@ -127,12 +124,12 @@ class VariableVisitor(ABC):
 
 class VariableNetcdfFilePathVisitor(VariableVisitor):
 
-  def __init__(self, date):
+  def __init__(self, time_dict):
     self.result = dict()
-    self.date = date
+    self.time_dict = time_dict
 
   def visit_SingleLevelVariable(self, variable):
-    current_dict = {variable.str_id: variable.compute_netcdf_file_path(self.date)}
+    current_dict = {variable.str_id: variable.compute_netcdf_file_path(self.time_dict)}
     self.result.update(current_dict)
 
   def visit_MultiLevelVariable(self, variable):
