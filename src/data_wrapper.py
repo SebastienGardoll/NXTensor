@@ -73,7 +73,7 @@ class DataWrapper(YamlSerializable):
   def _compute_data_from_yaml_file_path(yaml_file_path):
     parent_dir_path = path.dirname(yaml_file_path)
     data_file_path = path.join(parent_dir_path,
-      f"{path.basename(path.splitext(yaml_file_path)[0])}.{Tensor.HDF5_FILENAME_EXTENSION}")
+      f"{path.basename(path.splitext(yaml_file_path)[0])}.{DataWrapper.HDF5_FILENAME_EXTENSION}")
     return data_file_path
 
   @staticmethod
