@@ -8,14 +8,13 @@ Created on Wed Apr 10 11:38:36 2019
 
 from yaml_class import YamlSerializable
 import logging
-import h5py
-import numpy as np
+import xarray as xr
 import os.path as path
 
 
 class DataWrapper(YamlSerializable):
 
-  HDF5_FILENAME_EXTENSION = 'h5'
+  FILENAME_EXTENSION = 'nc'
 
   def __init__(self, str_id, data = None, data_file_path = None):
     super().__init__(str_id)
@@ -41,10 +40,10 @@ class DataWrapper(YamlSerializable):
     return self._data
 
   def save(self, yaml_file_path):
-    logging.info(f"saving tensor to {yaml_file_path}")
+    logging.info(f"saving metadata to {yaml_file_path}")
 
     if self._data is None:
-      msg = "missing tensor data"
+      msg = "missing data"
       logging.error(msg)
       raise Exception(msg)
 
@@ -58,27 +57,26 @@ class DataWrapper(YamlSerializable):
     super().save(yaml_file_path)
 
     self._data = data
-    self._save_data()
+    self._save_data(self.data_file_path)
 
-  def _save_data(self):
+  def _save_data(self, data_file_path):
     try:
-      logging.debug(f"saving tensor data to {self.data_file_path}")
-      with h5py.File(self.data_file_path, 'w') as hdf5_file:
-        hdf5_file.create_dataset('dataset', data=self._data)
+      logging.debug(f"saving data to {self.data_file_path}")
+      self.data.to_netcdf(data_file_path)
     except Exception as e:
-      logging.error(f"cannot save the tensor data to '{self.data_file_path}': {str(e)}")
+      logging.error(f"cannot save the data to '{self.data_file_path}': {str(e)}")
       raise e
 
   @staticmethod
   def _compute_data_from_yaml_file_path(yaml_file_path):
     parent_dir_path = path.dirname(yaml_file_path)
     data_file_path = path.join(parent_dir_path,
-      f"{path.basename(path.splitext(yaml_file_path)[0])}.{DataWrapper.HDF5_FILENAME_EXTENSION}")
+      f"{path.basename(path.splitext(yaml_file_path)[0])}.{DataWrapper.FILENAME_EXTENSION}")
     return data_file_path
 
   @staticmethod
   def load(yaml_file_path):
-    logging.info(f"loading tensor from {yaml_file_path}")
+    logging.info(f"loading metadata from {yaml_file_path}")
     instance = YamlSerializable.load(yaml_file_path)
     data = DataWrapper._load_data(instance.data_file_path)
     instance.set_data(data)
@@ -87,10 +85,10 @@ class DataWrapper(YamlSerializable):
   @staticmethod
   def _load_data(data_file_path):
     try:
-      logging.debug(f"loading tensor data from {data_file_path}")
-      with h5py.File(data_file_path, 'r') as hdf5_file:
-        data = hdf5_file.get('dataset')
-        return np.array(data)
+      logging.debug(f"loading data from {data_file_path}")
+      data = xr.open_dataarray(data_file_path, decode_cf=False,
+                               decode_times=False, decode_coords=False)
+      return data
     except Exception as e:
-      logging.error(f"cannot load tensor data from '{data_file_path}': {str(e)}")
+      logging.error(f"cannot load data from '{data_file_path}': {str(e)}")
       raise e
