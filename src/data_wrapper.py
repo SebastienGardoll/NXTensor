@@ -11,6 +11,8 @@ import logging
 import xarray as xr
 import os.path as path
 from metadata_wrapper import MetadataWrapper
+import numpy as np
+from ABC import abstractmethod
 
 class DataWrapper(YamlSerializable):
 
@@ -33,6 +35,34 @@ class DataWrapper(YamlSerializable):
     new_metadata = self.get_metadata().append(other.get_metadata())
     self.set_data(new_data)
     self.set_metadata(new_metadata)
+
+  @abstractmethod
+  def __len__(self):
+    pass
+
+  # Return a new instance of Tensor with its data shuffled (keep metadata
+  # consistent)
+  def shuffle(self, permutations = None):
+    data = self.get_data()
+    metadata = self.get_metadata()
+
+    len_data = len(self)
+    len_metadata = len(metadata)
+
+    if len_data != len_metadata:
+      msg = f"incompatible size of data and metadata (resp: {len_data} and {len_metadata})"
+      logging.error(msg)
+      raise Exception(msg)
+
+    if permutations is None:
+      permutations = np.random.permutation(len_data)
+
+    metadata.shuffle(permutations)
+    core_array = data.data[permutations]
+    new_data = xr.DataArray(core_array)
+    self.set_data(new_data)
+
+    return permutations
 
   def set_data(self, data):
     self._data = data

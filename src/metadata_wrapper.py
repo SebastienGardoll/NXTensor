@@ -44,6 +44,8 @@ class MetadataWrapper:
   def __len__(self):
     return len(self.get_dataframe().index)
 
+  # In place shuffle of the metadata coording to the permutations parameter if
+  # given. Return permutations.
   def shuffle(self, permutations = None):
     dataframe = self.get_dataframe()
     if permutations is None:

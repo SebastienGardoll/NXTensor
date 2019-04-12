@@ -65,6 +65,9 @@ class Tensor(DataWrapper):
     self.nb_channel = nb_channel
     self.nb_img     = nb_img
 
+  def __len__(self):
+    return self.nb_img
+
   # None Proof.
   def set_data(self, data):
     super().set_data(data)
@@ -96,13 +99,6 @@ class Tensor(DataWrapper):
         raise Exception(msg)
 
     super().append(other, dim_name)
-
-  # Return a new instance of Tensor with its data shuffled (keep geolocalisation
-  # consistent)
-  def shuffle(self):
-    msg = 'Tensor.shuffle is not implemented yet'
-    logging.error(msg)
-    raise NotImplementedError(msg)
 
   # Return a list of instance of Tensor according to the given numpy'style split
   # specifications.
