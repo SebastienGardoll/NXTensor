@@ -40,8 +40,13 @@ class DbHandler:
         separator          = db_format_options[CsvKey.SEPARATOR]
         header_line_number = db_format_options[CsvKey.HEADER]
         na_symbol          = db_format_options[CsvKey.NA_SYMBOL]
-        dataset = pd.read_csv(db_file, sep=separator, header=header_line_number,
-                              na_values=na_symbol)
+        encoding           = db_format_options[CsvKey.ENCODING]
+        line_terminator    = db_format_options[CsvKey.LINE_TERMINATOR]
+
+        dataset = pd.read_csv(filepath_or_buffer=db_file, sep=separator,
+                              header=header_line_number, na_values=na_symbol,
+                              lineterminator=line_terminator,
+                              encoding=encoding)
       except KeyError:
         msg = 'missing csv option(s)'
         logging.error(msg)

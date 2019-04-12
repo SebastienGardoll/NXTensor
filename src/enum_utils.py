@@ -29,9 +29,11 @@ class DbFormat:
 
 class CsvKey:
 
-  SEPARATOR = 'separator'
-  HEADER    = 'header_line_number'
-  NA_SYMBOL = 'na_symbol'
+  SEPARATOR       = 'separator'
+  HEADER          = 'header_line_number'
+  NA_SYMBOL       = 'na_symbol'
+  LINE_TERMINATOR = 'line_terminator'
+  ENCODING        = 'encoding'
 
 class SelectionShape:
 

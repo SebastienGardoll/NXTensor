@@ -145,7 +145,9 @@ def bootstrap_cyclone_labels():
   db_format = DbFormat.CSV
   db_format_options = {CsvKey.SEPARATOR: ',',
                        CsvKey.HEADER: 0,
-                       CsvKey.NA_SYMBOL: ''}
+                       CsvKey.NA_SYMBOL: '',
+                       CsvKey.ENCODING: 'utf8',
+                       CsvKey.LINE_TERMINATOR: '\n'}
 
   db_meta_data_mapping = {TimeKey.YEAR: 'year',
                           TimeKey.MONTH:'month',
