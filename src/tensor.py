@@ -121,9 +121,8 @@ def unit_test():
   str_id = 'test_2kb'
   is_channels_last = True
   channel_to_index = None
-  index_to_localisation = None
-  tensor = Tensor(str_id, is_channels_last, channel_to_index, index_to_localisation,
-                  data)
+  metadata = None
+  tensor = Tensor(str_id, data, metadata, is_channels_last, channel_to_index)
   print(tensor)
   print(tensor.shape)
   print(tensor.x_size)
