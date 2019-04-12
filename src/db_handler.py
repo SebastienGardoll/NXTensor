@@ -67,11 +67,11 @@ class DbHandler:
     return DbHandler(dataframe, label)
 
   # See pandas'dataframe.groupby().groups
-  def get_group_mapping_by_time_resolution(self, variable_time_resolution):
+  def get_group_mapping_by_period(self, period_resolution):
     try:
-      resolution_degree = TimeKey.KEYS.index(variable_time_resolution)
+      resolution_degree = TimeKey.KEYS.index(period_resolution)
     except ValueError as e:
-      msg = f"unknown '{variable_time_resolution}' mapping between time " \
+      msg = f"unknown '{period_resolution}' mapping between time " \
         f"resolutions and time keys"
       logging.error(msg)
       raise Exception(e)

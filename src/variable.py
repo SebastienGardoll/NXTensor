@@ -41,10 +41,11 @@ class SingleLevelVariable(Variable):
 
   def __init__(self, str_id=None):
     super().__init__(str_id)
-    self.netcdf_attribute_name = None
-    self.netcdf_path_template  = None
+    self.netcdf_attribute_name    = None
+    self.netcdf_path_template     = None
+    self.netcdf_period_resolution = None # Period covered by the netcdf file.
 
-    self.time_resolution       = None
+    self.time_resolution       = None  # Resolution of the time in the netcdf file.
     self.date_template         = None
 
     self.coordinate_metadata = dict()
@@ -154,6 +155,7 @@ bootstrap_era5_variables('/home/sgardoll/cyclone/extraction_config')
 def bootstrap_era5_variables(variable_parent_dir_path):
   era5_single_level_variables = ['msl', 'tcwv','u10', 'v10']
   time_resolution = TimeResolution.HOUR
+  netcdf_period_resolution = TimeResolution.MONTH
 
   def bootstrap_era5_variable(str_id, attribute_name, netcdf_path_template, level = None):
     if level is None:
@@ -165,6 +167,7 @@ def bootstrap_era5_variables(variable_parent_dir_path):
     variable.str_id = str_id
     variable.netcdf_attribute_name = attribute_name
     variable.time_resolution = time_resolution
+    variable.netcdf_period_resolution = netcdf_period_resolution
     variable.date_template = '{year}-{month2d}-{day}T{hour}'
     variable.netcdf_path_template = netcdf_path_template
 

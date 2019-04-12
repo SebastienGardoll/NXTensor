@@ -8,7 +8,7 @@ Created on Wed Apr  3 17:27:08 2019
 
 from extraction import ExtractionConfig
 from db_handler import DbHandler
-from enum_utils import CoordinateKey, CoordinatePropertyKey
+from enum_utils import CoordinateKey, CoordinatePropertyKey, TimeKey
 import logging
 from multiprocessing import Pool
 import time_utils as tu
@@ -17,10 +17,9 @@ import xarray as xr
 import pandas as pd
 from tensor import Tensor
 from os import path
+from metadata_wrapper import MetadataWrapper
 
 class ChannelExtraction:
-
-  METADATA_COL_NAMES = ('label', 'year', 'month', 'day', 'lat', 'lon')
 
   def __init__(self, extraction_config_path, variable_index):
     self.extraction_conf = ExtractionConfig.load(extraction_config_path)
@@ -63,9 +62,9 @@ class ChannelExtraction:
 
   def _build_block_dict(self):
     group_mappings = list()
-    variable_time_resolution = self.extracted_variable.time_resolution
+    netcdf_period_resolution = self.extracted_variable.netcdf_period_resolution
     for label_db in self._label_dbs:
-      group_mapping = label_db.get_group_mapping_by_time_resolution(variable_time_resolution)
+      group_mapping = label_db.get_group_mapping_by_period(netcdf_period_resolution)
       group_mappings.append(group_mapping)
 
     set_group_keys = set()
@@ -118,9 +117,8 @@ class ChannelExtraction:
         curr_buffer.append(subregion)
         location = list()
         label_num_id = self.extraction_conf.get_labels()[label_index].num_id
-        location.append(label_num_id)
-        location.expend(curr_time_dict.values())
-        location.extend((curr_lat, curr_lon))
+        location.extend((label_num_id, curr_lat, curr_lon))
+        location.extend(curr_time_dict.values())
         curr_metadata_buffer.append(location)
     ts.close()
 
@@ -146,19 +144,33 @@ class ChannelExtraction:
       coordinate_format[key] = self.extracted_variable.coordinate_metadata[key][CoordinatePropertyKey.FORMAT]
 
     channel_mapping = {0: self.extracted_variable.str_id}
+    label_index = 0
+
 
     for label in self.extraction_conf.get_labels():
-      data = xr.DataArray(buffer_list)
-      metadata = pd.DataFrame(data=metadata_buffer_list,
-                              columns=ChannelExtraction.METADATA_COL_NAMES)
+      data = xr.DataArray(buffer_list[label_index])
 
-      block_filename, block_path = self._compute_block_names(block_num)
+      column_names = self._compute_metadata_column_names(label)
+      metadata = pd.DataFrame(data=metadata_buffer_list[label_index],
+                              columns=column_names)
+
+      block_filename, block_path = self._compute_block_names(block_num, label)
       is_channel_last = None
 
       block_tensor = Tensor(block_filename,
                             data, metadata, coordinate_format,
                             is_channel_last, channel_mapping)
       block_tensor.save(block_path)
+      label_index = label_index + 1
+
+  def _compute_metadata_column_names(self):
+    # Use variable.time_resolution (db may have time_resolution greater then variable's one)
+    result = ['label', 'lat', 'lon']
+    time_resolution_degree = TimeKey.KEYS[self.extracted_variable.time_resolution]
+    for index in range(0, time_resolution_degree + 1):
+      key = TimeKey.KEYS[index]
+      result.append(key)
+    return result
 
   def _compute_block_names(self, block_num, label):
     extraction_id = self.extraction_conf.str_id
