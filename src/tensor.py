@@ -8,13 +8,16 @@ Created on Wed Mar 27 11:58:30 2019
 
 from data_wrapper import DataWrapper
 import logging
+from enum_utils import CoordinateKey, CoordinateFormat
 
 class Tensor(DataWrapper):
 
-  def __init__(self, str_id, data, metadata, is_channels_last, channel_to_index):
+  def __init__(self, str_id, data, metadata, coordinate_format, is_channels_last,
+               channel_to_index):
 
     super().__init__(str_id, data, metadata)
     self.is_channels_last = is_channels_last
+    self.coordinate_format = coordinate_format
 
     # Dictionary that maps channel'str_id to their index in the tensor.
     self.channel_to_index = channel_to_index
@@ -122,7 +125,10 @@ def unit_test():
   is_channels_last = True
   channel_to_index = None
   metadata = None
-  tensor = Tensor(str_id, data, metadata, is_channels_last, channel_to_index)
+  coordinate_format = {CoordinateKey.LAT: CoordinateFormat.UNKNOWN,
+                       CoordinateKey.LON: CoordinateFormat.UNKNOWN}
+  tensor = Tensor(str_id, data, metadata, coordinate_format, is_channels_last,
+                  channel_to_index)
   print(tensor)
   print(tensor.shape)
   print(tensor.x_size)
