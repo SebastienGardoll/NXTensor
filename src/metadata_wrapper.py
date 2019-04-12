@@ -41,10 +41,13 @@ class MetadataWrapper:
                                                 ignore_index = True)
     self.set_dataframe(new_dataframe)
 
+  def __len__(self):
+    return len(self.get_dataframe().index)
+
   def shuffle(self, permutations = None):
     dataframe = self.get_dataframe()
     if permutations is None:
-      permutations = np.random.permutation(len(dataframe.index))
+      permutations = np.random.permutation(len(self))
 
     # Even if copy is False, dataframe variable has to be re-affected.
     dataframe = dataframe.reindex(labels = permutations, copy = False)
