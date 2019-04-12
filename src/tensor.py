@@ -11,10 +11,9 @@ import logging
 
 class Tensor(DataWrapper):
 
-  def __init__(self, str_id, data = None, data_file_path = None, shape = None,
-               is_channels_last, channel_to_index, index_to_localisation):
+  def __init__(self, str_id, data, metadata, is_channels_last, channel_to_index):
 
-    super().__init__(str_id, data, data_file_path, shape)
+    super().__init__(str_id, data, metadata)
     self.is_channels_last = is_channels_last
 
     # Dictionary that maps channel'str_id to their index in the tensor.
@@ -27,9 +26,6 @@ class Tensor(DataWrapper):
         self.index_to_channel[v] = k
     else:
       self.index_to_channel = None
-
-    # Array that map index of data row to their geo-localisation.
-    self.index_to_localisation = index_to_localisation
 
   # None Proof
   def __init_data_properties(self, shape):
