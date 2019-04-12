@@ -143,9 +143,8 @@ class ChannelExtraction:
     for key in CoordinateKey.KEYS:
       coordinate_format[key] = self.extracted_variable.coordinate_metadata[key][CoordinatePropertyKey.FORMAT]
 
-    channel_mapping = {0: self.extracted_variable.str_id}
+    channel_id_to_index = {self.extracted_variable.str_id: 0}
     label_index = 0
-
 
     for label in self.extraction_conf.get_labels():
       data = xr.DataArray(buffer_list[label_index])
@@ -159,7 +158,7 @@ class ChannelExtraction:
 
       block_tensor = Tensor(block_filename,
                             data, metadata, coordinate_format,
-                            is_channel_last, channel_mapping)
+                            is_channel_last, channel_id_to_index)
       block_tensor.save(block_path)
       label_index = label_index + 1
 

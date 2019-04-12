@@ -13,19 +13,19 @@ from enum_utils import CoordinateKey, CoordinateFormat, TensorKey
 class Tensor(DataWrapper):
 
   def __init__(self, str_id, data, metadata, coordinate_format, is_channels_last,
-               channel_to_index):
+               channel_id_to_index):
 
     super().__init__(str_id, data, metadata)
     self.is_channels_last = is_channels_last
     self.coordinate_format = coordinate_format
 
     # Dictionary that maps channel'str_id to their index in the tensor.
-    self.channel_to_index = channel_to_index
+    self.channel_id_to_index = channel_id_to_index
 
     # Array that maps index of channel in data to their str_id.
-    if channel_to_index is not None:
+    if channel_id_to_index is not None:
       self.index_to_channel = list()
-      for k, v in channel_to_index.items():
+      for k, v in channel_id_to_index.items():
         self.index_to_channel[v] = k
     else:
       self.index_to_channel = None
