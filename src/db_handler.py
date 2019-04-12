@@ -10,13 +10,25 @@ import pandas as pd
 import numpy as np
 import logging
 from coordinate_utils import CoordinateUtils
-from enum_utils import DbFormat, CsvKey, TimeKey
+from enum_utils import DbFormat, CsvKey, TimeKey, CoordinateKey
 
 class DbHandler:
 
-  def __init__(self, dataset, label):
-    self.dataset = dataset
+  def __init__(self, dataframe, label):
+    self.dataframe = dataframe
     self.label = label
+
+  def get_location(self, index):
+    row = self.dataframe.iloc[index]
+    lat = row[self.label.db_meta_data_mapping[CoordinateKey.LAT]]
+    lon = row[self.label.db_meta_data_mapping[CoordinateKey.LON]]
+    time_resolution_degree = TimeKey.KEYS.index(self.label.db_time_resolution)
+    time_dict = dict()
+    for index in range(0, time_resolution_degree + 1):
+      key = TimeKey.KEYS[index]
+      data = row[self.label.db_meta_data_mapping[key]]
+      time_dict[key] = int(data)
+    return (time_dict, lat, lon)
 
   @staticmethod
   def load(label):
@@ -43,7 +55,7 @@ class DbHandler:
         encoding           = db_format_options[CsvKey.ENCODING]
         line_terminator    = db_format_options[CsvKey.LINE_TERMINATOR]
 
-        dataset = pd.read_csv(filepath_or_buffer=db_file, sep=separator,
+        dataframe = pd.read_csv(filepath_or_buffer=db_file, sep=separator,
                               header=header_line_number, na_values=na_symbol,
                               lineterminator=line_terminator,
                               encoding=encoding)
@@ -51,9 +63,9 @@ class DbHandler:
         msg = 'missing csv option(s)'
         logging.error(msg)
         raise Exception(msg)
-    return DbHandler(dataset, label)
+    return DbHandler(dataframe, label)
 
-  # See pandas'dataset.groupby().groups
+  # See pandas'dataframe.groupby().groups
   def get_group_mapping_by_time_resolution(self, variable_time_resolution):
     try:
       resolution_degree = TimeKey.KEYS.index(variable_time_resolution)
@@ -64,8 +76,8 @@ class DbHandler:
       raise Exception(e)
     list_keys = TimeKey.KEYS[0:(resolution_degree+1)]
     list_column_names = [self.label.db_meta_data_mapping[key] for key in list_keys]
-    logging.debug(f"grouping dataset by '{list_column_names}'")
-    return self.dataset.groupby(list_column_names).groups
+    logging.debug(f"grouping dataframe by '{list_column_names}'")
+    return self.dataframe.groupby(list_column_names).groups
 
   def round_coordinates(self, coordinate_key, resolution, nb_decimal):
     column_name = self.label.db_meta_data_mapping[coordinate_key]
@@ -77,8 +89,8 @@ class DbHandler:
       rounded_value = CoordinateUtils.round_nearest(value, resolution, nb_decimal)
       return rounded_value
 
-    self.dataset[column_name] = \
-      np.vectorize(_round_coordinates)(self.dataset[column_name])
+    self.dataframe[column_name] = \
+      np.vectorize(_round_coordinates)(self.dataframe[column_name])
 
   def reformat_coordinates(self, coordinate_key, from_format, to_format,
                            resolution, nb_decimal):
@@ -96,7 +108,7 @@ class DbHandler:
       rounded_value = CoordinateUtils.round_nearest(value, resolution, nb_decimal)
       return coordinate_mapping[rounded_value]
 
-    self.dataset[column_name] = \
-      np.vectorize(_convert_coordinates) (self.dataset[column_name])
+    self.dataframe[column_name] = \
+      np.vectorize(_convert_coordinates) (self.dataframe[column_name])
 
   _LOAD_FORMAT_METHODS = {DbFormat.CSV: _load_csv_db.__func__}

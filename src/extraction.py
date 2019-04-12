@@ -8,7 +8,7 @@ Created on Wed Apr  3 13:26:39 2019
 
 from yaml_class import YamlSerializable
 from enum_utils import DbFormat, CoordinateFormat, SelectionShape, CoordinateKey,\
-                       TimeKey, CsvKey
+                       TimeKey, CsvKey, TimeResolution
 from os import path
 from variable import Variable
 import logging
@@ -116,6 +116,9 @@ class ClassificationLabel(YamlSerializable):
     # convert keys (see enum_utils) into db column names.
     self.db_meta_data_mapping = None
 
+    # Time resolution in the db.
+    self.db_time_resolution   = None
+
     self.coordinate_format = {CoordinateKey.LAT: CoordinateFormat.UNKNOWN,
                               CoordinateKey.LON: CoordinateFormat.UNKNOWN}
   def __repr__(self):
@@ -143,6 +146,7 @@ def bootstrap_cyclone_labels():
   lat_format = CoordinateFormat.INCREASING_DEGREE_NORTH
   lon_format = CoordinateFormat.EUROPEAN_DEGREE_EAST
   db_format = DbFormat.CSV
+  db_time_resolution = TimeResolution.HOUR
   db_format_options = {CsvKey.SEPARATOR: ',',
                        CsvKey.HEADER: 0,
                        CsvKey.NA_SYMBOL: '',
@@ -165,6 +169,7 @@ def bootstrap_cyclone_labels():
     label.db_format = db_format
     label.db_format_options = db_format_options
     label.db_mapping = db_meta_data_mapping
+    label.db_time_resolution = db_time_resolution
     label.coordinate_format[CoordinateKey.LAT] = lat_format
     label.coordinate_format[CoordinateKey.LON] = lon_format
     db_filename = db_filename_template.format(str_id=str_id,

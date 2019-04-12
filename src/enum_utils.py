@@ -8,12 +8,13 @@ Created on Tue Mar 26 12:13:52 2019
 
 class TimeResolution:
 
-  YEAR      = 'year'
-  MONTH     = 'month'
-  DAY       = 'day'
-  HOUR      = 'hour'
-  MINUTE    = 'minute'
-  SECOND    = 'second'
+  YEAR         = 'year'
+  MONTH        = 'month'
+  DAY          = 'day'
+  HOUR         = 'hour'
+  MINUTE       = 'minute'
+  SECOND       = 'second'
+  MICRO_SECOND = 'microsecond'
 
 class CoordinateFormat:
 
@@ -41,14 +42,15 @@ class SelectionShape:
 
 class TimeKey:
 
-  YEAR   = TimeResolution.YEAR
-  MONTH  = TimeResolution.MONTH
-  DAY    = TimeResolution.DAY
-  HOUR   = TimeResolution.HOUR
-  MINUTE = TimeResolution.MINUTE
-  SECOND = TimeResolution.SECOND
+  YEAR         = TimeResolution.YEAR
+  MONTH        = TimeResolution.MONTH
+  DAY          = TimeResolution.DAY
+  HOUR         = TimeResolution.HOUR
+  MINUTE       = TimeResolution.MINUTE
+  SECOND       = TimeResolution.SECOND
+  MICRO_SECOND = TimeResolution.MICRO_SECOND
 
-  KEYS   = (YEAR, MONTH, DAY, HOUR, MINUTE, SECOND)
+  KEYS   = (YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, MICRO_SECOND)
 
 class CoordinateKey:
 

@@ -100,15 +100,15 @@ class ChannelExtraction:
     return block_dict
 
   def _process_group_key(self, group_key, groups, buffer_list,
-                          metadata_buffer_list):
+                         metadata_buffer_list):
     ts_time_dict = tu.from_time_list_to_dict(group_key)
     ts = XarrayTimeSeries(self.extracted_variable, ts_time_dict)
     for label_index in range(0, len(groups)):
       curr_buffer = buffer_list[label_index]
       curr_metadata_buffer = metadata_buffer_list[label_index]
+      curr_db = self._label_dbs[label_index]
       for index in groups[label_index]:
-        # TODO : mapping index dataset to (time_dict, lat, lon) in db_handler
-        curr_time_dict, curr_lat, curr_lon = None, None, None
+        curr_time_dict, curr_lat, curr_lon = curr_db.get_location(index)
         subregion = ts.extract_square_region(self.extracted_variable,
                                              curr_time_dict,
                                              curr_lat, curr_lon,
