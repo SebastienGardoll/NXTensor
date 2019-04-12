@@ -8,7 +8,7 @@ Created on Wed Mar 27 11:58:30 2019
 
 from data_wrapper import DataWrapper
 import logging
-from enum_utils import CoordinateKey, CoordinateFormat
+from enum_utils import CoordinateKey, CoordinateFormat, TensorKey
 
 class Tensor(DataWrapper):
 
@@ -72,6 +72,30 @@ class Tensor(DataWrapper):
       self.__init_data_properties(data.shape)
     else:
       self.__init_data_properties(None)
+
+  def append(self, other):
+    nb_self_dim  = len(self.shape)
+    nb_other_dim = len(other.shape)
+
+    if nb_self_dim == nb_other_dim:
+      if nb_self_dim == 2:
+        dim_name   = TensorKey.CHANNEL
+      else:
+        if nb_self_dim == 3:
+          dim_name = TensorKey.IMG
+        else:
+          msg = f"number of dimension unsupported: {nb_self_dim}"
+          logging.error(msg)
+          raise Exception(msg)
+    else:
+      if nb_self_dim == (nb_other_dim + 1):
+        dim_name = self.get_data().dims[0]
+      else:
+        msg = f"unsupported case of appending, nb_self_dim: {nb_self_dim}, nb_other_dim: {nb_other_dim}"
+        logging.error(msg)
+        raise Exception(msg)
+
+    super().append(other, dim_name)
 
   # Return a new instance of Tensor with its data shuffled (keep geolocalisation
   # consistent)
