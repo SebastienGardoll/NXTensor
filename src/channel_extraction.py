@@ -13,9 +13,14 @@ import logging
 from multiprocessing import Pool
 import time_utils as tu
 from time_series import XarrayTimeSeries
-import numpy as np
+import xarray as xr
+import pandas as pd
+from tensor import Tensor
+from os import path
 
 class ChannelExtraction:
+
+  METADATA_COL_NAMES = ('label', 'year', 'month', 'day', 'lat', 'lon')
 
   def __init__(self, extraction_config_path, variable_index):
     self.extraction_conf = ExtractionConfig.load(extraction_config_path)
@@ -33,7 +38,7 @@ class ChannelExtraction:
       self._label_dbs.append(current_db)
 
   def _check_format(self):
-    var_format = self.extracted_variable
+    var_format = self.extracted_variable.coordinate_metadata
     label_formats = dict()
     label_db_dict = dict()
     for label_db in self._label_dbs:
@@ -43,7 +48,7 @@ class ChannelExtraction:
 
     for curr_label, curr_format in label_formats.items():
       for curr_key in CoordinateKey.KEYS:
-        curr_var_format = var_format[curr_key]
+        curr_var_format = var_format[curr_key][CoordinatePropertyKey.FORMAT]
         curr_label_format = curr_format[curr_key]
         curr_db = label_db_dict[curr_label.str_id]
         curr_resolution = var_format[curr_key][CoordinatePropertyKey.RESOLUTION]
@@ -56,7 +61,7 @@ class ChannelExtraction:
         else:
           curr_db.round_coordinates(curr_key, curr_resolution, curr_nb_decimal)
 
-  def _build_block_list(self):
+  def _build_block_dict(self):
     group_mappings = list()
     variable_time_resolution = self.extracted_variable.time_resolution
     for label_db in self._label_dbs:
@@ -67,7 +72,8 @@ class ChannelExtraction:
     for group_mapping in group_mappings:
       set_group_keys.update(group_mapping.keys())
 
-    block_list = list()
+    block_dict = dict()
+    block_index = 0
     curr_block = dict()
     nb_instantiated_block = 1
 
@@ -81,28 +87,25 @@ class ChannelExtraction:
         groups.append(group_mapping.get(group_key, None))
       curr_block[group_key] = groups
       if count_group_key_per_block >= nb_group_key_per_block:
-        block_list.append(curr_block)
+        block_dict[block_index] = curr_block
+        block_index = block_index + 1
         curr_block = dict()
         nb_instantiated_block = nb_instantiated_block + 1
 
-    if len(block_list) < nb_instantiated_block:
+    if len(block_dict) < nb_instantiated_block:
       # Append the last instantiated block.
-      block_list.append(curr_block)
+      block_dict[block_index] = curr_block
+      block_index = block_index + 1
 
-    return block_list
+    return block_dict
 
-  def _preprocess_block(self, block):
-    return None, None, None # TODO handle empty group.
-
-
-  # !!!!!!!!!!!!! utiliser tensor et tensor meta data !!!!!!!!!!!!!!!!!!!!!!!!
-  def _process_block_item(self, group_key, groups, buffer_list,
-                          grp_index_to_buffer_index_list):
+  def _process_group_key(self, group_key, groups, buffer_list,
+                          metadata_buffer_list):
     ts_time_dict = tu.from_time_list_to_dict(group_key)
     ts = XarrayTimeSeries(self.extracted_variable, ts_time_dict)
     for label_index in range(0, len(groups)):
       curr_buffer = buffer_list[label_index]
-      curr_grp_index_to_buffer = grp_index_to_buffer_index_list[label_index]
+      curr_metadata_buffer = metadata_buffer_list[label_index]
       for index in groups[label_index]:
         # TODO : mapping index dataset to (time_dict, lat, lon) in db_handler
         curr_time_dict, curr_lat, curr_lon = None, None, None
@@ -111,24 +114,61 @@ class ChannelExtraction:
                                              curr_lat, curr_lon,
                                              self.half_lat_frame,
                                              self.half_lon_frame)
-        # Copy to buffer.
-        buffer_index = curr_grp_index_to_buffer[index]
-        np.copyto(dst=curr_buffer[buffer_index], src=subregion, casting='no')
-        location.extend
+        # Append to buffer.
+        curr_buffer.append(subregion)
+        location = list()
+        label_num_id = self.extraction_conf.get_labels()[label_index].num_id
+        location.append(label_num_id)
+        location.expend(curr_time_dict.values())
+        location.extend((curr_lat, curr_lon))
+        curr_metadata_buffer.append(location)
     ts.close()
 
-  def _process_block(self, block):
-    # Compute mapping between buffer index and the indexes in the groups.
-    buffer_list, grp_index_to_buffer_index_list,\
-    buffer_index_to_tensor_metadata_list = self._preprocess_block(block)
+  def _process_block(self, block_item):
+    block_num, block = block_item
+    buffer_list = list()
+    metadata_buffer_list = list()
+
+    for label in self.extraction_conf.get_labels():
+      buffer_list.append(list())
+      metadata_buffer_list.append(list())
 
     # Extract the subregion.
     for group_key, groups in block.items():
-      self._process_block_item(group_key, groups, buffer_list,
-                               grp_index_to_buffer_index_list)
+      self._process_group_key(group_key, groups, buffer_list, metadata_buffer_list)
 
     # Save the buffers.
-    # TODO
+
+    # Coordinate formats in the tensor cannot be other than the variable'ones.
+    # _checkformat ensures this.
+    coordinate_format = dict()
+    for key in CoordinateKey.KEYS:
+      coordinate_format[key] = self.extracted_variable.coordinate_metadata[key][CoordinatePropertyKey.FORMAT]
+
+    channel_mapping = {0: self.extracted_variable.str_id}
+
+    for label in self.extraction_conf.get_labels():
+      data = xr.DataArray(buffer_list)
+      metadata = pd.DataFrame(data=metadata_buffer_list,
+                              columns=ChannelExtraction.METADATA_COL_NAMES)
+
+      block_filename, block_path = self._compute_block_names(block_num)
+      is_channel_last = None
+
+      block_tensor = Tensor(block_filename,
+                            data, metadata, coordinate_format,
+                            is_channel_last, channel_mapping)
+      block_tensor.save(block_path)
+
+  def _compute_block_names(self, block_num, label):
+    extraction_id = self.extraction_conf.str_id
+    label_display_name = label.display_name
+    variable_id = self.extracted_variable.str_id
+
+    block_filename = f"{extraction_id}_{variable_id}_{label_display_name}_block_{block_num}.{Tensor.FILENAME_EXTENSION}"
+    block_path = path.join(self.extraction_conf.tmp_dir_path, block_filename)
+    return (block_filename, block_path)
+
 
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
@@ -136,15 +176,17 @@ class ChannelExtraction:
     self._check_format()
 
     # Build the list of blocks to be processed.
-    block_list = self._build_block_list()
+    block_dict = self._build_block_dict()
 
     # Process the list of blocks.
+    # Python 3.7 dict preserves order.
     with Pool(processes=self.extraction_conf.nb_process) as pool:
-      pool.map(func=self._process_block, iterable=block_list, chunksize=1)
+      pool.map(func=self._process_block, iterable=block_dict.items(), chunksize=1)
 
     # Merge the blocks and build a tensor object composed of 1 channel.
-
+    # TODO: sperated method so as to implement failover
     # Compute the statistics on each label et the enter channel.
+    # TODO: sperated method so as to implement failover
 
 """
 import logging
