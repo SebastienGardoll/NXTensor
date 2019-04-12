@@ -36,6 +36,24 @@ class MetadataWrapper:
         logging.error(msg)
         raise Exception(msg)
 
+  def append(self, other):
+    new_dataframe = self.get_dataframe().append(other=other.get_dataframe(),
+                                                ignore_index = True)
+    self.set_dataframe(new_dataframe)
+
+  def shuffle(self, permutations = None):
+    dataframe = self.get_dataframe()
+    if permutations is None:
+      permutations = np.random.permutation(len(dataframe.index))
+
+    # Even if copy is False, dataframe variable has to be re-affected.
+    dataframe = dataframe.reindex(labels = permutations, copy = False)
+    dataframe.reset_index(drop=True, inplace = True)
+
+    self.set_dataframe(dataframe)
+
+    return permutations
+
   def close(self):
     pass # Nothing to do.
 
