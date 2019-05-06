@@ -112,26 +112,25 @@ class ChannelExtraction:
   def _process_group_key(self, group_key, groups, buffer_list,
                          metadata_buffer_list):
     ts_time_dict = tu.from_time_list_to_dict(group_key)
-    ts = XarrayTimeSeries(self.extracted_variable, ts_time_dict)
-    for label_index in range(0, len(groups)):
-      curr_buffer = buffer_list[label_index]
-      curr_metadata_buffer = metadata_buffer_list[label_index]
-      curr_db = self._label_dbs[label_index]
-      for index in groups[label_index]:
-        curr_time_dict, curr_lat, curr_lon = curr_db.get_location(index)
-        subregion = ts.extract_square_region(self.extracted_variable,
-                                             curr_time_dict,
-                                             curr_lat, curr_lon,
-                                             self.half_lat_frame,
-                                             self.half_lon_frame)
-        # Append to buffer.
-        curr_buffer.append(subregion)
-        location = list()
-        label_num_id = self.extraction_conf.get_labels()[label_index].num_id
-        location.extend((label_num_id, curr_lat, curr_lon))
-        location.extend(curr_time_dict.values())
-        curr_metadata_buffer.append(location)
-    ts.close()
+    with XarrayTimeSeries(self.extracted_variable, ts_time_dict) as ts:
+      for label_index in range(0, len(groups)):
+        curr_buffer = buffer_list[label_index]
+        curr_metadata_buffer = metadata_buffer_list[label_index]
+        curr_db = self._label_dbs[label_index]
+        for index in groups[label_index]:
+          curr_time_dict, curr_lat, curr_lon = curr_db.get_location(index)
+          subregion = ts.extract_square_region(self.extracted_variable,
+                                               curr_time_dict,
+                                               curr_lat, curr_lon,
+                                               self.half_lat_frame,
+                                               self.half_lon_frame)
+          # Append to buffer.
+          curr_buffer.append(subregion)
+          location = list()
+          label_num_id = self.extraction_conf.get_labels()[label_index].num_id
+          location.extend((label_num_id, curr_lat, curr_lon))
+          location.extend(curr_time_dict.values())
+          curr_metadata_buffer.append(location)
 
   def _process_block(self, block_item):
     block_num, block = block_item
@@ -142,7 +141,7 @@ class ChannelExtraction:
       buffer_list.append(list())
       metadata_buffer_list.append(list())
 
-    # Extract the subregion.
+    # Extract the subregions.
     for group_key, groups in block.items():
       self._process_group_key(group_key, groups, buffer_list, metadata_buffer_list)
 
@@ -206,9 +205,9 @@ class ChannelExtraction:
       pool.map(func=self._process_block, iterable=block_dict.items(), chunksize=1)
 
     # Merge the blocks and build a tensor object composed of 1 channel.
-    # TODO: sperated method so as to implement failover
+    # TODO: separated method so as to implement failover
     # Compute the statistics on each label et the enter channel.
-    # TODO: sperated method so as to implement failover
+    # TODO: separated method so as to implement failover
 
 """
 import logging
