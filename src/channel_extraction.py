@@ -72,10 +72,17 @@ class ChannelExtraction:
   def _build_block_dict(self):
     group_mappings = list()
     netcdf_period_resolution = self.extracted_variable.netcdf_period_resolution
+
+    # group_mappings is a list of group_mapping from the different dbs.
+    # This list is ordered following the order of the list of _label_dbs as
+    # if the index of _label_dbs was a numerical id of the labels.
     for label_db in self._label_dbs:
       group_mapping = label_db.get_group_mapping_by_period(netcdf_period_resolution)
       group_mappings.append(group_mapping)
 
+    # See get_group_mapping_by_period.
+    # set_group_keys is the set of tuples that represent a period of time
+    # (like (year, month).
     set_group_keys = set()
     for group_mapping in group_mappings:
       set_group_keys.update(group_mapping.keys())
@@ -88,6 +95,11 @@ class ChannelExtraction:
     count_group_key_per_block = 0
     nb_group_key_per_block = int(len(set_group_keys)/self.extraction_conf.nb_block) + 1
 
+    # Create a dictionary where a key is the block numerical id (zero based)
+    # and a value is the block.
+    # A block is a dictionary where a key is a group_key (time period) and a
+    # value is list of list of indexes of label db (groups). This list is ordered
+    # following the label order (as if the index of the list was a numerical id).
     for group_key in set_group_keys:
       count_group_key_per_block = count_group_key_per_block + 1
       groups = list()
@@ -113,12 +125,16 @@ class ChannelExtraction:
                          metadata_buffer_list):
     ts_time_dict = tu.from_time_list_to_dict(group_key)
     with XarrayTimeSeries(self.extracted_variable, ts_time_dict) as ts:
+      # Remember that groups is a list ordered following the order of the
+      # _label_dbs. So label_index points a specific label.
       for label_index in range(0, len(groups)):
         curr_buffer = buffer_list[label_index]
         curr_metadata_buffer = metadata_buffer_list[label_index]
         curr_db = self._label_dbs[label_index]
-        for index in groups[label_index]:
-          curr_time_dict, curr_lat, curr_lon = curr_db.get_location(index)
+        # indexes is a list of indexes of the current label db for the
+        # current time period (group_key).
+        for indexes in groups[label_index]:
+          curr_time_dict, curr_lat, curr_lon = curr_db.get_location(indexes)
           subregion = ts.extract_square_region(self.extracted_variable,
                                                curr_time_dict,
                                                curr_lat, curr_lon,

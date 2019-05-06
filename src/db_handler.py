@@ -67,6 +67,10 @@ class DbHandler:
     return DbHandler(dataframe, label)
 
   # See pandas'dataframe.groupby().groups
+  # Group the rows of the label db by the given time resolution.
+  # i.e. if the resolution is the month:
+  # group_mapping is a dictionary with group_key, a tuple (year, month) as a key,
+  # and list_of_indexes the list of indexes.
   def get_group_mapping_by_period(self, period_resolution):
     try:
       resolution_degree = TimeKey.KEYS.index(period_resolution)
