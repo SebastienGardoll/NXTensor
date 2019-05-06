@@ -23,7 +23,7 @@ class ChannelExtraction:
 
   def __init__(self, extraction_config_path, variable_str_id):
     self.extraction_conf = ExtractionConfig.load(extraction_config_path)
-    
+
     for variable in self.extraction_conf.get_variables():
       if variable.str_id == variable_str_id:
         self.extracted_variable = variable
@@ -45,7 +45,7 @@ class ChannelExtraction:
       current_db = DbHandler.load(label)
       self._label_dbs.append(current_db)
 
-  def _check_format(self):
+  def _format_label_dbs(self):
     var_format = self.extracted_variable.coordinate_metadata
     label_formats = dict()
     label_db_dict = dict()
@@ -193,7 +193,7 @@ class ChannelExtraction:
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
     # label dbs.
-    self._check_format()
+    self._format_label_dbs()
 
     # Build the list of blocks to be processed.
     block_dict = self._build_block_dict()
