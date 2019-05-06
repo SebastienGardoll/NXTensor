@@ -86,11 +86,12 @@ class ChannelExtraction:
     nb_instantiated_block = 1
 
     count_group_key_per_block = 0
-    nb_group_key_per_block = int(len(set_group_keys)/self.extraction_conf.nb_block) +1
+    nb_group_key_per_block = int(len(set_group_keys)/self.extraction_conf.nb_block) + 1
 
     for group_key in set_group_keys:
       count_group_key_per_block = count_group_key_per_block + 1
       groups = list()
+      # Harvest the groups from the db of the labels, for the same group key.
       for group_mapping in group_mappings:
         groups.append(group_mapping.get(group_key, None))
       curr_block[group_key] = groups
@@ -99,6 +100,7 @@ class ChannelExtraction:
         block_index = block_index + 1
         curr_block = dict()
         nb_instantiated_block = nb_instantiated_block + 1
+        count_group_key_per_block = 0
 
     if len(block_dict) < nb_instantiated_block:
       # Append the last instantiated block.
