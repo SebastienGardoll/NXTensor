@@ -21,10 +21,19 @@ from metadata_wrapper import MetadataWrapper
 
 class ChannelExtraction:
 
-  def __init__(self, extraction_config_path, variable_index):
+  def __init__(self, extraction_config_path, variable_str_id):
     self.extraction_conf = ExtractionConfig.load(extraction_config_path)
-    self.variable_index = variable_index
-    self.extracted_variable = self.extraction_conf.get_variables()[variable_index]
+    
+    for variable in self.extraction_conf.get_variables():
+      if variable.str_id == variable_str_id:
+        self.extracted_variable = variable
+        break
+
+    if self.extracted_variable is None:
+      msg = f"unknown variable '{variable_str_id}'"
+      logging.fatal(msg)
+      raise Exception(msg)
+
     self.half_lat_frame = (self.extraction_conf.y_size *
             self.extracted_variable.coordinate_metadata[CoordinateKey.LAT]
             [CoordinatePropertyKey.RESOLUTION])/2
@@ -215,5 +224,5 @@ def unit_test():
   from os import path
   config_parent_path = '/home/sgardoll/cyclone/extraction_config'
   extraction_config_path = path.join(config_parent_path, '2kb_extraction_config.yml')
-  variable_index = 0
-  driver = ChannelExtraction(extraction_config_path, variable_index)
+  variable_str_id = 'msl'
+  driver = ChannelExtraction(extraction_config_path, variable_str_id)
