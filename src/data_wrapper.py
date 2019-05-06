@@ -12,11 +12,11 @@ import xarray as xr
 import os.path as path
 from metadata_wrapper import MetadataWrapper
 import numpy as np
-from ABC import abstractmethod
+from abc import abstractmethod
 
 class DataWrapper(YamlSerializable):
 
-  FILENAME_EXTENSION = 'nc'
+  _FILENAME_EXTENSION = 'nc'
 
   def __init__(self, str_id, data, metadata):
     super().__init__(str_id)
@@ -134,7 +134,7 @@ class DataWrapper(YamlSerializable):
   def _compute_data_from_yaml_file_path(yaml_file_path):
     parent_dir_path = path.dirname(yaml_file_path)
     data_file_path = path.join(parent_dir_path,
-      f"{path.basename(path.splitext(yaml_file_path)[0])}.{DataWrapper.FILENAME_EXTENSION}")
+      f"{path.basename(path.splitext(yaml_file_path)[0])}.{DataWrapper._FILENAME_EXTENSION}")
     return data_file_path
 
   @staticmethod

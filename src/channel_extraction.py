@@ -17,7 +17,7 @@ import xarray as xr
 import pandas as pd
 from tensor import Tensor
 from os import path
-from metadata_wrapper import MetadataWrapper
+from yaml_class import YamlSerializable
 
 class ChannelExtraction:
 
@@ -117,7 +117,6 @@ class ChannelExtraction:
     if len(block_dict) < nb_instantiated_block:
       # Append the last instantiated block.
       block_dict[block_index] = curr_block
-      block_index = block_index + 1
 
     return block_dict
 
@@ -173,24 +172,29 @@ class ChannelExtraction:
     channel_id_to_index = {self.extracted_variable.str_id: 0}
     label_index = 0
 
+    block_yaml_file_paths = list()
+
     for label in self.extraction_conf.get_labels():
       # Store the subregions in a xarray data array.
       data = xr.DataArray(subregion_list[label_index])
 
       # Store the location of the subregion in a pandas data frame.
-      column_names = self._compute_metadata_column_names(label)
+      column_names = self._compute_metadata_column_names()
       metadata = pd.DataFrame(data=location_subregion_list[label_index],
                               columns=column_names)
 
       # Create a instance of Tensor (not as a real tensor but a part (block) of a
       # channel of a tensor).
-      block_filename, block_path = self._compute_block_names(block_num, label)
+      block_yaml_filename, block_yaml_file_path = self._compute_block_names(block_num, label)
       is_channel_last = None
-      block_tensor = Tensor(block_filename,
+      channel_block = Tensor(block_yaml_filename,
                             data, metadata, coordinate_format,
                             is_channel_last, channel_id_to_index)
-      block_tensor.save(block_path)
+      channel_block.save(block_yaml_file_path)
+      block_yaml_file_paths.append(block_yaml_file_path)
       label_index = label_index + 1
+
+    return block_yaml_file_paths
 
   def _compute_metadata_column_names(self):
     # Use variable.time_resolution (db may have time_resolution greater then variable's one)
@@ -209,10 +213,26 @@ class ChannelExtraction:
     label_display_name = label.display_name
     variable_id = self.extracted_variable.str_id
 
-    block_filename = f"{extraction_id}_{variable_id}_{label_display_name}_block_{block_num}.{Tensor.FILENAME_EXTENSION}"
-    block_path = path.join(self.extraction_conf.tmp_dir_path, block_filename)
-    return (block_filename, block_path)
+    block_yaml_filename = f"{extraction_id}_{variable_id}_{label_display_name}_block_{block_num}.{YamlSerializable.YAML_FILENAME_EXT}"
+    block_yaml_file_path = path.join(self.extraction_conf.tmp_dir_path, block_yaml_filename)
+    return (block_yaml_filename, block_yaml_file_path)
 
+  def _merge_block(self, block_yaml_file_paths):
+    # Bootstrap the concatenation of the blocks.
+    index = 0
+    channel = Tensor.load(block_yaml_file_paths[index])
+    index = index + 1
+
+    while(index < len(block_yaml_file_paths)):
+      current_block = Tensor.load(block_yaml_file_paths[index])
+      channel.append(current_block, self.extracted_variable.str_id)
+      index = index + 1
+
+    # Reset channel data.
+    channel.data_file_path     = None
+    channel.metadata_file_path = None
+    channel.str_id             = self.extracted_variable.str_id
+    return channel
 
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
@@ -225,12 +245,18 @@ class ChannelExtraction:
     # Process the list of blocks.
     # Python 3.7 dict preserves order.
     with Pool(processes=self.extraction_conf.nb_process) as pool:
-      pool.map(func=self._process_block, iterable=block_dict.items(), chunksize=1)
+      block_file_paths = pool.map(func=self._process_block,
+                                       iterable=block_dict.items(), chunksize=1)
 
     # Merge the blocks and build a tensor object composed of 1 channel.
     # TODO: separated method so as to implement failover, one day...
-    # Compute the statistics on each label et the enter channel.
+    channel = self._merge_block(block_file_paths)
+
+    # Compute the statistics on each label of the channel.
     # TODO: separated method so as to implement failover, one day...
+
+    # Save the channel along side the locations and the statistics.
+    # TODO
 
 """
 import logging
