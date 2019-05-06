@@ -149,7 +149,7 @@ class ChannelExtraction:
     # Save the buffers.
 
     # Coordinate formats in the tensor cannot be other than the variable'ones.
-    # _checkformat ensures this.
+    # _format_label_dbs ensures this.
     coordinate_format = dict()
     for key in CoordinateKey.KEYS:
       coordinate_format[key] = self.extracted_variable.coordinate_metadata[key][CoordinatePropertyKey.FORMAT]
