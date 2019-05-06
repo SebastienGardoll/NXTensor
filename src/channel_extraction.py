@@ -121,15 +121,15 @@ class ChannelExtraction:
 
     return block_dict
 
-  def _process_group_key(self, group_key, groups, buffer_list,
-                         metadata_buffer_list):
+  def _process_group_key(self, group_key, groups, subregion_list,
+                         location_subregion_list):
     ts_time_dict = tu.from_time_list_to_dict(group_key)
     with XarrayTimeSeries(self.extracted_variable, ts_time_dict) as ts:
       # Remember that groups is a list ordered following the order of the
       # _label_dbs. So label_index points a specific label.
       for label_index in range(0, len(groups)):
-        curr_buffer = buffer_list[label_index]
-        curr_metadata_buffer = metadata_buffer_list[label_index]
+        curr_buffer = subregion_list[label_index]
+        curr_metadata_buffer = location_subregion_list[label_index]
         curr_db = self._label_dbs[label_index]
         # indexes is a list of indexes of the current label db for the
         # current time period (group_key).
@@ -150,21 +150,22 @@ class ChannelExtraction:
 
   def _process_block(self, block_item):
     block_num, block = block_item
-    buffer_list = list()
-    metadata_buffer_list = list()
 
+    # Allocate the buffers.
+    subregion_list = list()
+    location_subregion_list = list()
     for label in self.extraction_conf.get_labels():
-      buffer_list.append(list())
-      metadata_buffer_list.append(list())
+      subregion_list.append(list())
+      location_subregion_list.append(list())
 
     # Extract the subregions.
     for group_key, groups in block.items():
-      self._process_group_key(group_key, groups, buffer_list, metadata_buffer_list)
+      self._process_group_key(group_key, groups, subregion_list, location_subregion_list)
 
     # Save the buffers.
 
     # Coordinate formats in the tensor cannot be other than the variable'ones.
-    # _format_label_dbs ensures this.
+    # _format_label_dbs asserts this.
     coordinate_format = dict()
     for key in CoordinateKey.KEYS:
       coordinate_format[key] = self.extracted_variable.coordinate_metadata[key][CoordinatePropertyKey.FORMAT]
@@ -173,15 +174,18 @@ class ChannelExtraction:
     label_index = 0
 
     for label in self.extraction_conf.get_labels():
-      data = xr.DataArray(buffer_list[label_index])
+      # Store the subregions in a xarray data array.
+      data = xr.DataArray(subregion_list[label_index])
 
+      # Store the location of the subregion in a pandas data frame.
       column_names = self._compute_metadata_column_names(label)
-      metadata = pd.DataFrame(data=metadata_buffer_list[label_index],
+      metadata = pd.DataFrame(data=location_subregion_list[label_index],
                               columns=column_names)
 
+      # Create a instance of Tensor (not as a real tensor but a part (block) of a
+      # channel of a tensor).
       block_filename, block_path = self._compute_block_names(block_num, label)
       is_channel_last = None
-
       block_tensor = Tensor(block_filename,
                             data, metadata, coordinate_format,
                             is_channel_last, channel_id_to_index)
@@ -191,10 +195,13 @@ class ChannelExtraction:
   def _compute_metadata_column_names(self):
     # Use variable.time_resolution (db may have time_resolution greater then variable's one)
     result = ['label', 'lat', 'lon']
+
+    # Add the date metadata.
     time_resolution_degree = TimeKey.KEYS[self.extracted_variable.time_resolution]
     for index in range(0, time_resolution_degree + 1):
       key = TimeKey.KEYS[index]
       result.append(key)
+
     return result
 
   def _compute_block_names(self, block_num, label):
@@ -221,9 +228,9 @@ class ChannelExtraction:
       pool.map(func=self._process_block, iterable=block_dict.items(), chunksize=1)
 
     # Merge the blocks and build a tensor object composed of 1 channel.
-    # TODO: separated method so as to implement failover
+    # TODO: separated method so as to implement failover, one day...
     # Compute the statistics on each label et the enter channel.
-    # TODO: separated method so as to implement failover
+    # TODO: separated method so as to implement failover, one day...
 
 """
 import logging
