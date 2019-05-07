@@ -81,10 +81,10 @@ class Tensor(DataWrapper):
     nb_other_dim = len(other.shape)
 
     if nb_self_dim == nb_other_dim:
-      if nb_self_dim == 2:
+      if nb_self_dim == 3:
         dim_name   = TensorKey.CHANNEL
       else:
-        if nb_self_dim == 3:
+        if nb_self_dim == 4:
           dim_name = TensorKey.IMG
         else:
           msg = f"number of dimension unsupported: {nb_self_dim}"
