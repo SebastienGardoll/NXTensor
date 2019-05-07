@@ -124,6 +124,17 @@ class Tensor(DataWrapper):
     logging.error(msg)
     raise NotImplementedError(msg)
 
+  def _dispatcher(self, channel_method, img_tensor_method, **kwargs):
+    if self.shape == 3:
+      channel_method(kwargs)
+    else:
+      if self.shape == 4:
+        img_tensor_method(kwargs)
+      else:
+        msg = f"unsupported shape ({self.shape}) of tensor"
+        logging.fatal(msg)
+        raise Exception(msg)
+
   def __repr__(self):
     return f"{self.__class__.__name__}(str_id={self.str_id}, shape={self.shape})"
 
