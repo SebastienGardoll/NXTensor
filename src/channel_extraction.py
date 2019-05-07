@@ -225,7 +225,7 @@ class ChannelExtraction:
 
     while(index < len(block_yaml_file_paths)):
       current_block = Tensor.load(block_yaml_file_paths[index])
-      channel.append(current_block, self.extracted_variable.str_id)
+      channel.append(current_block)
       index = index + 1
 
     # Reset channel data.
@@ -252,7 +252,7 @@ class ChannelExtraction:
     # TODO: separated method so as to implement failover, one day...
     channel = self._merge_block(block_file_paths)
 
-    # Compute the statistics on each label of the channel.
+    # Compute the statistics of the channel.
     # TODO: separated method so as to implement failover, one day...
 
     # Save the channel along side the locations and the statistics.
