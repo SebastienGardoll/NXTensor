@@ -40,8 +40,8 @@ class DataWrapper(YamlSerializable):
   def __len__(self):
     pass
 
-  # Return a new instance of Tensor with its data shuffled (keep metadata
-  # consistent)
+  # Return a new instance of Tensor with its data shuffled for the first dimension
+  # (keep metadata consistent)
   def shuffle(self, permutations = None):
     data = self.get_data()
     metadata = self.get_metadata()
