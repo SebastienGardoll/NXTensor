@@ -124,6 +124,13 @@ class Tensor(DataWrapper):
     logging.error(msg)
     raise NotImplementedError(msg)
 
+  def _inner_standardize(data_array):
+    mean = data_array.mean()
+    std  = data_array.std()
+    data_array -= mean
+    data_array /= std
+    return mean, std
+
   def _dispatcher(self, channel_method, img_tensor_method, **kwargs):
     if self.shape == 3:
       channel_method(kwargs)
