@@ -124,9 +124,13 @@ class Tensor(DataWrapper):
     logging.error(msg)
     raise NotImplementedError(msg)
 
-  def _inner_standardize(data_array):
-    mean = data_array.mean()
-    std  = data_array.std()
+  def _inner_standardize(data_array, mean=None, std=None):
+    if mean is None:
+      mean = data_array.mean()
+
+    if std is None:
+      std  = data_array.std()
+
     data_array -= mean
     data_array /= std
     return mean, std
