@@ -227,16 +227,16 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 from variable import create_computed_variables
-create_computed_variables('...')
+create_computed_variables('/home/sgardoll/cyclone/extraction_config')
 """
 def create_computed_variables(variable_parent_dir_path):
   variable = ComputedVariable()
   variable.str_id = 'wsl'
   variable.computation_expression = 'u10 2 pow v10 2 pow + sqrt'
   variable.variable_file_paths = [path.join(variable_parent_dir_path,
-                                            f"u10{Variable.FILE_NAME_POSTFIX}"),
+                                            f"u10_{Variable.FILE_NAME_POSTFIX}"),
                                   path.join(variable_parent_dir_path,
-                                            f"v10{Variable.FILE_NAME_POSTFIX}")]
+                                            f"v10_{Variable.FILE_NAME_POSTFIX}")]
   variable.get_variables()
   variable_file_path = path.join(variable_parent_dir_path, variable.compute_filename())
   variable.save(variable_file_path)
