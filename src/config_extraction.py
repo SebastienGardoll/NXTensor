@@ -218,7 +218,7 @@ if logger.hasHandlers():
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-from extraction import test_load
+from config_extraction import test_load
 test_load('/home/sgardoll/cyclone/extraction_config')
 """
 def test_load(config_parent_dir):
@@ -240,7 +240,7 @@ if logger.hasHandlers():
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-from extraction import bootstrap_all
+from config_extraction import bootstrap_all
 bootstrap_all('/home/sgardoll/cyclone/extraction_config')
 """
 def bootstrap_all(config_file_parent_dir_path):
