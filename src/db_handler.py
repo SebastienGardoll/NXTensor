@@ -25,8 +25,8 @@ class DbHandler:
     lon = self.dataframe.at[index, self.label.db_meta_data_mapping[CoordinateKey.LON]]
     time_resolution_degree = TimeKey.KEYS.index(self.label.db_time_resolution)
     time_dict = dict()
-    for index in range(0, time_resolution_degree + 1):
-      key = TimeKey.KEYS[index]
+    for time_post in range(0, time_resolution_degree + 1):
+      key = TimeKey.KEYS[time_post]
       data = self.dataframe.at[index, self.label.db_meta_data_mapping[key]]
       time_dict[key] = data
     return (time_dict, lat, lon)

@@ -100,6 +100,7 @@ class ChannelExtraction:
     # A block is a dictionary where a key is a group_key (time period) and a
     # value is list of list of indexes of label db (groups). This list is ordered
     # following the label order (as if the index of the list was a numerical id).
+    # the list of indexes may be None.
     for group_key in set_group_keys:
       count_group_key_per_block = count_group_key_per_block + 1
       groups = list()
@@ -130,22 +131,25 @@ class ChannelExtraction:
         curr_buffer = subregion_list[label_index]
         curr_metadata_buffer = location_subregion_list[label_index]
         curr_db = self._label_dbs[label_index]
-        # indexes is a list of indexes of the current label db for the
+        # list_indexes is a list of indexes of the current label db for the
         # current time period (group_key).
-        for indexes in groups[label_index]:
-          curr_time_dict, curr_lat, curr_lon = curr_db.get_location(indexes)
-          subregion = ts.extract_square_region(self.extracted_variable,
-                                               curr_time_dict,
-                                               curr_lat, curr_lon,
-                                               self.half_lat_frame,
-                                               self.half_lon_frame)
-          # Append to buffer.
-          curr_buffer.append(subregion)
-          location = list()
-          label_num_id = self.extraction_conf.get_labels()[label_index].num_id
-          location.extend((label_num_id, curr_lat, curr_lon))
-          location.extend(curr_time_dict.values())
-          curr_metadata_buffer.append(location)
+        # indexes may be None.
+        list_indexes = groups[label_index]
+        if list_indexes is not None:
+          for index in list_indexes:
+            curr_time_dict, curr_lat, curr_lon = curr_db.get_location(index)
+            subregion = ts.extract_square_region(self.extracted_variable,
+                                                 curr_time_dict,
+                                                 curr_lat, curr_lon,
+                                                 self.half_lat_frame,
+                                                 self.half_lon_frame)
+            # Append to buffer.
+            curr_buffer.append(subregion)
+            location = list()
+            label_num_id = self.extraction_conf.get_labels()[label_index].num_id
+            location.extend((label_num_id, curr_lat, curr_lon))
+            location.extend(curr_time_dict.values())
+            curr_metadata_buffer.append(location)
 
   def _process_block(self, block_item):
     block_num, block = block_item
@@ -244,9 +248,15 @@ class ChannelExtraction:
 
     # Process the list of blocks.
     # Python 3.7 dict preserves order.
+    """DEBUG
     with Pool(processes=self.extraction_conf.nb_process) as pool:
       block_file_paths = pool.map(func=self._process_block,
                                        iterable=block_dict.items(), chunksize=1)
+    """
+    #DEBUG
+    for item in block_dict.items():
+      block_file_paths = self._process_block(item)
+
 
     # Merge the blocks and build a tensor object composed of 1 channel.
     # TODO: separated method so as to implement failover, one day...
@@ -264,6 +274,8 @@ logger = logging.getLogger()
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(levelname)-8s %(message)s')
 handler.setFormatter(formatter)
+if logger.hasHandlers():
+  logger.handlers.clear()
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
@@ -276,6 +288,3 @@ def unit_test(config_parent_path):
   variable_str_id = 'msl'
   driver = ChannelExtraction(extraction_config_path, variable_str_id)
   driver.extract()
-
-# DEBUG
-unit_test('/home/sgardoll/cyclone/extraction_config')

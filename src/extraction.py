@@ -213,6 +213,8 @@ logger = logging.getLogger()
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(levelname)-8s %(message)s')
 handler.setFormatter(formatter)
+if logger.hasHandlers():
+  logger.handlers.clear()
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
@@ -233,6 +235,8 @@ logger = logging.getLogger()
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(levelname)-8s %(message)s')
 handler.setFormatter(formatter)
+if logger.hasHandlers():
+  logger.handlers.clear()
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
