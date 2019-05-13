@@ -18,11 +18,11 @@ class TimeResolution:
 
 class CoordinateFormat:
 
-  DECREASING_DEGREE_NORTH = 'decreasing_degree_north' # From   90° to  -90°
-  INCREASING_DEGREE_NORTH = 'increasing_degree_north' # From  -90° to   90°
-  AMERICAN_DEGREE_EAST    = 'american_degree_east'    # From    0° to  360°
-  EUROPEAN_DEGREE_EAST    = 'european_degree_east'    # From -180° to  180°
-  UNKNOWN                 = 'unknown'
+  DECREASING_DEGREE_NORTH  = 'decreasing_degree_north'  # From   90° to  -90°
+  INCREASING_DEGREE_NORTH  = 'increasing_degree_north'  # From  -90° to   90°
+  ZERO_TO_360_DEGREE_EAST  = 'zero_to_360_degree_east'  # From    0° to  360°
+  M_180_TO_180_DEGREE_EAST = 'm_180_to_180_degree_east' # From -180° to  180°
+  UNKNOWN                  = 'unknown'
 
 class DbFormat:
 

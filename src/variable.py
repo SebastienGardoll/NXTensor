@@ -139,19 +139,6 @@ class VariableNetcdfFilePathVisitor(VariableVisitor):
   def visit_ComputedVariable(self, variable):
     pass
 
-
-"""
-import logging
-logger = logging.getLogger()
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(levelname)-8s %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
-
-from variable import bootstrap_era5_variables
-bootstrap_era5_variables('/home/sgardoll/cyclone/extraction_config')
-"""
 def bootstrap_era5_variables(variable_parent_dir_path):
   era5_single_level_variables = ['msl', 'tcwv','u10', 'v10']
   time_resolution = TimeResolution.HOUR
@@ -180,7 +167,7 @@ def bootstrap_era5_variables(variable_parent_dir_path):
     lat_cmdata[CoordinatePropertyKey.NETCDF_ATTR_NAME] = 'latitude'
 
     lon_cmdata = cmdata[CoordinateKey.LON]
-    lon_cmdata[CoordinatePropertyKey.FORMAT] = CoordinateFormat.AMERICAN_DEGREE_EAST
+    lon_cmdata[CoordinatePropertyKey.FORMAT] = CoordinateFormat.ZERO_TO_360_DEGREE_EAST
     lon_cmdata[CoordinatePropertyKey.RESOLUTION] = 0.25
     lon_cmdata[CoordinatePropertyKey.NB_DECIMAL] = 2
     lon_cmdata[CoordinatePropertyKey.NETCDF_ATTR_NAME] = 'longitude'
@@ -217,18 +204,6 @@ def test_load(variable_parent_dir_path):
     var = Variable.load(path.join(variable_parent_dir_path, Variable.generate_filename(str_id)))
     print(var)
 
-"""
-import logging
-logger = logging.getLogger()
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(levelname)-8s %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
-
-from variable import create_computed_variables
-create_computed_variables('/home/sgardoll/cyclone/extraction_config')
-"""
 def create_computed_variables(variable_parent_dir_path):
   variable = ComputedVariable()
   variable.str_id = 'wsl'
@@ -240,3 +215,20 @@ def create_computed_variables(variable_parent_dir_path):
   variable.get_variables()
   variable_file_path = path.join(variable_parent_dir_path, variable.compute_filename())
   variable.save(variable_file_path)
+
+
+"""
+import logging
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
+from variable import bootstrap_all
+bootstrap_all('/home/sgardoll/cyclone/extraction_config')
+"""
+def bootstrap_all(config_file_parent_dir_path):
+  bootstrap_era5_variables(config_file_parent_dir_path)
+  create_computed_variables(config_file_parent_dir_path)

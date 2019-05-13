@@ -81,15 +81,15 @@ class CoordinateUtils:
     else:
       return range(start, stop, resolution)
 
-  _GENERATOR = {CoordinateFormat.EUROPEAN_DEGREE_EAST: {
-    CoordinateFormat.AMERICAN_DEGREE_EAST: _generate_mapping_degrees_east_european_to_american.__func__}}
+  _GENERATOR = {CoordinateFormat.M_180_TO_180_DEGREE_EAST: {
+    CoordinateFormat.ZERO_TO_360_DEGREE_EAST: _generate_mapping_degrees_east_european_to_american.__func__}}
 
 """
 from coordinate_utils import unit_test
 unit_test()
 """
 def unit_test():
-  mapping = CoordinateUtils.get_convert_mapping(CoordinateFormat.EUROPEAN_DEGREE_EAST,
-                                           CoordinateFormat.AMERICAN_DEGREE_EAST,
+  mapping = CoordinateUtils.get_convert_mapping(CoordinateFormat.M_180_TO_180_DEGREE_EAST,
+                                           CoordinateFormat.ZERO_TO_360_DEGREE_EAST,
                                            0.25 )
   return mapping

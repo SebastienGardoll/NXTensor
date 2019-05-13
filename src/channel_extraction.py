@@ -268,11 +268,10 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 from channel_extraction import unit_test
-unit_test()
+unit_test('/home/sgardoll/cyclone/extraction_config')
 """
-def unit_test():
+def unit_test(config_parent_path):
   from os import path
-  config_parent_path = '/home/sgardoll/cyclone/extraction_config'
-  extraction_config_path = path.join(config_parent_path, '2kb_extraction_config.yml')
+  extraction_config_path = path.join(config_parent_path, '2000_10_extraction_config.yml')
   variable_str_id = 'msl'
   driver = ChannelExtraction(extraction_config_path, variable_str_id)

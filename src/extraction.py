@@ -131,7 +131,7 @@ def bootstrap_cyclone_labels(label_parent_dir):
   filename_postfix = 'dataset.csv'
   db_filename_template = '{str_id}_{display_name}_{filename_postfix}'
   lat_format = CoordinateFormat.INCREASING_DEGREE_NORTH
-  lon_format = CoordinateFormat.EUROPEAN_DEGREE_EAST
+  lon_format = CoordinateFormat.M_180_TO_180_DEGREE_EAST
   db_format = DbFormat.CSV
   db_time_resolution = TimeResolution.HOUR
   db_format_options = {CsvKey.SEPARATOR: ',',
