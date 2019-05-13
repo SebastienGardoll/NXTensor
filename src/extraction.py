@@ -125,20 +125,7 @@ class ClassificationLabel(YamlSerializable):
     return f"{self.__class__.__name__}(str_id={self.str_id}, name={self.display_name}, " \
       f"num_id={self.num_id}, db={self.db_file_path})"
 
-"""
-import logging
-logger = logging.getLogger()
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(levelname)-8s %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
-
-from extraction import bootstrap_cyclone_labels
-bootstrap_cyclone_labels()
-"""
-def bootstrap_cyclone_labels():
-  label_parent_dir = '/home/sgardoll/cyclone/extraction_config'
+def bootstrap_cyclone_labels(label_parent_dir):
   dataset = ['2ka', '2kb', '2000', '2000_10', 'all']
   data_parent_dir = '/data/sgardoll/cyclone_data/dataset'
   filename_postfix = 'dataset.csv'
@@ -183,20 +170,7 @@ def bootstrap_cyclone_labels():
     create_label(str_id, 1.0, 'cyclone')
     create_label(str_id, 0.0, 'no_cyclone')
 
-"""
-import logging
-logger = logging.getLogger()
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(levelname)-8s %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
-
-from extraction import bootstrap_cyclone_extraction_configs
-bootstrap_cyclone_extraction_configs()
-"""
-def bootstrap_cyclone_extraction_configs():
-  config_parent_dir = '/home/sgardoll/cyclone/extraction_config'
+def bootstrap_cyclone_extraction_configs(config_parent_dir):
   output_parent_dir = '/data/sgardoll/cyclone_data'
   dataset = ['2ka', '2kb', '2000', '2000_10', 'all']
   era5_variables = ['msl', 'tcwv','u10', 'v10', 'ta200', 'ta500', 'u850', 'v850']
@@ -243,13 +217,28 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 from extraction import test_load
-test_load()
+test_load('/home/sgardoll/cyclone/extraction_config')
 """
-def test_load():
-  config_parent_dir = '/home/sgardoll/cyclone/extraction_config'
+def test_load(config_parent_dir):
   dataset = ['2ka', '2kb', '2000', '2000_10', 'all']
   for str_id in dataset:
     filename = ExtractionConfig.generate_filename(str_id)
     conf = ExtractionConfig.load(path.join(config_parent_dir, filename))
     conf.get_variables()
     conf.get_labels()
+
+"""
+import logging
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
+from extraction import bootstrap_all
+bootstrap_all('/home/sgardoll/cyclone/extraction_config')
+"""
+def bootstrap_all(config_file_parent_dir_path):
+  bootstrap_cyclone_labels(config_file_parent_dir_path)
+  bootstrap_cyclone_extraction_configs(config_file_parent_dir_path)
