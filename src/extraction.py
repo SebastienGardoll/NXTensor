@@ -180,7 +180,7 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir):
   tensor_dir_path = path.join(output_parent_dir, 'tensor')
   channel_dir_path = path.join(output_parent_dir, 'channel')
   tmp_dir_path = path.join(output_parent_dir, 'tmp')
-  batch_size = 12
+  nb_block   = 12
   nb_process = 4
 
   variable_file_paths = list()
@@ -201,7 +201,7 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir):
     extract_config.tensor_dir_path = tensor_dir_path
     extract_config.channel_dir_path = channel_dir_path
     extract_config.tmp_dir_path = tmp_dir_path
-    extract_config.batch_size = batch_size
+    extract_config.nb_block = nb_block
     extract_config.nb_process = nb_process
 
     file_path = path.join(config_parent_dir, ExtractionConfig.generate_filename(str_id))
