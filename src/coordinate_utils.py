@@ -54,6 +54,12 @@ class CoordinateUtils:
       raise Exception(msg)
 
   @staticmethod
+  def _generate_mapping_degrees_north_inc_to_dec(resolution):
+    values = CoordinateUtils._generate_float_range(-90, 90, resolution)
+    keys   = values
+    return dict(zip(keys, values))
+
+  @staticmethod
   def _generate_mapping_degrees_east_m_180_to_0(resolution):
     dest_values = CoordinateUtils._generate_float_range(0, 360, resolution)
     keys_1 = CoordinateUtils._generate_float_range(0, (180+resolution), resolution)
@@ -81,8 +87,12 @@ class CoordinateUtils:
     else:
       return range(start, stop, resolution)
 
-  _GENERATOR = {CoordinateFormat.M_180_TO_180_DEGREE_EAST: {
-    CoordinateFormat.ZERO_TO_360_DEGREE_EAST: _generate_mapping_degrees_east_m_180_to_0.__func__}}
+  _GENERATOR = \
+    {CoordinateFormat.M_180_TO_180_DEGREE_EAST: {
+       CoordinateFormat.ZERO_TO_360_DEGREE_EAST: _generate_mapping_degrees_east_m_180_to_0.__func__},
+     CoordinateFormat.INCREASING_DEGREE_NORTH: {
+       CoordinateFormat.DECREASING_DEGREE_NORTH: _generate_mapping_degrees_north_inc_to_dec.__func__}
+    }
 
 """
 from coordinate_utils import unit_test
