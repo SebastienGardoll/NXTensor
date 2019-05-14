@@ -22,11 +22,17 @@ class DataWrapper(YamlSerializable):
   def __init__(self, str_id, data, metadata):
     super().__init__(str_id)
 
-    self.data_file_path     = None
-    self.metadata_file_path = None
-    self.shape              = None
-    self._data              = None
-    self._metadata          = None
+    self.data_file_path       = None
+    self.metadata_file_path   = None
+    self.shape                = None
+    self.metadata_separator   = ','
+    self.metadata_na_symbol   = ''
+    self.metadata_encoding    = 'utf8'
+    self.metadata_line_term   = '\n'
+    self.metadata_header      = True
+    self.metadata_index_label = 'id'
+    self._data                = None
+    self._metadata            = None
 
     self.set_data(data)
     self.set_metadata(metadata)
@@ -121,7 +127,13 @@ class DataWrapper(YamlSerializable):
     self.set_data(data)
     self.set_metadata(metadata)
     self._save_data()
-    self.get_metadata().save(self.metadata_file_path)
+    self.get_metadata().to_csv(self.metadata_file_path,
+                            sep=self.metadata_separator,
+                            na_rep=self.metadata_na_symbol,
+                            header=True, index=True,
+                            index_label=self.metadata_index_label,
+                            encoding=self.metadata_encoding,
+                            line_terminator=self.metadata_line_term)
 
   def _save_data(self):
     try:
