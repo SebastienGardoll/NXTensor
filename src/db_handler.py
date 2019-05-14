@@ -59,9 +59,9 @@ class DbHandler:
         line_terminator    = db_format_options[CsvKey.LINE_TERMINATOR]
 
         dataframe = pd.read_csv(filepath_or_buffer=db_file, sep=separator,
-                              header=header_line_number, na_values=na_symbol,
-                              lineterminator=line_terminator,
-                              encoding=encoding)
+                                header=header_line_number, na_values=na_symbol,
+                                lineterminator=line_terminator,
+                                encoding=encoding)
       except KeyError:
         msg = 'missing csv option(s)'
         logging.error(msg)
