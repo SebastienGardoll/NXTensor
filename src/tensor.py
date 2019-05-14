@@ -24,9 +24,7 @@ class Tensor(DataWrapper):
 
     # Array that maps index of channel in data to their str_id.
     if channel_id_to_index is not None:
-      self.index_to_channel = list()
-      for k, v in channel_id_to_index.items():
-        self.index_to_channel[v] = k
+      self.index_to_channel = dict(zip(channel_id_to_index.values(), channel_id_to_index.keys()))
     else:
       self.index_to_channel = None
 
