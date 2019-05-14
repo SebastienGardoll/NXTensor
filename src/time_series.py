@@ -57,7 +57,7 @@ class XarrayTimeSeries:
 
     if isinstance(variable, MultiLevelVariable) or \
        isinstance(variable, SingleLevelVariable):
-      logging.debug(f"starting the extraction of the variable '{variable.str_id}'")
+      logging.debug(f"starting the extraction of the single or multi level variable '{variable.str_id}'")
       result = self._extract_square_region(variable, time_dict, lat, lon,
                                            half_lat_frame, half_lon_frame)
     else:
@@ -80,11 +80,11 @@ class XarrayTimeSeries:
     logging.debug(f"extracting subregion {time_dict}, {lat}, {lon} for variable '{variable.str_id}'")
 
     lat_attribute_name = variable.coordinate_metadata[CoordinateKey.LAT][CoordinatePropertyKey.NETCDF_ATTR_NAME]
+    lat_resolution = variable.coordinate_metadata[CoordinateKey.LAT][CoordinatePropertyKey.RESOLUTION]
+    lon_resolution = variable.coordinate_metadata[CoordinateKey.LON][CoordinatePropertyKey.RESOLUTION]
 
     if has_to_round:
-      lat_resolution = variable.coordinate_metadata[CoordinateKey.LAT][CoordinatePropertyKey.RESOLUTION]
       lat_nb_decimal = variable.coordinate_metadata[CoordinateKey.LAT][CoordinatePropertyKey.NB_DECIMAL]
-      lon_resolution = variable.coordinate_metadata[CoordinateKey.LON][CoordinatePropertyKey.RESOLUTION]
       lon_nb_decimal = variable.coordinate_metadata[CoordinateKey.LON][CoordinatePropertyKey.NB_DECIMAL]
       lat = CoordinateUtils.round_nearest(lat, lat_resolution, lat_nb_decimal)
       lon = CoordinateUtils.round_nearest(lon, lon_resolution, lon_nb_decimal)
