@@ -11,6 +11,7 @@ import numpy as np
 import logging
 from coordinate_utils import CoordinateUtils
 from enum_utils import DbFormat, CsvKey, TimeKey, CoordinateKey
+import time_utils as tu
 
 class DbHandler:
 
@@ -24,11 +25,12 @@ class DbHandler:
     lat = self.dataframe.at[index, self.label.db_meta_data_mapping[CoordinateKey.LAT]]
     lon = self.dataframe.at[index, self.label.db_meta_data_mapping[CoordinateKey.LON]]
     time_resolution_degree = TimeKey.KEYS.index(self.label.db_time_resolution)
-    time_dict = dict()
+    time_list = list()
     for time_post in range(0, time_resolution_degree + 1):
       key = TimeKey.KEYS[time_post]
       data = self.dataframe.at[index, self.label.db_meta_data_mapping[key]]
-      time_dict[key] = data
+      time_list.append(data)
+    time_dict = tu.from_time_list_to_dict(time_list)
     return (time_dict, lat, lon)
 
   @staticmethod
