@@ -50,3 +50,8 @@ def from_time_list_to_dict(time_list):
     result['microsecond'] = time_list[6]
 
   return result
+
+def remove_2d_time_dict(time_dict):
+  time_dict.pop('month2d', None)
+  time_dict.pop('hour2d', None)
+  return time_dict
