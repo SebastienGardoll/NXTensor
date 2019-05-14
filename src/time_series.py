@@ -79,25 +79,26 @@ class XarrayTimeSeries:
                              half_lat_frame, half_lon_frame, has_to_round=True):
     logging.debug(f"extracting subregion {time_dict}, {lat}, {lon} for variable '{variable.str_id}'")
 
+    lat_attribute_name = variable.coordinate_metadata[CoordinateKey.LAT][CoordinatePropertyKey.NETCDF_ATTR_NAME]
+
     if has_to_round:
       lat_resolution = variable.coordinate_metadata[CoordinateKey.LAT][CoordinatePropertyKey.RESOLUTION]
       lat_nb_decimal = variable.coordinate_metadata[CoordinateKey.LAT][CoordinatePropertyKey.NB_DECIMAL]
       lon_resolution = variable.coordinate_metadata[CoordinateKey.LON][CoordinatePropertyKey.RESOLUTION]
       lon_nb_decimal = variable.coordinate_metadata[CoordinateKey.LON][CoordinatePropertyKey.NB_DECIMAL]
-
       lat = CoordinateUtils.round_nearest(lat, lat_resolution, lat_nb_decimal)
       lon = CoordinateUtils.round_nearest(lon, lon_resolution, lon_nb_decimal)
 
     # Minus LAT_RESOLUTION because the upper bound in slice is included.
-    lat_min  = (lat - half_lat_frame + variable.lat_resolution)
+    lat_min  = (lat - half_lat_frame + lat_resolution)
     lat_max  = (lat + half_lat_frame)
     # Minus LON_RESOLUTION because the upper bound in slice is included.
     lon_min  = (lon - half_lon_frame)
-    lon_max  = (lon + half_lon_frame - variable.lon_resolution)
+    lon_max  = (lon + half_lon_frame - lon_resolution)
 
     formatted_date = variable.date_template.format(**time_dict)
 
-    lat_series = self.dataset[variable.lat_attribute_name]
+    lat_series = self.dataset[lat_attribute_name]
 
     if lat_series[0] > lat_series[-1]:
         logging.debug('switching lat min and max')
