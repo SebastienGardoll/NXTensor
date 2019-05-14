@@ -10,6 +10,7 @@ from yaml_class import YamlSerializable
 import logging
 import xarray as xr
 import os.path as path
+import os
 from metadata_wrapper import MetadataWrapper
 import numpy as np
 from abc import abstractmethod
@@ -125,7 +126,8 @@ class DataWrapper(YamlSerializable):
   def _save_data(self):
     try:
       logging.debug(f"saving data to {self.data_file_path}")
-      self.data.to_netcdf(self.data_file_path, mode = 'w')
+      os.makedirs(path.dirname(self.data_file_path), exist_ok=True)
+      self._data.to_netcdf(self.data_file_path, mode = 'w')
     except Exception as e:
       logging.error(f"cannot save the data to '{self.data_file_path}': {str(e)}")
       raise e
