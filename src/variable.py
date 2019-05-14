@@ -155,7 +155,7 @@ def bootstrap_era5_variables(variable_parent_dir_path):
     variable.netcdf_attribute_name = attribute_name
     variable.time_resolution = time_resolution
     variable.netcdf_period_resolution = netcdf_period_resolution
-    variable.date_template = '{year}-{month2d}-{day}T{hour}'
+    variable.date_template = '{year}-{month2d}-{day}T{hour2d}'
     variable.netcdf_path_template = netcdf_path_template
 
     cmdata = variable.coordinate_metadata

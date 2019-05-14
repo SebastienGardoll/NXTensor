@@ -38,6 +38,7 @@ def from_time_list_to_dict(time_list):
 
   if list_len >= 4:
     result['hour']        = time_list[3]
+    result['hour2d']      = f"{time_list[3]:02d}"
 
   if list_len >= 5:
     result['minute']      = time_list[4]
