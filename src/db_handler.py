@@ -103,7 +103,7 @@ class DbHandler:
                            resolution, nb_decimal):
     column_name = self.label.db_meta_data_mapping[coordinate_key]
     logging.info(f"reformat column '{column_name}' from format "
-                 f"'from_format' to 'to_format' in the db of label"
+                 f"'{from_format}' to '{to_format}' in the db of label"
                  f" '{self.label.str_id}'")
     coordinate_mapping = CoordinateUtils.get_convert_mapping(from_format,
                                                              to_format,
