@@ -245,8 +245,10 @@ class ChannelExtraction:
       channel.metadata_file_path = None
       channel.str_id             = self.extracted_variable.str_id
       return channel
-    except:
+    except Exception as e:
       channel.close()
+      logging.fatal(str(e))
+      raise e
 
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
@@ -272,6 +274,7 @@ class ChannelExtraction:
     # Merge the blocks and build a tensor object composed of 1 channel.
     # TODO: separated method so as to implement failover, one day...
     channel = self._concat_blocks(block_file_paths)
+    return channel
 
     # Compute the statistics of the channel.
     # TODO: separated method so as to implement failover, one day...
@@ -299,3 +302,6 @@ def unit_test(config_parent_path):
   variable_str_id = 'msl'
   driver = ChannelExtraction(extraction_config_path, variable_str_id)
   driver.extract()
+
+# DEBUG
+unit_test('/home/sgardoll/cyclone/extraction_config')
