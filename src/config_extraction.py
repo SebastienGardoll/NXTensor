@@ -25,7 +25,7 @@ class ExtractionConfig(YamlSerializable):
   def generate_filename(str_id):
     return f"{str_id}_{ExtractionConfig.FILE_NAME_POSTFIX}"
 
-  def __init__(self, str_id=None):
+  def __init__(self, str_id):
     super().__init__(str_id)
 
     # x and y size of an image of the tensor.
@@ -91,19 +91,21 @@ class ClassificationLabel(YamlSerializable):
   FILE_NAME_POSTFIX = 'label.yml'
 
   def compute_filename(self):
-    return ClassificationLabel.generate_filename(self.str_id, self.display_name)
+    return ClassificationLabel.generate_filename(self.dataset_id, self.display_name)
 
   @staticmethod
-  def generate_filename(str_id, name):
-    return f"{str_id}_{name}_{ClassificationLabel.FILE_NAME_POSTFIX}"
+  def generate_filename(dataset_id, display_name):
+    return f"{dataset_id}_{display_name}_{ClassificationLabel.FILE_NAME_POSTFIX}"
 
-  def __init__(self, str_id=None):
-    super().__init__(str_id)
+  def __init__(self, dataset_id, display_name):
+    super().__init__(f"{dataset_id}_{display_name}")
 
     # Numerical id that encode the label.
     self.num_id               = None
+    # The dataset identifier.
+    self.dataset_id           = dataset_id
     # The name of the label to be displayed to the user.
-    self.display_name         = None
+    self.display_name         = display_name
     # The path to the db that contains the information of the labels.
     self.db_file_path         = None
     # The format of the data base of labels (CSV, etc.).
@@ -122,14 +124,14 @@ class ClassificationLabel(YamlSerializable):
     self.coordinate_format = {CoordinateKey.LAT: CoordinateFormat.UNKNOWN,
                               CoordinateKey.LON: CoordinateFormat.UNKNOWN}
   def __repr__(self):
-    return f"{self.__class__.__name__}(str_id={self.str_id}, name={self.display_name}, " \
+    return f"{self.__class__.__name__}(str_id={self.str_id}, dataset_id={self.dataset_id}, name={self.display_name}, " \
       f"num_id={self.num_id}, db={self.db_file_path})"
 
 def bootstrap_cyclone_labels(label_parent_dir):
-  dataset = ['2ka', '2kb', '2000', '2000_10', 'all']
+  dataset_ids = ['2ka', '2kb', '2000', '2000_10', 'all']
   data_parent_dir = '/data/sgardoll/cyclone_data/dataset'
   filename_postfix = 'dataset.csv'
-  db_filename_template = '{str_id}_{display_name}_{filename_postfix}'
+  db_filename_template = '{dataset_id}_{display_name}_{filename_postfix}'
   lat_format = CoordinateFormat.INCREASING_DEGREE_NORTH
   lon_format = CoordinateFormat.M_180_TO_180_DEGREE_EAST
   db_format = DbFormat.CSV
@@ -147,32 +149,30 @@ def bootstrap_cyclone_labels(label_parent_dir):
                           CoordinateKey.LAT: 'lat',
                           CoordinateKey.LON: 'lon'}
 
-  def create_label(str_id, num_id, display_name):
-    label = ClassificationLabel()
-    label.str_id = str_id
+  def create_label(dataset_id, num_id, display_name):
+    label = ClassificationLabel(dataset_id, display_name)
     label.num_id = num_id
     label.db_file_path = ''
-    label.display_name = display_name
     label.db_format = db_format
     label.db_format_options = db_format_options
     label.db_meta_data_mapping = db_meta_data_mapping
     label.db_time_resolution = db_time_resolution
     label.coordinate_format[CoordinateKey.LAT] = lat_format
     label.coordinate_format[CoordinateKey.LON] = lon_format
-    db_filename = db_filename_template.format(str_id=str_id,
+    db_filename = db_filename_template.format(dataset_id=dataset_id,
                                               display_name=display_name,
                                               filename_postfix=filename_postfix)
     label.db_file_path = path.join(data_parent_dir, db_filename)
     label_file_path = path.join(label_parent_dir, label.compute_filename())
     label.save(label_file_path)
 
-  for str_id in dataset:
-    create_label(str_id, 1.0, 'cyclone')
-    create_label(str_id, 0.0, 'no_cyclone')
+  for dataset_id in dataset_ids:
+    create_label(dataset_id, 1.0, 'cyclone')
+    create_label(dataset_id, 0.0, 'no_cyclone')
 
 def bootstrap_cyclone_extraction_configs(config_parent_dir):
   output_parent_dir = '/data/sgardoll/cyclone_data'
-  dataset = ['2ka', '2kb', '2000', '2000_10', 'all']
+  dataset_ids = ['2ka', '2kb', '2000', '2000_10', 'all']
   era5_variables = ['msl', 'tcwv','u10', 'v10', 'ta200', 'ta500', 'u850', 'v850']
   x_size = 32
   y_size = 32
@@ -188,11 +188,10 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir):
     var_filename = Variable.generate_filename(var_str_id)
     variable_file_paths.append(path.join(config_parent_dir, var_filename))
 
-  for str_id in dataset:
-    labels = [f"{config_parent_dir}/{ClassificationLabel.generate_filename(str_id, 'cyclone')}",
-              f"{config_parent_dir}/{ClassificationLabel.generate_filename(str_id, 'no_cyclone')}"]
-    extract_config = ExtractionConfig()
-    extract_config.str_id = str_id
+  for dataset_id in dataset_ids:
+    labels = [f"{config_parent_dir}/{ClassificationLabel.generate_filename(dataset_id, 'cyclone')}",
+              f"{config_parent_dir}/{ClassificationLabel.generate_filename(dataset_id, 'no_cyclone')}"]
+    extract_config = ExtractionConfig(dataset_id)
     extract_config.x_size = x_size
     extract_config.y_size = y_size
     extract_config.variable_file_paths = variable_file_paths
@@ -204,7 +203,7 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir):
     extract_config.nb_block = nb_block
     extract_config.nb_process = nb_process
 
-    file_path = path.join(config_parent_dir, ExtractionConfig.generate_filename(str_id))
+    file_path = path.join(config_parent_dir, ExtractionConfig.generate_filename(dataset_id))
     extract_config.save(file_path)
 
 """
