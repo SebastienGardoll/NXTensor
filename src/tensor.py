@@ -80,10 +80,10 @@ class Tensor(DataWrapper):
 
     if nb_self_dim == nb_other_dim:
       if nb_self_dim == 3:
-        dim_name   = TensorKey.CHANNEL
+        dim_name = 'dim_0'
       else:
         if nb_self_dim == 4:
-          dim_name = TensorKey.IMG
+          dim_name = TensorKey.IMG # TODO: to be tested.
         else:
           msg = f"number of dimension unsupported: {nb_self_dim}"
           logging.error(msg)
