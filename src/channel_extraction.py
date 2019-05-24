@@ -226,19 +226,22 @@ class ChannelExtraction:
     return (block_yaml_filename, block_yaml_file_path)
 
   def _concat_blocks(self, block_yaml_file_paths):
+    channel = None
     try:
       # Bootstrap the concatenation of the blocks.
       index = 0
       channel = Tensor.load(block_yaml_file_paths[index])
       index = index + 1
 
+      current_block = None
       while(index < len(block_yaml_file_paths)):
         try:
           current_block = Tensor.load(block_yaml_file_paths[index])
           channel.append(current_block)
           index = index + 1
         finally:
-          current_block.close()
+          if not current_block is None:
+            current_block.close()
 
       # Reset channel data.
       channel.data_file_path     = None
@@ -246,7 +249,8 @@ class ChannelExtraction:
       channel.str_id             = self.extracted_variable.str_id
       return channel
     except Exception as e:
-      channel.close()
+      if not channel is None:
+        channel.close()
       logging.fatal(str(e))
       raise e
 
