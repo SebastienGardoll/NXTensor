@@ -163,7 +163,7 @@ class DataWrapper(YamlSerializable):
     logging.info(f"loading metadata from {yaml_file_path}")
     instance = YamlSerializable.load(yaml_file_path)
     data = DataWrapper._load_data(instance.data_file_path)
-    metadata = MetadataWrapper(instance.metadata_file_path)
+    metadata = MetadataWrapper(csv_file_path=instance.metadata_file_path)
     instance.set_data(data)
     instance.set_metadata(metadata)
     return instance
