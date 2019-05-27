@@ -22,15 +22,13 @@ class MetadataWrapper:
 
   def __init__(self, dataframe = None, csv_file_path = None):
     self.csv_file_path = None
-    self._dataframe     = None
+    self._dataframe    = None
 
     if dataframe is not None:
       self.set_dataframe(dataframe)
     else:
       if csv_file_path is not None:
-        dataframe = self._load(csv_file_path)
-        self.csv_file_path = csv_file_path
-        self.set_dataframe(dataframe)
+        self._load(csv_file_path)
       else:
         msg = 'one other parameter is necessary (dataframe or csv_file_path)'
         logging.error(msg)
@@ -70,6 +68,7 @@ class MetadataWrapper:
 
   def save(self, csv_file_path):
     logging.info(f"saving dataframe to '{self.csv_file_path}'")
+    self.csv_file_path = csv_file_path
     self.get_dataframe().to_csv(path_or_buf=csv_file_path,
                      sep = MetadataWrapper.CSV_SEPARATOR,
                      na_rep = MetadataWrapper.CSV_NA_SYMBOLE, header = True,
@@ -77,8 +76,9 @@ class MetadataWrapper:
                      encoding = MetadataWrapper.CSV_ENCODING,
                      line_terminator = MetadataWrapper.CSV_LINE_TERMINATOR)
 
-  def _load(self):
-    logging.info(f"opening dataframe '{self.csv_file_path}'")
+  def _load(self, csv_file_path):
+    logging.info(f"opening dataframe '{csv_file_path}'")
+    self.csv_file_path = csv_file_path
     with open(self.csv_file_path, 'r') as csv_file:
       try:
         dataframe = pd.read_csv(filepath_or_buffer=csv_file,
