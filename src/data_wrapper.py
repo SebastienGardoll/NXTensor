@@ -87,6 +87,10 @@ class DataWrapper(YamlSerializable):
   def close(self):
     try:
       self._data.close()
+    except :
+      pass
+
+    try:
       self._metadata.close()
     except :
       pass
@@ -145,6 +149,7 @@ class DataWrapper(YamlSerializable):
       self._data.to_netcdf(self.data_file_path, mode = 'w')
     except Exception as e:
       logging.error(f"cannot save the data to '{self.data_file_path}': {str(e)}")
+      self.close()
       raise e
 
   @staticmethod
