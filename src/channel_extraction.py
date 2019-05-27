@@ -183,7 +183,10 @@ class ChannelExtraction:
         logging.info(f"storing subregions of label '{label.str_id}' into a DataArray")
         # Store the subregions in a xarray data array.
         data = xr.DataArray(subregion_list[label_index])
-
+        """
+        for item in subregion_list[label_index]:
+          item.close()
+        """
         # Store the location of the subregion in a pandas data frame.
         logging.debug(f"storing locations of label '{label.str_id}' into a DataArray")
         column_names = self._compute_metadata_column_names()
@@ -194,11 +197,13 @@ class ChannelExtraction:
         # channel of a tensor).
         block_yaml_filename, block_yaml_file_path = self._compute_block_names(block_num, label)
         is_channel_last = None
-        channel_block = Tensor(block_yaml_filename,
-                               data, metadata, coordinate_format,
-                               is_channel_last, channel_id_to_index)
-        logging.info(f"saving block '{block_yaml_filename}'")
-        channel_block.save(block_yaml_file_path)
+
+        with Tensor(block_yaml_filename,
+                    data, metadata, coordinate_format,
+                    is_channel_last, channel_id_to_index) as channel_block:
+          logging.info(f"saving block '{block_yaml_filename}'")
+          channel_block.save(block_yaml_file_path)
+
         block_yaml_file_paths.append(block_yaml_file_path)
       label_index = label_index + 1
 
@@ -226,33 +231,21 @@ class ChannelExtraction:
     return (block_yaml_filename, block_yaml_file_path)
 
   def _concat_blocks(self, block_yaml_file_paths):
-    channel = None
-    try:
-      # Bootstrap the concatenation of the blocks.
-      index = 0
-      channel = Tensor.load(block_yaml_file_paths[index])
+    # Bootstrap the concatenation of the blocks.
+    index = 0
+    with Tensor.load(block_yaml_file_paths[index]) as channel:
       index = index + 1
 
-      current_block = None
       while(index < len(block_yaml_file_paths)):
-        try:
-          current_block = Tensor.load(block_yaml_file_paths[index])
+        with Tensor.load(block_yaml_file_paths[index]) as current_block:
           channel.append(current_block)
-          index = index + 1
-        finally:
-          if not current_block is None:
-            current_block.close()
+        index = index + 1
 
       # Reset channel data.
       channel.data_file_path     = None
       channel.metadata_file_path = None
       channel.str_id             = self.extracted_variable.str_id
       return channel
-    except Exception as e:
-      if not channel is None:
-        channel.close()
-      logging.fatal(str(e))
-      raise e
 
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
@@ -277,8 +270,8 @@ class ChannelExtraction:
 
     # Merge the blocks and build a tensor object composed of 1 channel.
     # TODO: separated method so as to implement failover, one day...
-    channel = self._concat_blocks(block_file_paths)
-    return channel
+    with self._concat_blocks(block_file_paths) as channel:
+      return channel
 
     # Compute the statistics of the channel.
     # TODO: separated method so as to implement failover, one day...
