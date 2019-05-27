@@ -97,6 +97,9 @@ class DataWrapper(YamlSerializable):
   def __exit__(self, type, value, traceback):
     self.close()
 
+  def __del__(self):
+    self.close()
+
   def save(self, yaml_file_path):
     logging.info(f"saving data properties to {yaml_file_path}")
 
