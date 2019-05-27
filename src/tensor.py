@@ -170,18 +170,18 @@ def unit_test():
   metadata = None
   coordinate_format = {CoordinateKey.LAT: CoordinateFormat.UNKNOWN,
                        CoordinateKey.LON: CoordinateFormat.UNKNOWN}
-  tensor = Tensor(str_id, data, metadata, coordinate_format, is_channels_last,
-                  channel_to_index)
-  print(tensor)
-  print(tensor.shape)
-  print(tensor.x_size)
-  print(tensor.y_size)
-  print(tensor.nb_channel)
-  print(tensor.nb_img)
-  print(tensor.get_data().shape)
+  with Tensor(str_id, data, metadata, coordinate_format, is_channels_last,
+              channel_to_index) as tensor:
+    print(tensor)
+    print(tensor.shape)
+    print(tensor.x_size)
+    print(tensor.y_size)
+    print(tensor.nb_channel)
+    print(tensor.nb_img)
+    print(tensor.get_data().shape)
 
-  yaml_file_path = '/home/sgardoll/tmp/test.yml'
-  tensor.save(yaml_file_path)
+    yaml_file_path = '/home/sgardoll/tmp/test.yml'
+    tensor.save(yaml_file_path)
 
-  tensor = Tensor.load(yaml_file_path)
-  print(tensor)
+    tensor = Tensor.load(yaml_file_path)
+    print(tensor)
