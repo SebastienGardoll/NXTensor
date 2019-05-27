@@ -12,21 +12,14 @@ from enum_utils import CoordinateKey, CoordinateFormat, TensorKey
 
 class Tensor(DataWrapper):
 
-  def __init__(self, str_id, data, metadata, coordinate_format, is_channels_last,
-               channel_id_to_index):
+  X_LABEL = 'x'
+  Y_LABEL = 'y'
 
+  def __init__(self, str_id, data, metadata, coordinate_format, is_channels_last):
     super().__init__(str_id, data, metadata)
     self.is_channels_last = is_channels_last
     self.coordinate_format = coordinate_format
-
-    # Dictionary that maps channel'str_id to their index in the tensor.
-    self.channel_id_to_index = channel_id_to_index
-
-    # Array that maps index of channel in data to their str_id.
-    if channel_id_to_index is not None:
-      self.index_to_channel = dict(zip(channel_id_to_index.values(), channel_id_to_index.keys()))
-    else:
-      self.index_to_channel = None
+    self.stats_mapping = dict()
 
   # None Proof
   def __init_data_properties(self, shape):
@@ -81,7 +74,7 @@ class Tensor(DataWrapper):
 
     if nb_self_dim == nb_other_dim:
       if nb_self_dim == 3:
-        dim_name = 'dim_0'
+        dim_name = self._data.dims[0]
       else:
         if nb_self_dim == 4:
           dim_name = TensorKey.IMG # TODO: to be tested.
@@ -98,6 +91,7 @@ class Tensor(DataWrapper):
         raise Exception(msg)
 
     super().append(other, dim_name)
+    logging.info(f"new shape is {self.shape}")
 
   # Return a list of instance of Tensor according to the given numpy'style split
   # specifications.
@@ -111,19 +105,26 @@ class Tensor(DataWrapper):
     logging.error(msg)
     raise NotImplementedError(msg)
 
-  def standardize(self, stats_mapping):
-    # Dictionary that maps channel str_id and the path of the statistics file
-    # of the channel.
+  def standardize(self, channel_name=None, mean=None, std=None):
+    if channel_name is None:
+      channel_name = self._data.dims[0]
 
     # if stats_mapping not None => standardize the tensor according to the given mapping
     # else compute std, apply and save it.
-    self.stats_mapping = stats_mapping
+    mean, std = self._inner_standardize(channel_name, mean, std)
 
-    msg = 'Tensor.standardize is not implemented yet'
-    logging.error(msg)
-    raise NotImplementedError(msg)
+    if not channel_name in self.stats_mapping:
+      mapping = {'mean': 0., 'std': 0.}
+      self.stats_mapping[channel_name]= mapping
+    else:
+      mapping = self.stats_mapping[channel_name]
 
-  def _inner_standardize(data_array, mean=None, std=None):
+    mapping[TensorKey.MEAN] = mean
+    mapping[TensorKey.STD]  = std
+
+  def _inner_standardize(self, channel_name, mean=None, std=None):
+    data_array = self.get_data()[channel_name]
+
     if mean is None:
       mean = data_array.mean()
 
