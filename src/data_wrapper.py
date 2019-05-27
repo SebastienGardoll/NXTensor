@@ -39,9 +39,8 @@ class DataWrapper(YamlSerializable):
 
   def append(self, other, dim_name):
     new_data = xr.concat((self.get_data(), other.get_data()), dim=dim_name)
-    new_metadata = self.get_metadata().append(other.get_metadata())
+    self.get_metadata().append(other.get_metadata())
     self.set_data(new_data)
-    self.set_metadata(new_metadata)
 
   @abstractmethod
   def __len__(self):
