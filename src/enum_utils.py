@@ -69,4 +69,5 @@ class CoordinatePropertyKey:
 class TensorKey:
 
   IMG     = 'img'
-  CHANNEL = 'channel'
+  MEAN    = 'mean'
+  STD     = 'std'

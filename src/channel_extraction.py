@@ -173,7 +173,6 @@ class ChannelExtraction:
     for key in CoordinateKey.KEYS:
       coordinate_format[key] = self.extracted_variable.coordinate_metadata[key][CoordinatePropertyKey.FORMAT]
 
-    channel_id_to_index = {self.extracted_variable.str_id: 0}
     label_index = 0
 
     block_yaml_file_paths = list()
@@ -181,8 +180,10 @@ class ChannelExtraction:
     for label in self.extraction_conf.get_labels():
       if subregion_list[label_index]:
         logging.info(f"storing subregions of label '{label.str_id}' into a DataArray")
+        # dims are lost when instantiating a DataArray based on other DataArray objects.
+        dims = (self.extracted_variable.str_id, Tensor.X_LABEL, Tensor.Y_LABEL)
         # Store the subregions in a xarray data array.
-        data = xr.DataArray(subregion_list[label_index])
+        data = xr.DataArray(subregion_list[label_index], dims=dims)
         for item in subregion_list[label_index]:
           item.close()
 
@@ -199,7 +200,7 @@ class ChannelExtraction:
 
         with Tensor(block_yaml_filename,
                     data, metadata, coordinate_format,
-                    is_channel_last, channel_id_to_index) as channel_block:
+                    is_channel_last) as channel_block:
           logging.info(f"saving block '{block_yaml_filename}'")
           channel_block.save(block_yaml_file_path)
 
@@ -246,6 +247,10 @@ class ChannelExtraction:
     channel.str_id             = self.extracted_variable.str_id
     return channel
 
+  def _standardize(self, channel):
+    pass
+
+
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
     # label dbs.
@@ -270,7 +275,7 @@ class ChannelExtraction:
     # Merge the blocks and build a tensor object composed of 1 channel.
     # TODO: separated method so as to implement failover, one day...
     with self._concat_blocks(block_file_paths) as channel:
-      return channel
+      self._standardize(channel)
 
     # Compute the statistics of the channel.
     # TODO: separated method so as to implement failover, one day...
