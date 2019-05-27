@@ -143,6 +143,8 @@ class XarrayTimeSeries:
   def __exit__(self, type, value, traceback):
     self.close()
 
+  def __del__(self):
+    self.close()
 
 class ExtractionComputedVariable(VariableVisitor):
 
