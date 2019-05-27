@@ -72,6 +72,11 @@ class DataWrapper(YamlSerializable):
     return permutations
 
   def set_data(self, data):
+    try:
+      self._data.close() # May not exist or be None, see _save_data method.
+    except:
+      pass
+
     self._data = data
     self.shape = data.shape
 
@@ -87,7 +92,7 @@ class DataWrapper(YamlSerializable):
   def close(self):
     try:
       self._data.close()
-    except :
+    except:
       pass
 
     try:
