@@ -183,10 +183,9 @@ class ChannelExtraction:
         logging.info(f"storing subregions of label '{label.str_id}' into a DataArray")
         # Store the subregions in a xarray data array.
         data = xr.DataArray(subregion_list[label_index])
-        """
         for item in subregion_list[label_index]:
           item.close()
-        """
+
         # Store the location of the subregion in a pandas data frame.
         logging.debug(f"storing locations of label '{label.str_id}' into a DataArray")
         column_names = self._compute_metadata_column_names()
@@ -233,19 +232,19 @@ class ChannelExtraction:
   def _concat_blocks(self, block_yaml_file_paths):
     # Bootstrap the concatenation of the blocks.
     index = 0
-    with Tensor.load(block_yaml_file_paths[index]) as channel:
+    channel = Tensor.load(block_yaml_file_paths[index])
+    index = index + 1
+
+    while(index < len(block_yaml_file_paths)):
+      with Tensor.load(block_yaml_file_paths[index]) as current_block:
+        channel.append(current_block)
       index = index + 1
 
-      while(index < len(block_yaml_file_paths)):
-        with Tensor.load(block_yaml_file_paths[index]) as current_block:
-          channel.append(current_block)
-        index = index + 1
-
-      # Reset channel data.
-      channel.data_file_path     = None
-      channel.metadata_file_path = None
-      channel.str_id             = self.extracted_variable.str_id
-      return channel
+    # Reset channel data.
+    channel.data_file_path     = None
+    channel.metadata_file_path = None
+    channel.str_id             = self.extracted_variable.str_id
+    return channel
 
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
