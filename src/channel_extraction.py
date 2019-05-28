@@ -16,6 +16,7 @@ from time_series import XarrayTimeSeries
 import xarray as xr
 import pandas as pd
 from tensor import Tensor
+import os
 from os import path
 from yaml_class import YamlSerializable
 from metadata_wrapper import MetadataWrapper
@@ -99,7 +100,7 @@ class ChannelExtraction:
     # Create a dictionary where a key is the block numerical id (zero based)
     # and a value is the block.
     # A block is a dictionary where a key is a group_key (time period) and a
-    # value is list of list of indexes of label db (groups). This list is ordered
+    # value is list of list of indexes of label dbs (groups). This list is ordered
     # following the label order (as if the index of the list was a numerical id).
     # the list of indexes may be None.
     for group_key in set_group_keys:
@@ -195,7 +196,6 @@ class ChannelExtraction:
                                           columns=column_names)
         metadata = MetadataWrapper(dataframe=metadata_dataframe)
 
-
         # Create a instance of Tensor (not as a real tensor but a part (block) of a
         # channel of a tensor).
         block_yaml_filename, block_yaml_file_path = self._compute_block_names(block_num, label)
@@ -204,7 +204,7 @@ class ChannelExtraction:
         with Tensor(block_yaml_filename,
                     data, metadata, coordinate_format,
                     is_channel_last) as channel_block:
-          logging.info(f"saving block '{block_yaml_filename}'")
+          logging.info(f"saving block '{block_yaml_filename}' ({os.getpid()})")
           channel_block.save(block_yaml_file_path)
 
         block_yaml_file_paths.append(block_yaml_file_path)
@@ -234,6 +234,8 @@ class ChannelExtraction:
     return (block_yaml_filename, block_yaml_file_path)
 
   def _concat_blocks(self, block_yaml_file_paths):
+    logging.debug(f"concatenating the block: {block_yaml_file_paths}")
+
     # Bootstrap the concatenation of the blocks.
     index = 0
     channel = Tensor.load(block_yaml_file_paths[index])
@@ -263,16 +265,23 @@ class ChannelExtraction:
 
     # Process the list of blocks.
     # Python 3.7 dict preserves order.
-    """DEBUG
+    #"""
     with Pool(processes=self.extraction_conf.nb_process) as pool:
-      block_file_paths = pool.map(func=self._process_block,
-                                       iterable=block_dict.items(), chunksize=1)
-    """
+      tmp_block_file_paths = pool.map(func=self._process_block,
+                                  iterable=block_dict.items(), chunksize=1)
+    # Flatten list of list of path files.
+    block_file_paths = list()
+    for item in tmp_block_file_paths:
+      block_file_paths.extend(item)
+
+    #"""
+
     #DEBUG
+    """
     block_file_paths = list()
     for item in block_dict.items():
       block_file_paths.extend(self._process_block(item))
-
+    """
 
     # Merge the blocks and build a tensor object composed of 1 channel.
     # Separated method so as to implement failover, one day...
@@ -283,7 +292,6 @@ class ChannelExtraction:
       tensor_yml_filename = self._compute_tensor_name()
       tensor_yml_file_path = path.join(self.extraction_conf.tensor_dir_path, tensor_yml_filename)
       channel.save(tensor_yml_file_path)
-
 """
 import logging
 logger = logging.getLogger()
