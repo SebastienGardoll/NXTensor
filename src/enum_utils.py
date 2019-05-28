@@ -59,6 +59,11 @@ class CoordinateKey:
 
   KEYS  = (LAT, LON)
 
+class DBMetadata:
+  LABEL = 'label'
+  LAT   = CoordinateKey.LAT
+  LON   = CoordinateKey.LON
+
 class CoordinatePropertyKey:
 
   FORMAT           = 'format'
