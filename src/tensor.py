@@ -105,13 +105,21 @@ class Tensor(DataWrapper):
     logging.error(msg)
     raise NotImplementedError(msg)
 
+  def is_channel(self):
+    return len(self.shape) == 3
+
   def standardize(self, channel_name=None, mean=None, std=None):
+    if not self.is_channel():
+      msg = 'Tensor.standardize is not implemented yet for tensor (but it is for channel)'
+      logging.error(msg)
+      raise NotImplementedError(msg)
+
     if channel_name is None:
       channel_name = self._data.dims[0]
 
     # if stats_mapping not None => standardize the tensor according to the given mapping
     # else compute std, apply and save it.
-    mean, std = self._inner_standardize(channel_name, mean, std)
+    mean, std = self._inner_standardize(mean, std)
 
     if not channel_name in self.stats_mapping:
       mapping = {'mean': 0., 'std': 0.}
@@ -122,8 +130,8 @@ class Tensor(DataWrapper):
     mapping[TensorKey.MEAN] = mean
     mapping[TensorKey.STD]  = std
 
-  def _inner_standardize(self, channel_name, mean=None, std=None):
-    data_array = self.get_data()[channel_name]
+  def _inner_standardize(self, mean=None, std=None):
+    data_array = self.get_data()
 
     if mean is None:
       mean = data_array.mean()
