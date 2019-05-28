@@ -177,7 +177,7 @@ def bootstrap_cyclone_labels(label_parent_dir):
 def bootstrap_cyclone_extraction_configs(config_parent_dir):
   output_parent_dir = '/data/sgardoll/cyclone_data'
   dataset_ids = ['2ka', '2kb', '2000', '2000_10', 'all']
-  era5_variables = ['msl', 'tcwv','u10', 'v10', 'ta200', 'ta500', 'u850', 'v850']
+  era5_variables = ['msl', 'tcwv','u10', 'v10', 'ta200', 'ta500', 'u850', 'v850', 'wsl10']
   x_size = 32
   y_size = 32
   selection_shape = SelectionShape.SQUARE
