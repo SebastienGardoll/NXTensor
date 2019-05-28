@@ -33,6 +33,7 @@ class DataWrapper(YamlSerializable):
     self.metadata_index_label = 'id'
     self._data                = None
     self._metadata            = None
+    self.dims                 = None
 
     self.set_data(data)
     self.set_metadata(metadata)
@@ -78,6 +79,7 @@ class DataWrapper(YamlSerializable):
 
     self._data = data
     self.shape = data.shape
+    self.dims  = data.dims
 
   def get_data(self):
     return self._data
