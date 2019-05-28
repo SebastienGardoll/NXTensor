@@ -85,7 +85,7 @@ class ChannelExtraction:
 
     # See get_group_mapping_by_period.
     # set_group_keys is the set of tuples that represent a period of time
-    # (like (year, month).
+    # (like (year, month), e.g. (2000, 10)).
     set_group_keys = set()
     for group_mapping in group_mappings:
       set_group_keys.update(group_mapping.keys())
@@ -99,11 +99,13 @@ class ChannelExtraction:
     nb_group_key_per_block = int(len(set_group_keys)/self.extraction_conf.nb_block) + 1
 
     # Create a dictionary where a key is the block numerical id (zero based)
-    # and a value is the block.
+    # and a value is that block.
     # A block is a dictionary where a key is a group_key (time period) and a
     # value is list of list of indexes of label dbs (groups). This list is ordered
     # following the label order (as if the index of the list was a numerical id).
     # the list of indexes may be None.
+    # self.extraction_conf.nb_block gives the maximum number of blocks, so the
+    # number of groups in a block is computed according to this number.
     for group_key in set_group_keys:
       count_group_key_per_block = count_group_key_per_block + 1
       groups = list()
@@ -205,7 +207,7 @@ class ChannelExtraction:
         with Tensor(block_yaml_filename,
                     data, metadata, coordinate_format,
                     is_channel_last) as channel_block:
-          logging.info(f"saving block '{block_yaml_filename}' (PID: {os.getpid()})")
+          logging.info(f"> saving label block '{block_yaml_filename}' (PID: {os.getpid()})")
           channel_block.save(block_yaml_file_path)
 
         block_yaml_file_paths.append(block_yaml_file_path)
@@ -267,10 +269,10 @@ class ChannelExtraction:
     # Process the list of blocks.
     # Python 3.7 dict preserves order.
     #"""
-    logging.info(f"processing {len(block_dict.items())} blocks with {self.extraction_conf.nb_process} processes")
+    logging.info(f"> processing {len(block_dict.items())} blocks with {self.extraction_conf.nb_process} processes")
     with Pool(processes=self.extraction_conf.nb_process) as pool:
       tmp_block_file_paths = pool.map(func=self._process_block,
-                                  iterable=block_dict.items(), chunksize=1)
+                                      iterable=block_dict.items(), chunksize=1)
     # Flatten list of list of path files.
     block_file_paths = list()
     for item in tmp_block_file_paths:
@@ -297,7 +299,7 @@ class ChannelExtraction:
 import logging
 logger = logging.getLogger()
 handler = logging.StreamHandler()
-formatter = logging.Formatter('%(levelname)-8s %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(threadName)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 handler.setFormatter(formatter)
 if logger.hasHandlers():
   logger.handlers.clear()
@@ -313,6 +315,3 @@ def unit_test(config_parent_path):
   variable_str_id = 'msl'
   driver = ChannelExtraction(extraction_config_path, variable_str_id)
   driver.extract()
-
-# DEBUG
-unit_test('/home/sgardoll/cyclone/extraction_config')
