@@ -70,7 +70,7 @@ class Tensor(DataWrapper):
   def append(self, other):
     nb_self_dim  = len(self.shape)
     nb_other_dim = len(other.shape)
-    logging.info(f"append data ({other.shape}) to this data {self.shape}")
+    logging.info(f"append data (shape: {other.shape}) to this data (shape: {self.shape})")
 
     if nb_self_dim == nb_other_dim:
       if nb_self_dim == 3:
