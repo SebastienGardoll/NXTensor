@@ -67,7 +67,7 @@ class MetadataWrapper:
     return self._dataframe
 
   def save(self, csv_file_path):
-    logging.info(f"saving dataframe to '{self.csv_file_path}'")
+    logging.debug(f"saving dataframe to '{csv_file_path}'")
     self.csv_file_path = csv_file_path
     self.get_dataframe().to_csv(path_or_buf=csv_file_path,
                      sep = MetadataWrapper.CSV_SEPARATOR,
@@ -77,7 +77,7 @@ class MetadataWrapper:
                      line_terminator = MetadataWrapper.CSV_LINE_TERMINATOR)
 
   def _load(self, csv_file_path):
-    logging.info(f"opening dataframe '{csv_file_path}'")
+    logging.debug(f"opening dataframe '{csv_file_path}'")
     self.csv_file_path = csv_file_path
     with open(self.csv_file_path, 'r') as csv_file:
       try:
