@@ -111,7 +111,7 @@ class DataWrapper(YamlSerializable):
     self.close()
 
   def save(self, yaml_file_path):
-    logging.info(f"saving data properties to {yaml_file_path}")
+    logging.info(f"saving data to {yaml_file_path}")
 
     if self.get_data() is None:
       msg = "missing data"
@@ -140,13 +140,7 @@ class DataWrapper(YamlSerializable):
     self.set_data(data)
     self.set_metadata(metadata)
     self._save_data()
-    self.get_metadata().to_csv(self.metadata_file_path,
-                            sep=self.metadata_separator,
-                            na_rep=self.metadata_na_symbol,
-                            header=True, index=True,
-                            index_label=self.metadata_index_label,
-                            encoding=self.metadata_encoding,
-                            line_terminator=self.metadata_line_term)
+    self.get_metadata().save(self.metadata_file_path)
 
   def _save_data(self):
     try:
