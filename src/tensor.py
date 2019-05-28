@@ -114,6 +114,8 @@ class Tensor(DataWrapper):
       logging.error(msg)
       raise NotImplementedError(msg)
 
+    logging.debug("standardizating the channel")
+
     if channel_name is None:
       channel_name = self._data.dims[0]
 
