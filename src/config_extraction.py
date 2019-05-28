@@ -41,12 +41,16 @@ class ExtractionConfig(YamlSerializable):
     self.channel_dir_path = None
     self.tmp_dir_path = None
 
-    # The number of process spawn during the extraction.
+    # The maximum number of process spawn during the extraction.
     # Each process treats one block.
     self.nb_process = None
 
-    # The number of block per extraction.
+    # The maximum number of blocks per extraction.
     self.nb_block = None
+
+    # The number of processes and the number of blocks should be the same so
+    # as to speed up the extraction. The less the number of blocks is, the greater
+    # is the size of the blocks.
 
     self._variables = None # Transient for yaml serialization.
     self._labels = None # Transient for yaml serialization.
