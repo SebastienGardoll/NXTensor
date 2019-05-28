@@ -8,7 +8,8 @@ Created on Wed Apr  3 17:27:08 2019
 
 from config_extraction import ExtractionConfig
 from db_handler import DbHandler
-from enum_utils import CoordinateKey, CoordinatePropertyKey, TimeKey, TensorKey
+from enum_utils import CoordinateKey, CoordinatePropertyKey, TimeKey, TensorKey,\
+                       DBMetadata
 import logging
 from multiprocessing import Pool
 import time_utils as tu
@@ -204,7 +205,7 @@ class ChannelExtraction:
         with Tensor(block_yaml_filename,
                     data, metadata, coordinate_format,
                     is_channel_last) as channel_block:
-          logging.info(f"saving block '{block_yaml_filename}' ({os.getpid()})")
+          logging.info(f"saving block '{block_yaml_filename}' (PID: {os.getpid()})")
           channel_block.save(block_yaml_file_path)
 
         block_yaml_file_paths.append(block_yaml_file_path)
@@ -214,7 +215,7 @@ class ChannelExtraction:
 
   def _compute_metadata_column_names(self):
     # Use variable.time_resolution (db may have time_resolution greater then variable's one)
-    result = ['label', 'lat', 'lon']
+    result = [DBMetadata.LABEL, DBMetadata.LAT, DBMetadata.LON]
 
     # Add the date metadata.
     time_resolution_degree = TimeKey.KEYS.index(self.extracted_variable.time_resolution)
@@ -266,6 +267,7 @@ class ChannelExtraction:
     # Process the list of blocks.
     # Python 3.7 dict preserves order.
     #"""
+    logging.info(f"processing {len(block_dict.items())} blocks with {self.extraction_conf.nb_process} processes")
     with Pool(processes=self.extraction_conf.nb_process) as pool:
       tmp_block_file_paths = pool.map(func=self._process_block,
                                   iterable=block_dict.items(), chunksize=1)
@@ -273,7 +275,6 @@ class ChannelExtraction:
     block_file_paths = list()
     for item in tmp_block_file_paths:
       block_file_paths.extend(item)
-
     #"""
 
     #DEBUG
