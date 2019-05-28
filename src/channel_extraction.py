@@ -8,7 +8,7 @@ Created on Wed Apr  3 17:27:08 2019
 
 from config_extraction import ExtractionConfig
 from db_handler import DbHandler
-from enum_utils import CoordinateKey, CoordinatePropertyKey, TimeKey
+from enum_utils import CoordinateKey, CoordinatePropertyKey, TimeKey, TensorKey
 import logging
 from multiprocessing import Pool
 import time_utils as tu
@@ -18,6 +18,7 @@ import pandas as pd
 from tensor import Tensor
 from os import path
 from yaml_class import YamlSerializable
+from metadata_wrapper import MetadataWrapper
 
 class ChannelExtraction:
 
@@ -190,8 +191,10 @@ class ChannelExtraction:
         # Store the location of the subregion in a pandas data frame.
         logging.debug(f"storing locations of label '{label.str_id}' into a DataArray")
         column_names = self._compute_metadata_column_names()
-        metadata = pd.DataFrame(data=location_subregion_list[label_index],
-                                columns=column_names)
+        metadata_dataframe = pd.DataFrame(data=location_subregion_list[label_index],
+                                          columns=column_names)
+        metadata = MetadataWrapper(dataframe=metadata_dataframe)
+
 
         # Create a instance of Tensor (not as a real tensor but a part (block) of a
         # channel of a tensor).
@@ -247,9 +250,8 @@ class ChannelExtraction:
     channel.str_id             = self.extracted_variable.str_id
     return channel
 
-  def _standardize(self, channel):
-    pass
-
+  def _compute_tensor_name(self):
+    return f"{self.extraction_conf.str_id}_{self.extracted_variable.str_id}_{TensorKey.CHANNEL}.{Tensor.YAML_FILENAME_EXT}"
 
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
@@ -273,15 +275,14 @@ class ChannelExtraction:
 
 
     # Merge the blocks and build a tensor object composed of 1 channel.
-    # TODO: separated method so as to implement failover, one day...
+    # Separated method so as to implement failover, one day...
     with self._concat_blocks(block_file_paths) as channel:
-      self._standardize(channel)
-
-    # Compute the statistics of the channel.
-    # TODO: separated method so as to implement failover, one day...
-
-    # Save the channel along side the locations and the statistics.
-    # TODO
+      # Compute the statistics of the channel and standardize it.
+      channel.standardize() # It may be optinally computed via program args.
+      # Save the channel along side the locations and the statistics.
+      tensor_yml_filename = self._compute_tensor_name()
+      tensor_yml_file_path = path.join(self.extraction_conf.tensor_dir_path, tensor_yml_filename)
+      channel.save(tensor_yml_file_path)
 
 """
 import logging

@@ -71,3 +71,4 @@ class TensorKey:
   IMG     = 'img'
   MEAN    = 'mean'
   STD     = 'std'
+  CHANNEL = 'channel'
