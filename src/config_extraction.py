@@ -50,7 +50,7 @@ class ExtractionConfig(YamlSerializable):
 
     # The number of processes and the number of blocks should be the same so
     # as to speed up the extraction. The less the number of blocks is, the greater
-    # is the size of the blocks.
+    # is the size of the blocks and the longer it takes to compute it.
 
     self._variables = None # Transient for yaml serialization.
     self._labels = None # Transient for yaml serialization.
