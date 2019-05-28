@@ -134,10 +134,10 @@ class Tensor(DataWrapper):
     data_array = self.get_data()
 
     if mean is None:
-      mean = data_array.mean()
+      mean = float(data_array.mean())
 
     if std is None:
-      std  = data_array.std()
+      std  = float(data_array.std())
 
     data_array -= mean
     data_array /= std
