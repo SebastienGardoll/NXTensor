@@ -9,6 +9,7 @@ Created on Fri Apr 12 10:23:54 2019
 import pandas as pd
 import numpy as np
 import logging
+from enum_utils import DBMetadata
 
 class MetadataWrapper:
 
@@ -37,6 +38,7 @@ class MetadataWrapper:
   def append(self, other):
     new_dataframe = self.get_dataframe().append(other=other.get_dataframe(),
                                                 ignore_index = True)
+    new_dataframe.reset_index(drop=True, inplace = True)
     self.set_dataframe(new_dataframe)
 
   def __len__(self):
@@ -68,11 +70,12 @@ class MetadataWrapper:
 
   def save(self, csv_file_path):
     logging.debug(f"saving dataframe to '{csv_file_path}'")
+    dataframe = self.get_dataframe()
     self.csv_file_path = csv_file_path
-    self.get_dataframe().to_csv(path_or_buf=csv_file_path,
+    dataframe.to_csv(path_or_buf=csv_file_path,
                      sep = MetadataWrapper.CSV_SEPARATOR,
                      na_rep = MetadataWrapper.CSV_NA_SYMBOLE, header = True,
-                     index = True, index_label='index',
+                     index = False,
                      encoding = MetadataWrapper.CSV_ENCODING,
                      line_terminator = MetadataWrapper.CSV_LINE_TERMINATOR)
 
@@ -82,11 +85,11 @@ class MetadataWrapper:
     with open(self.csv_file_path, 'r') as csv_file:
       try:
         dataframe = pd.read_csv(filepath_or_buffer=csv_file,
-                               sep=MetadataWrapper.CSV_SEPARATOR,
-                               header=MetadataWrapper.CSV_HEADER_LINE_NUMBER,
-                               na_values=MetadataWrapper.CSV_NA_SYMBOLE,
-                               lineterminator=MetadataWrapper.CSV_LINE_TERMINATOR,
-                               encoding=MetadataWrapper.CSV_ENCODING)
+                                sep=MetadataWrapper.CSV_SEPARATOR,
+                                header=MetadataWrapper.CSV_HEADER_LINE_NUMBER,
+                                na_values=MetadataWrapper.CSV_NA_SYMBOLE,
+                                lineterminator=MetadataWrapper.CSV_LINE_TERMINATOR,
+                                encoding=MetadataWrapper.CSV_ENCODING)
         self.set_dataframe(dataframe)
       except:
         msg = f"error while loading dataframe from {self.csv_file_path}"
