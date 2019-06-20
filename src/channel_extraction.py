@@ -128,7 +128,7 @@ class ChannelExtraction:
 
   def _process_group_key(self, group_key, groups, subregion_list,
                          location_subregion_list):
-    logging.info(f"processing group_key '{group_key}'")
+    logging.info(f"processing group_key '{group_key}' (PID: {os.getpid()})")
     ts_time_dict = tu.from_time_list_to_dict(group_key)
     with XarrayTimeSeries(self.extracted_variable, ts_time_dict) as ts:
       # Remember that groups is a list ordered following the order of the
@@ -160,7 +160,7 @@ class ChannelExtraction:
   def _process_block(self, block_item):
     block_num, block = block_item
 
-    logging.info(f"processing block num {block_num}")
+    logging.info(f"processing block num {block_num} (PID: {os.getpid()})")
 
     # Allocate the buffers.
     subregion_list = list()
@@ -187,7 +187,7 @@ class ChannelExtraction:
 
     for label in self.extraction_conf.get_labels():
       if subregion_list[label_index]:
-        logging.info(f"storing subregions of label '{label.str_id}' into a DataArray")
+        logging.info(f"storing subregions of label '{label.str_id}' into a DataArray (PID: {os.getpid()})")
         # dims are lost when instantiating a DataArray based on other DataArray objects.
         dims = (self.extracted_variable.str_id, Tensor.X_LABEL, Tensor.Y_LABEL)
         # Store the subregions in a xarray data array.
@@ -302,7 +302,7 @@ class ChannelExtraction:
 import logging
 logger = logging.getLogger()
 handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(threadName)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - : %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 handler.setFormatter(formatter)
 if logger.hasHandlers():
   logger.handlers.clear()
@@ -310,14 +310,10 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 from channel_extraction import unit_test
-unit_test('/home/sgardoll/cyclone/extraction_config')
+unit_test('/home/sgardoll/cyclone/extraction_config', 'msl')
 """
-def unit_test(config_parent_path):
+def unit_test(config_parent_path, variable_str_id):
   from os import path
   extraction_config_path = path.join(config_parent_path, '2000_10_extraction_config.yml')
-  variable_str_id = 'msl'
   driver = ChannelExtraction(extraction_config_path, variable_str_id)
   driver.extract()
-
-# DEBUG
-unit_test('/home/sgardoll/cyclone/extraction_config')
