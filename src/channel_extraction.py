@@ -128,6 +128,7 @@ class ChannelExtraction:
 
   def _process_group_key(self, group_key, groups, subregion_list,
                          location_subregion_list):
+    logging.info(f"processing group_key '{group_key}'")
     ts_time_dict = tu.from_time_list_to_dict(group_key)
     with XarrayTimeSeries(self.extracted_variable, ts_time_dict) as ts:
       # Remember that groups is a list ordered following the order of the
@@ -158,6 +159,8 @@ class ChannelExtraction:
 
   def _process_block(self, block_item):
     block_num, block = block_item
+
+    logging.info(f"processing block num {block_num}")
 
     # Allocate the buffers.
     subregion_list = list()
@@ -237,7 +240,7 @@ class ChannelExtraction:
     return (block_yaml_filename, block_yaml_file_path)
 
   def _concat_blocks(self, block_yaml_file_paths):
-    logging.debug(f"concatenating the block: {block_yaml_file_paths}")
+    logging.info(f"concatenating the block: {block_yaml_file_paths}")
 
     # Bootstrap the concatenation of the blocks.
     index = 0
