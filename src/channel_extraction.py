@@ -315,7 +315,7 @@ unit_test('/home/sgardoll/cyclone/extraction_config')
 def unit_test(config_parent_path):
   from os import path
   extraction_config_path = path.join(config_parent_path, '2000_10_extraction_config.yml')
-  variable_str_id = 'wsl10'
+  variable_str_id = 'msl'
   driver = ChannelExtraction(extraction_config_path, variable_str_id)
   driver.extract()
 

@@ -20,6 +20,24 @@ class Variable(YamlSerializable, ABC):
   def __init__(self, str_id=None):
     super().__init__(str_id)
 
+    self.netcdf_period_resolution = None # Period covered by the netcdf file.
+
+    self.time_resolution       = None  # Resolution of the time in the netcdf file.
+    self.date_template         = None
+
+    self.coordinate_metadata = dict()
+    self.coordinate_metadata[CoordinateKey.LAT] =\
+      {CoordinatePropertyKey.FORMAT    : CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.RESOLUTION: CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.NB_DECIMAL: CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.NETCDF_ATTR_NAME: None}
+
+    self.coordinate_metadata[CoordinateKey.LON] = \
+      {CoordinatePropertyKey.FORMAT    : CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.RESOLUTION: CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.NB_DECIMAL: CoordinateFormat.UNKNOWN,
+       CoordinatePropertyKey.NETCDF_ATTR_NAME: None}
+
   def compute_filename(self):
     return Variable.generate_filename(self.str_id)
 
@@ -43,23 +61,6 @@ class SingleLevelVariable(Variable):
     super().__init__(str_id)
     self.netcdf_attribute_name    = None
     self.netcdf_path_template     = None
-    self.netcdf_period_resolution = None # Period covered by the netcdf file.
-
-    self.time_resolution       = None  # Resolution of the time in the netcdf file.
-    self.date_template         = None
-
-    self.coordinate_metadata = dict()
-    self.coordinate_metadata[CoordinateKey.LAT] =\
-      {CoordinatePropertyKey.FORMAT    : CoordinateFormat.UNKNOWN,
-       CoordinatePropertyKey.RESOLUTION: CoordinateFormat.UNKNOWN,
-       CoordinatePropertyKey.NB_DECIMAL: CoordinateFormat.UNKNOWN,
-       CoordinatePropertyKey.NETCDF_ATTR_NAME: None}
-
-    self.coordinate_metadata[CoordinateKey.LON] = \
-      {CoordinatePropertyKey.FORMAT    : CoordinateFormat.UNKNOWN,
-       CoordinatePropertyKey.RESOLUTION: CoordinateFormat.UNKNOWN,
-       CoordinatePropertyKey.NB_DECIMAL: CoordinateFormat.UNKNOWN,
-       CoordinatePropertyKey.NETCDF_ATTR_NAME: None}
 
   def compute_netcdf_file_path(self, time_dict):
     return self.netcdf_path_template.format(**time_dict)
@@ -214,7 +215,14 @@ def create_computed_variables(variable_parent_dir_path):
                                             f"u10_{Variable.FILE_NAME_POSTFIX}"),
                                   path.join(variable_parent_dir_path,
                                             f"v10_{Variable.FILE_NAME_POSTFIX}")]
-  variable.get_variables()
+
+  composite_vars = variable.get_variables()
+
+  variable.netcdf_period_resolution = composite_vars[0].netcdf_period_resolution
+  variable.time_resolution = composite_vars[0].time_resolution
+  variable.date_template = composite_vars[0].date_template
+  variable.coordinate_metadata = composite_vars[0].coordinate_metadata
+
   variable_file_path = path.join(variable_parent_dir_path, variable.compute_filename())
   variable.save(variable_file_path)
 
