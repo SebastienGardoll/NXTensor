@@ -67,6 +67,9 @@ class Tensor(DataWrapper):
     else:
       self.__init_data_properties(None)
 
+  def compute_tensor_name(extraction_id, variable_id):
+    return f"{extraction_id}_{variable_id}_{TensorKey.CHANNEL}.{Tensor.YAML_FILENAME_EXT}"
+
   def append(self, other):
     nb_self_dim  = len(self.shape)
     nb_other_dim = len(other.shape)

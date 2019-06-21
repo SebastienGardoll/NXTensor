@@ -258,9 +258,6 @@ class ChannelExtraction:
     channel.str_id             = self.extracted_variable.str_id
     return channel
 
-  def _compute_tensor_name(self):
-    return f"{self.extraction_conf.str_id}_{self.extracted_variable.str_id}_{TensorKey.CHANNEL}.{Tensor.YAML_FILENAME_EXT}"
-
   def extract(self):
     # Match the format of the variable to be extracted and the format of the
     # label dbs.
@@ -293,9 +290,9 @@ class ChannelExtraction:
     # Separated method so as to implement failover, one day...
     with self._concat_blocks(block_file_paths) as channel:
       # Compute the statistics of the channel and standardize it.
-      channel.standardize() # It may be optinally computed via program args.
+      channel.standardize() # It may be optionally computed via program args.
       # Save the channel along side the locations and the statistics.
-      tensor_yml_filename = self._compute_tensor_name()
+      tensor_yml_filename = Tensor.compute_tensor_name(self.extraction_conf.str_id, self.extracted_variable.str_id)
       tensor_yml_file_path = path.join(self.extraction_conf.tensor_dir_path, tensor_yml_filename)
       channel.save(tensor_yml_file_path)
 """
