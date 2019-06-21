@@ -189,7 +189,7 @@ class ChannelExtraction:
       if subregion_list[label_index]:
         logging.info(f"storing subregions of label '{label.str_id}' into a DataArray (PID: {os.getpid()})")
         # dims are lost when instantiating a DataArray based on other DataArray objects.
-        dims = (self.extracted_variable.str_id, Tensor.X_LABEL, Tensor.Y_LABEL)
+        dims = (self.extracted_variable.str_id, TensorKey.X, TensorKey.Y)
         # Store the subregions in a xarray data array.
         data = xr.DataArray(subregion_list[label_index], dims=dims)
         for item in subregion_list[label_index]:

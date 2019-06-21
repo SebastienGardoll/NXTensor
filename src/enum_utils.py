@@ -77,3 +77,5 @@ class TensorKey:
   MEAN    = 'mean'
   STD     = 'std'
   CHANNEL = 'channel'
+  X       = 'x'
+  Y       = 'y'

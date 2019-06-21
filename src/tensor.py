@@ -9,11 +9,10 @@ Created on Wed Mar 27 11:58:30 2019
 from data_wrapper import DataWrapper
 import logging
 from enum_utils import CoordinateKey, CoordinateFormat, TensorKey
+import numpy as np
+from xarray import DataArray
 
 class Tensor(DataWrapper):
-
-  X_LABEL = 'x'
-  Y_LABEL = 'y'
 
   def __init__(self, str_id, data, metadata, coordinate_format, is_channels_last):
     super().__init__(str_id, data, metadata)
@@ -104,9 +103,29 @@ class Tensor(DataWrapper):
     raise NotImplementedError(msg)
 
   def stack(self, other_tensors):
-    msg = 'Tensor.stack is not implemented yet'
-    logging.error(msg)
-    raise NotImplementedError(msg)
+
+    if not self.is_channel():
+      msg = 'Tensor.stack is not implemented for data with number of dimension over 3'
+      logging.fatal(msg)
+      raise NotImplementedError(msg)
+
+    data_arrays = [self.get_data()]
+    for other_tensor in other_tensors:
+      if not other_tensor.is_channel():
+        msg = 'Tensor.stack is not implemented for data with number of dimension over 3'
+        logging.fatal(msg)
+        raise NotImplementedError(msg)
+      data_arrays.append(other_tensor.get_data())
+
+    numpy_data = np.stack(data_arrays, axis=3)
+    dims = (TensorKey.IMG, TensorKey.X, TensorKey.Y, TensorKey.CHANNEL)
+    data = DataArray(numpy_data, dims=dims)
+    self.get_data().close()
+    self.set_data(data)
+    self.is_channels_last = True
+
+    for other_tensor in other_tensors:
+      self.stats_mapping.update(other_tensor.stats_mapping)
 
   def is_channel(self):
     return len(self.shape) == 3
