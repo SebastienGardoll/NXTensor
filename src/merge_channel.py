@@ -40,6 +40,9 @@ class MergeChannel:
     for tensor in tensors:
       tensor.close()
 
+    logging.info(f"shuffling the tensor")
+    tensor.shuffle()
+
     return result
 
 """
