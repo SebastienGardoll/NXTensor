@@ -33,8 +33,13 @@ class MergeChannel:
     logging.info(f"the {len(self.channel_paths)} channels are loaded")
     result = tensors.pop(0)
     logging.info(f"stacking the {len(self.channel_paths)} channels")
-    result.stack(tensors)
+    result.stack(tensors, self.extraction_conf.str_id)
     logging.info(f"the tensor shape is {result.shape}")
+
+    logging.info(f"the closing the channels")
+    for tensor in tensors:
+      tensor.close()
+
     return result
 
 """
@@ -49,10 +54,11 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 from merge_channel import unit_test
-unit_test('/home/sgardoll/cyclone/extraction_config')
+stacked_tensor = unit_test('/home/sgardoll/cyclone/extraction_config')
 """
 def unit_test(config_parent_path):
   from os import path
   extraction_config_path = path.join(config_parent_path, '2000_10_extraction_config.yml')
   driver = MergeChannel(extraction_config_path)
   stacked_tensor = driver.merge_channels()
+  return stacked_tensor

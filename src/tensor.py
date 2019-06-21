@@ -102,7 +102,7 @@ class Tensor(DataWrapper):
     logging.error(msg)
     raise NotImplementedError(msg)
 
-  def stack(self, other_tensors):
+  def stack(self, other_tensors, str_id):
 
     if not self.is_channel():
       msg = 'Tensor.stack is not implemented for data with number of dimension over 3'
@@ -120,9 +120,9 @@ class Tensor(DataWrapper):
     numpy_data = np.stack(data_arrays, axis=3)
     dims = (TensorKey.IMG, TensorKey.X, TensorKey.Y, TensorKey.CHANNEL)
     data = DataArray(numpy_data, dims=dims)
-    self.get_data().close()
-    self.set_data(data)
+    self.set_data(data) # Close the previous data array object.
     self.is_channels_last = True
+    self.str_id = str_id
 
     for other_tensor in other_tensors:
       self.stats_mapping.update(other_tensor.stats_mapping)

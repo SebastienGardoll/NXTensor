@@ -129,11 +129,9 @@ class DataWrapper(YamlSerializable):
     metadata = self.get_metadata()
     del self._metadata
 
-    if self.data_file_path is None:
-      self.data_file_path = DataWrapper._compute_data_from_yaml_file_path(yaml_file_path)
+    self.data_file_path = DataWrapper._compute_data_from_yaml_file_path(yaml_file_path)
 
-    if self.metadata_file_path is None:
-      self.metadata_file_path = DataWrapper._compute_metadata_from_yaml_file_path(yaml_file_path)
+    self.metadata_file_path = DataWrapper._compute_metadata_from_yaml_file_path(yaml_file_path)
 
     super().save(yaml_file_path)
 
