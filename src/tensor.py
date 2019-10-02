@@ -95,9 +95,12 @@ class Tensor(DataWrapper):
     super().append(other, dim_name)
     logging.info(f"new shape is {self.shape}")
 
-  # Return a list of instance of Tensor according to the given numpy'style split
-  # specifications.
+  # Return a list of instance of Tensor according to the given split
+  # specifications: (train_ratio, [validation_ratio], [test_ratio]).
   def split(self, split_spec):
+
+    # TODO: check addition <= 1. ; each element <0 < 1.
+
     msg = 'Tensor.split is not implemented yet'
     logging.error(msg)
     raise NotImplementedError(msg)
