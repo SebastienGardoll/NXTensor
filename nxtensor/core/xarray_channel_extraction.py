@@ -31,7 +31,7 @@ from nxtensor.utils.file_utils import FileExtension
 Block = NewType('Block', pd.DataFrame)
 
 # A Period is a tuple composed of values that correspond to the values of TimeResolution::KEYS (same order).
-Period = NewType('Period', Tuple[float, ...])
+Period = NewType('Period', Tuple[Union[float, int], ...])
 
 # Constants
 DEFAULT_CSV_SAVE_OPTIONS: Mapping[CsvOptNames, str] = {CsvOptNames.SEPARATOR: ',', CsvOptNames.ENCODING: 'utf8',
