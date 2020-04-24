@@ -60,7 +60,7 @@ class ExtractionVisitor(VariableVisitor):
 
             # dims are lost when instantiating a DataArray based on other DataArray objects.
             dims = (var.str_id, TensorDimension.X, TensorDimension.Y)
-            # Stack the extracted regions in a xarray data array => data extraction_metadata_block.
+            # Stack the extracted regions in a xarray data array => data extraction_metadata_blocks.
             data = xr.DataArray(extracted_regions, dims=dims)
             self.result[label_id] = data
 

@@ -52,7 +52,7 @@ class ExtractionConfig(YamlSerializable):
         self.tmp_dir_path: str = None
 
         # The maximum number of process spawn during the extraction.
-        # Each process treats one extraction_metadata_block.
+        # Each process treats one extraction_metadata_blocks.
         self.nb_process: int = 1
 
         # The number of processes and the number of extraction_metadata_blocks should be the same so

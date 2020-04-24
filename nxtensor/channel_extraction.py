@@ -54,7 +54,7 @@ def extract(extraction_conf: ExtractionConfig, variable_id: str):
 
     # TODO: save metadata options (csv).
     chan_xtract.extract(extraction_metadata_block_processing_function=process_block,
-                        extraction_metadata_block=extraction_metadata_blocks,
+                        extraction_metadata_blocks=extraction_metadata_blocks,
                         db_metadata_mappings=db_metadata_mappings,
                         netcdf_file_time_period=variable.netcdf_period_resolution,
                         nb_workers=extraction_conf.nb_process,

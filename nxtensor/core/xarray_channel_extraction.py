@@ -56,17 +56,17 @@ def convert_block_to_dict(extraction_metadata_block: Block) -> Sequence[Mapping[
 
 def extract(extraction_metadata_block_processing_function: Callable[[Period, Mapping[str, Block]],
                                                                     Tuple[str, Dict[str, xr.DataArray]]],
-            extraction_metadata_block: Mapping[str, pd.DataFrame],
+            extraction_metadata_blocks: Mapping[str, pd.DataFrame],
             db_metadata_mappings: Mapping[str, DBMetadataMapping],
             netcdf_file_time_period: TimeResolution,
             nb_workers: int = 0,
             inplace=False,
             extraction_metadata_block_csv_save_options: Mapping[CsvOptNames, str] = DEFAULT_CSV_SAVE_OPTIONS)\
             -> Dict[Period, Dict[str, Dict[str, str]]]:
-    # Returns the data extraction_metadata_block and the extraction data extraction_metadata_block according to
+    # Returns the data extraction_metadata_blocks and the extraction data extraction_metadata_blocks according to
     # the label for all the period of time.
     structures = dict()
-    for label_id, dataframe in extraction_metadata_block.items():
+    for label_id, dataframe in extraction_metadata_blocks.items():
         db_metadata_mapping = db_metadata_mappings[label_id]
         structure = __build_blocks_structure(dataframe, db_metadata_mapping, netcdf_file_time_period, inplace)
         structures[label_id] = structure
