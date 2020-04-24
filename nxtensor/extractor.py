@@ -45,6 +45,8 @@ class ExtractionVisitor(VariableVisitor):
                 chan_xtract.convert_block_to_dict(extraction_metadata_block)
 
             extracted_regions: List[xr.DataArray] = list()
+            # The order of extraction_data_list must be deterministic so as all the channel
+            # match their extracted region line by line.
             for extraction_data in extraction_data_list:
                 # TODO: instantiate the visitor thanks to a factory (shape).
                 extractor: SquareRegionExtractionVisitor = \
