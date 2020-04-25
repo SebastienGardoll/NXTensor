@@ -14,7 +14,7 @@ from nxtensor.exceptions import ConfigurationError
 from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.db_utils import DBMetadataMapping, create_db_metadata_mapping
-from nxtensor.utils.csv_option_names import CsvOptNames
+from nxtensor.utils.csv_option_names import CsvOptName
 
 from multiprocessing import Pool
 import os.path as path
@@ -30,25 +30,22 @@ from nxtensor.utils.file_extensions import FileExtension
 LabelId = str
 
 # A block of extraction metadata (lat, lon, year, month, etc.).
-MetaDataBlock = NewType('MetaDataBlock', pd.DataFrame)
+MetaDataBlock = NewType('MetaDataBlock', Sequence[Mapping[Union[TimeResolution, Coordinate], Union[int, float, str]]])
 
 # A Period is a tuple composed of values that correspond to the values of
 # TimeResolution::TIME_RESOLUTION_KEYS (same order).
 Period = NewType('Period', Tuple[Union[float, int], ...])
 
-# Constants
-DEFAULT_CSV_SAVE_OPTIONS: Mapping[CsvOptNames, str] = {CsvOptNames.SEPARATOR: ',', CsvOptNames.ENCODING: 'utf8',
-                                                       CsvOptNames.SAVE_LINE_TERMINATOR: '\\n'}
+
 INDEX_NAME = 'index'
 
 
 __extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, MetaDataBlock]]],
                                                           Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]]
-__extraction_metadata_block_csv_save_options: Mapping[CsvOptNames, str]
+__extraction_metadata_block_csv_save_options: Mapping[CsvOptName, str]
 
 
-def convert_block_to_dict(extraction_metadata_block: MetaDataBlock)\
-        -> Sequence[Mapping[Union[TimeResolution, Coordinate], Union[int, float, str]]]:
+def convert_block_to_dict(extraction_metadata_block: pd.DataFrame) -> MetaDataBlock:
     result = extraction_metadata_block.to_dict('records')
     for dictionary in result:
         dictionary[TimeResolution.MONTH2D] = f"{dictionary[TimeResolution.MONTH]:02d}"
@@ -63,10 +60,9 @@ def extract(extraction_metadata_block_processing_function: Callable[[Period, Lis
             extraction_metadata_blocks: Mapping[LabelId, pd.DataFrame],
             db_metadata_mappings: Mapping[LabelId, DBMetadataMapping],
             netcdf_file_time_period: TimeResolution,
-            nb_workers: int = 0,
-            inplace=False,
-            extraction_metadata_block_csv_save_options: Mapping[CsvOptNames, str] = DEFAULT_CSV_SAVE_OPTIONS)\
-            -> Dict[Period, Dict[str, Dict[str, str]]]:
+            extraction_metadata_block_csv_save_options: Mapping[CsvOptName, str] = None,
+            nb_workers: int = 1,
+            inplace=False) -> Dict[Period, Dict[str, Dict[str, str]]]:
     # Returns the data extraction_metadata_blocks and the extraction data extraction_metadata_blocks according to
     # the label for all the period of time.
     structures = dict()
@@ -78,13 +74,6 @@ def extract(extraction_metadata_block_processing_function: Callable[[Period, Lis
     # Merged_structures guarantees the order (following period, label_id and extraction metadata).
     merged_structures: List[Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]]] = __merge_block_structures(structures)
     del structures
-
-    if CsvOptNames.SAVE_LINE_TERMINATOR in extraction_metadata_block_csv_save_options:
-        if extraction_metadata_block_csv_save_options[CsvOptNames.SAVE_LINE_TERMINATOR] == \
-                DEFAULT_CSV_SAVE_OPTIONS[CsvOptNames.SAVE_LINE_TERMINATOR]:
-            extraction_metadata_block_csv_save_options = \
-                {k: v for k, v in extraction_metadata_block_csv_save_options.items()}
-            extraction_metadata_block_csv_save_options[CsvOptNames.SAVE_LINE_TERMINATOR] = '\n'
 
     global __extraction_metadata_block_csv_save_options
     __extraction_metadata_block_csv_save_options = extraction_metadata_block_csv_save_options
@@ -115,8 +104,11 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
         os.makedirs(path.dirname(file_prefix_path), exist_ok=True)
 
         extraction_metadata_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.CSV_FILE_EXTENSION}"
-        metadata_block.to_csv(path_or_buf=extraction_metadata_block_file_path,
-                              **__extraction_metadata_block_csv_save_options)
+        if __extraction_metadata_block_csv_save_options is None:
+            fu.to_csv(data=metadata_block, file_path=extraction_metadata_block_file_path)
+        else:
+            fu.to_csv(data=metadata_block, file_path=extraction_metadata_block_file_path,
+                      csv_options=__extraction_metadata_block_csv_save_options)
 
         data_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.HDF5_FILE_EXTENSION}"
         fu.write_ndarray_to_hdf5(specific_label_file_prefix_path, data_block.values)
@@ -202,7 +194,7 @@ def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMet
     # Compute the extraction_metadata_blocks.
     result: Dict[Period, MetaDataBlock] = dict()
     for index in indices.keys():
-        result[index] = restricted_renamed_df.loc[indices[index]]
+        result[index] = convert_block_to_dict(restricted_renamed_df.loc[indices[index]])
 
     return result
 
@@ -241,9 +233,6 @@ def __unit_test1():
     assert len(merged_structures[1][1][1][1]) == 51
 
     assert len(merged_structures[0][1]) == 1  # Cyclone not in period (2000, 9).
-
-    converted_block = convert_block_to_dict(merged_structures[1][1][0][1])
-    print(converted_block[0:2])
 
 
 def __unit_test2():

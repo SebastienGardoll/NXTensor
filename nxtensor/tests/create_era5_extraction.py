@@ -2,10 +2,10 @@ from os import path
 
 from nxtensor.extraction import ClassificationLabel, ExtractionConfig, ExtractionShape
 from nxtensor.utils.time_resolutions import TimeResolution
-from nxtensor.utils.csv_option_names import CsvOptNames
+from nxtensor.utils.csv_option_names import CsvOptName
 from nxtensor.utils.db_types import DBType
 from nxtensor.variable import Variable
-
+import csv
 
 def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
     dataset_ids = ['2ka', '2kb', '2000', '2000_10', 'all']
@@ -14,10 +14,12 @@ def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
     db_filename_template = '{dataset_id}_{label_id}_{filename_postfix}'
     db_format = DBType.CSV
     db_time_resolution = TimeResolution.HOUR
-    db_format_options = {CsvOptNames.SEPARATOR: ',',
-                         CsvOptNames.HEADER: 0,
-                         CsvOptNames.ENCODING: 'utf8',
-                         CsvOptNames.READ_LINE_TERMINATOR: '\\n'}
+    db_format_options = {CsvOptName.SEPARATOR: ',',
+                         CsvOptName.HEADER: 0,
+                         CsvOptName.ENCODING: 'utf8',
+                         CsvOptName.LINE_TERMINATOR: '\\n',
+                         CsvOptName.QUOTE_CHAR: '"',
+                         CsvOptName.QUOTING: csv.QUOTE_NONNUMERIC}
 
     db_meta_data_mapping = dict(lat='lat', lon='lon', year='year', month='month', day='day', hour='hour')
 

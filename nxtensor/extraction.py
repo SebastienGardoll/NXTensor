@@ -8,7 +8,7 @@ Created on Wed Apr  3 13:26:39 2019
 from nxtensor.core.xarray_channel_extraction import LabelId
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.db_utils import DBMetadataMapping
-from nxtensor.utils.csv_option_names import CsvOptNames
+from nxtensor.utils.csv_option_names import CsvOptName
 from nxtensor.utils.db_types import DBType
 from nxtensor.yaml_serializable import YamlSerializable
 from nxtensor.variable import Variable, VariableId
@@ -130,7 +130,7 @@ class ClassificationLabel(YamlSerializable):
         self.db_format: DBType = None
 
         # The description of the db options (dictionary).
-        self.db_format_options: Dict[CsvOptNames, str] = None
+        self.db_format_options: Dict[CsvOptName, str] = None
 
         # Dictionary that maps required information about the labels:
         # convert keys (see enum_utils) into db column names.

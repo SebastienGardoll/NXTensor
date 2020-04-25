@@ -5,12 +5,10 @@ Created on Fri Apr 23 14:50:20 2020
 
 @author: sebastien@gardoll.fr
 """
-from typing import Dict, List, Mapping, Union, Sequence, Tuple
+from typing import Dict, List, Mapping, Tuple
 
-import nxtensor.utils.time_resolutions
 from nxtensor.square_extractor import SquareRegionExtractionVisitor
 from nxtensor.core.xarray_channel_extraction import MetaDataBlock, Period
-from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.tensor_dimensions import TensorDimension
 from nxtensor.extraction import ExtractionShape
 from nxtensor.variable import VariableVisitor, SingleLevelVariable, MultiLevelVariable, ComputedVariable, Variable, \
@@ -19,7 +17,6 @@ from nxtensor.variable import VariableVisitor, SingleLevelVariable, MultiLevelVa
 import nxtensor.core.xarray_extractions as xtract
 import nxtensor.utils.time_utils as tu
 
-import nxtensor.core.xarray_channel_extraction as chan_xtract
 from nxtensor.core.xarray_channel_extraction import LabelId
 
 import xarray as xr
@@ -28,7 +25,8 @@ import xarray as xr
 class ExtractionVisitor(VariableVisitor):
 
     # TODO: instantiate the visitor thanks to a factory (shape).
-    def __init__(self, period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]], half_lat_frame: int,
+    def __init__(self, period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]],
+                 half_lat_frame: int,
                  half_lon_frame: int, dask_scheduler: str = 'single-threaded',
                  shape: ExtractionShape = ExtractionShape.SQUARE):
         self.__period: Period = period
@@ -42,15 +40,10 @@ class ExtractionVisitor(VariableVisitor):
     def __core_extraction(self, var: Variable, datasets: Mapping[VariableId, xr.Dataset]) -> None:
 
         for label_id, extraction_metadata_block in self.__extraction_metadata_blocks:
-            # noinspection PyTypeChecker
-            extraction_data_list: Sequence[Mapping[Union[Coordinate, nxtensor.utils.time_resolutions.TimeResolution],
-                                                   Union[int, float]]] = \
-                chan_xtract.convert_block_to_dict(extraction_metadata_block)
-
             extracted_regions: List[xr.DataArray] = list()
             # The order of extraction_data_list must be deterministic so as all the channel
             # match their extracted region line by line.
-            for extraction_data in extraction_data_list:
+            for extraction_data in extraction_metadata_block:
                 # TODO: instantiate the visitor thanks to a factory (shape).
                 extractor: SquareRegionExtractionVisitor = \
                     SquareRegionExtractionVisitor(datasets=datasets,
