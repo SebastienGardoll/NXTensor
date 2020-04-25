@@ -14,10 +14,9 @@ from nxtensor.yaml_serializable import YamlSerializable
 from nxtensor.variable import Variable, VariableId
 import logging
 from typing import List, Dict, Mapping
-from enum import Enum
 
 
-class ExtractionShape(Enum):
+class ExtractionShape:
 
     SQUARE = 'square'
 
