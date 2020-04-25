@@ -7,7 +7,7 @@ Created on Wed Apr  22 11:14:54 2020
 """
 from typing import Dict, Tuple, List
 
-from nxtensor.core.xarray_channel_extraction import Block, Period
+from nxtensor.core.xarray_channel_extraction import MetaDataBlock, Period
 from nxtensor.extraction import ExtractionConfig
 from nxtensor.extractor import ExtractionVisitor
 from nxtensor.utils.db_utils import DBMetadataMapping
@@ -30,8 +30,8 @@ def extract(extraction_conf: ExtractionConfig, variable_id: str):
     variable: Variable = extraction_conf.get_variables()[variable_id]
     file_prefix_path = path.join(extraction_conf.blocks_dir_path, extraction_conf.str_id)
 
-    def process_block(period: Period, extraction_metadata_blocks: List[Tuple[LabelId, Block]]) \
-            -> Tuple[str, List[Tuple[LabelId, xr.DataArray, Block]]]:
+    def process_block(period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]]) \
+            -> Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]:
         # Must be a integer !!! TODO: check for that when designing an extraction.
         half_lat_frame = int((extraction_conf.y_size * variable.lat_resolution)/2)
         half_lon_frame = int((extraction_conf.y_size * variable.lat_resolution)/2)
@@ -42,7 +42,7 @@ def extract(extraction_conf: ExtractionConfig, variable_id: str):
                                                          dask_scheduler=extraction_conf.dask_scheduler,
                                                          shape=extraction_conf.extraction_shape)
         variable.accept(extractor)
-        result: Tuple[str, List[Tuple[LabelId, xr.DataArray, Block]]] = (file_prefix_path, extractor.get_result())
+        result: Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]] = (file_prefix_path, extractor.get_result())
         return result
 
     db_metadata_mappings: Dict[str, DBMetadataMapping] = dict()

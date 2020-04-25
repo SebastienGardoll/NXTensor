@@ -9,7 +9,7 @@ from typing import Dict, List, Mapping, Union, Sequence, Tuple
 
 import nxtensor.utils.time_resolutions
 from nxtensor.core.square_extractor import SquareRegionExtractionVisitor
-from nxtensor.core.xarray_channel_extraction import Block, Period
+from nxtensor.core.xarray_channel_extraction import MetaDataBlock, Period
 from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.tensor_dimensions import TensorDimension
 from nxtensor.extraction import ExtractionShape
@@ -28,16 +28,16 @@ import xarray as xr
 class ExtractionVisitor(VariableVisitor):
 
     # TODO: instantiate the visitor thanks to a factory (shape).
-    def __init__(self, period: Period, extraction_metadata_blocks: List[Tuple[LabelId, Block]], half_lat_frame: int,
+    def __init__(self, period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]], half_lat_frame: int,
                  half_lon_frame: int, dask_scheduler: str = 'single-threaded',
                  shape: ExtractionShape = ExtractionShape.SQUARE):
         self.__period: Period = period
-        self.__extraction_metadata_blocks: List[Tuple[LabelId, Block]] = extraction_metadata_blocks
+        self.__extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]] = extraction_metadata_blocks
         self.__half_lat_frame: int = half_lat_frame
         self.__half_lon_frame: int = half_lon_frame
         self.__dask_scheduler: str = dask_scheduler
         self.__shape: ExtractionShape = shape
-        self.result: List[Tuple[LabelId, xr.DataArray, Block]] = list()
+        self.result: List[Tuple[LabelId, xr.DataArray, MetaDataBlock]] = list()
 
     def __core_extraction(self, var: Variable, datasets: Mapping[str, xr.Dataset]) -> None:
 
@@ -86,5 +86,5 @@ class ExtractionVisitor(VariableVisitor):
             datasets[var_id] = xtract.open_netcdf(netcdf_file_path)
         self.__core_extraction(var, datasets)
 
-    def get_result(self) -> List[Tuple[LabelId, xr.DataArray, Block]]:
+    def get_result(self) -> List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]:
         return self.result
