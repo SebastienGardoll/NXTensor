@@ -10,6 +10,7 @@ from typing import Dict, Set, NewType, Tuple, Callable, Mapping, Union, Sequence
 import pandas as pd
 import xarray as xr
 
+import nxtensor.utils.csv_utils
 from nxtensor.exceptions import ConfigurationError
 from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.time_resolutions import TimeResolution
@@ -105,10 +106,10 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
 
         extraction_metadata_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.CSV_FILE_EXTENSION}"
         if __extraction_metadata_block_csv_save_options is None:
-            fu.to_csv(data=metadata_block, file_path=extraction_metadata_block_file_path)
+            nxtensor.utils.csv_utils.to_csv(data=metadata_block, file_path=extraction_metadata_block_file_path)
         else:
-            fu.to_csv(data=metadata_block, file_path=extraction_metadata_block_file_path,
-                      csv_options=__extraction_metadata_block_csv_save_options)
+            nxtensor.utils.csv_utils.to_csv(data=metadata_block, file_path=extraction_metadata_block_file_path,
+                                            csv_options=__extraction_metadata_block_csv_save_options)
 
         data_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.HDF5_FILE_EXTENSION}"
         fu.write_ndarray_to_hdf5(specific_label_file_prefix_path, data_block.values)

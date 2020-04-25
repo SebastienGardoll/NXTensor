@@ -2,10 +2,11 @@ from os import path
 
 from nxtensor.extraction import ClassificationLabel, ExtractionConfig, ExtractionShape
 from nxtensor.utils.time_resolutions import TimeResolution
-from nxtensor.utils.csv_option_names import CsvOptName
 from nxtensor.utils.db_types import DBType
 from nxtensor.variable import Variable
 import csv
+
+import nxtensor.utils.csv_utils as cu
 
 
 def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
@@ -15,12 +16,8 @@ def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
     db_filename_template = '{dataset_id}_{label_id}_{filename_postfix}'
     db_format = DBType.CSV
     db_time_resolution = TimeResolution.HOUR
-    db_format_options = {CsvOptName.SEPARATOR: ',',
-                         CsvOptName.HEADER: 0,
-                         CsvOptName.ENCODING: 'utf8',
-                         CsvOptName.LINE_TERMINATOR: '\\n',
-                         CsvOptName.QUOTE_CHAR: '"',
-                         CsvOptName.QUOTING: csv.QUOTE_NONNUMERIC}
+    db_format_options = cu.create_csv_options(separator=',', header=0, line_terminator='utf8', encoding='\\n',
+                                              quote_char='"', quoting=csv.QUOTE_NONNUMERIC)
 
     db_meta_data_mapping = dict(lat='lat', lon='lon', year='year', month='month', day='day', hour='hour')
 
@@ -87,7 +84,8 @@ def test_load(config_parent_dir_path: str) -> None:
         filename = ExtractionConfig.generate_filename(str_id)
         conf = ExtractionConfig.load(path.join(config_parent_dir_path, filename))
         conf.get_variables()
-        conf.get_labels()
+        labels = conf.get_labels()
+        print(labels['no_cyclone'].db_format_options)
 
 
 if __name__ == '__main__':
