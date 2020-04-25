@@ -69,7 +69,10 @@ def create_computed_variables(variable_parent_dir_path: str) -> None:
     variable.netcdf_period_resolution = TimeResolution.MONTH
     variable.time_resolution = TimeResolution.HOUR
     variable.date_template = '{year}-{month2d}-{day}T{hour2d}'
-
+    variable.lat_nb_decimal = 2
+    variable.lat_resolution = 0.25
+    variable.lon_nb_decimal = 2
+    variable.lon_resolution = 0.25
     variable_file_path = path.join(variable_parent_dir_path, variable.compute_filename())
     variable.save(variable_file_path)
 
