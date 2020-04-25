@@ -5,8 +5,8 @@ Created on Wed Apr  22 17:06:18 2020
 
 @author: sebastien@gardoll.fr
 """
-from collections import Sequence, Mapping
 import csv
+from typing import Sequence, Mapping
 
 import numpy as np
 import h5py
