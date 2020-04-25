@@ -13,18 +13,18 @@ from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.xarray_rpn_calulator import XarrayRpnCalculator
 from nxtensor.variable import MultiLevelVariable, SingleLevelVariable, ComputedVariable, VariableVisitor, \
-    VariableNetcdfFilePathVisitor, Variable
+    VariableNetcdfFilePathVisitor, Variable, VariableId
 
 
 class SquareRegionExtractionVisitor(VariableVisitor):
 
-    def __init__(self, datasets: Mapping[str, xr.Dataset],
+    def __init__(self, datasets: Mapping[VariableId, xr.Dataset],
                  extraction_data: Mapping[Union[Coordinate, TimeResolution], Union[int, float]],
                  half_lat_frame: int, half_lon_frame: int, dask_scheduler: str = 'single-threaded'):
         # Buffer of extracted regions: optimization for computed variables.
         # Computed variables may contain computed variables, recursively !
-        self.__extracted_regions: Dict[str, xr.DataArray] = dict()
-        self.datasets: Mapping[str, xr.Dataset] = datasets
+        self.__extracted_regions: Dict[VariableId, xr.DataArray] = dict()
+        self.__datasets: Mapping[VariableId, xr.Dataset] = datasets
         self.__extraction_data: Mapping[Union[Coordinate, TimeResolution], Union[int, float]] = extraction_data
         self.__half_lat_frame: int = half_lat_frame
         self.__half_lon_frame: int = half_lon_frame
@@ -42,7 +42,7 @@ class SquareRegionExtractionVisitor(VariableVisitor):
     def visit_single_level_variable(self, var: SingleLevelVariable) -> None:
         if var.str_id not in self.__extracted_regions:
             formatted_date = self.__bootstrap(var)
-            self.result = xtract.extract_square_region(dataset=self.datasets[var.str_id],
+            self.result = xtract.extract_square_region(dataset=self.__datasets[var.str_id],
                                                        variable_netcdf_attr_name=var.netcdf_attr_name,
                                                        formatted_date=formatted_date,
                                                        lat=self.__extraction_data[Coordinate.LAT],
@@ -62,7 +62,7 @@ class SquareRegionExtractionVisitor(VariableVisitor):
     def visit_multi_level_variable(self, var: MultiLevelVariable) -> None:
         if var.str_id not in self.__extracted_regions:
             formatted_date = self.__bootstrap(var)
-            self.result = xtract.extract_square_region(dataset=self.datasets[var.str_id],
+            self.result = xtract.extract_square_region(dataset=self.__datasets[var.str_id],
                                                        variable_netcdf_attr_name=var.netcdf_attr_name,
                                                        formatted_date=formatted_date,
                                                        lat=self.__extraction_data[Coordinate.LAT],

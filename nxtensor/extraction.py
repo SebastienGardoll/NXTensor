@@ -11,7 +11,7 @@ from nxtensor.utils.db_utils import DBMetadataMapping
 from nxtensor.utils.csv_option_names import CsvOptNames
 from nxtensor.utils.db_types import DBType
 from nxtensor.yaml_serializable import YamlSerializable
-from nxtensor.variable import Variable
+from nxtensor.variable import Variable, VariableId
 import logging
 from typing import List, Dict, Mapping
 from enum import Enum
@@ -62,8 +62,8 @@ class ExtractionConfig(YamlSerializable):
         # as to speed up the extraction. The less the number of extraction_metadata_blocks is, the greater
         # is the size of the extraction_metadata_blocks and the longer it takes to compute it.
 
-        self.__variables: Dict[str, Variable] = None  # Transient for yaml serialization.
-        self.__labels: Dict[str, ClassificationLabel] = None  # Transient for yaml serialization.
+        self.__variables: Dict[VariableId, Variable] = None  # Transient for yaml serialization.
+        self.__labels: Dict[LabelId, ClassificationLabel] = None  # Transient for yaml serialization.
 
         # TODO: save metadata options (csv).
 
@@ -76,7 +76,7 @@ class ExtractionConfig(YamlSerializable):
         self.__variables = variables
         self.__labels = labels
 
-    def get_variables(self) -> Mapping[str, Variable]:
+    def get_variables(self) -> Mapping[VariableId, Variable]:
         variables_value = getattr(self, '__variables', None)
         if variables_value is None:
             logging.debug(f"loading the variables of {self.str_id}:")
@@ -85,7 +85,7 @@ class ExtractionConfig(YamlSerializable):
                 logging.debug(f"loading the variable {var_file_path}")
                 var = Variable.load(var_file_path)
                 variables.append(var)
-            self.__variables: Dict[str, Variable] = {var.str_id: var for var in variables}  # Preserve the order.
+            self.__variables: Dict[VariableId, Variable] = {var.str_id: var for var in variables}  # Preserve the order.
 
         return self.__variables
 

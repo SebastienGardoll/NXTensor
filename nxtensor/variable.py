@@ -12,6 +12,10 @@ import logging
 from nxtensor.utils.time_resolutions import TimeResolution
 from abc import ABC, abstractmethod
 
+# [TYPES]
+
+VariableId = str
+
 
 class Variable(YamlSerializable, ABC):
 
@@ -84,7 +88,7 @@ class ComputedVariable(Variable):
         # noinspection PyTypeChecker
         self.__variables:  Dict[str, Variable] = None  # Transient for yaml serialization.
 
-    def get_variables(self) -> Mapping[str, Variable]:
+    def get_variables(self) -> Mapping[VariableId, Variable]:
         variables_value = getattr(self, '__variables', None)
         if variables_value is None:
             logging.debug(f"loading the variables of {self.str_id}:")
@@ -130,7 +134,7 @@ class VariableVisitor(ABC):
 class VariableNetcdfFilePathVisitor(VariableVisitor):
 
     def __init__(self, time_dict: Mapping[TimeResolution, any]):
-        self.result: Dict[str, str] = dict()
+        self.result: Dict[VariableId, str] = dict()
         self.time_dict: Mapping[TimeResolution,  any] = time_dict
 
     def visit_single_level_variable(self, variable: 'SingleLevelVariable') -> None:
@@ -144,5 +148,5 @@ class VariableNetcdfFilePathVisitor(VariableVisitor):
         for variable in variable.get_variables().values():
             variable.accept(self)
 
-    def get_result(self) -> Dict[str, str]:
+    def get_result(self) -> Dict[VariableId, str]:
         return self.result

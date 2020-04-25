@@ -16,6 +16,9 @@ import xarray as xr
 
 
 # This class implement RPN calculator for Xarray's DataArray and scalars.
+from nxtensor.variable import VariableId
+
+
 class XarrayRpnCalculator:
 
     @staticmethod
@@ -78,7 +81,7 @@ class XarrayRpnCalculator:
                  'sqrt'   : (1, __sqrt.__func__),   # √x
                  'pow'    : (2, __power.__func__)}
 
-    def __init__(self, expression: str, extracted_regions: Mapping[str, xr.DataArray], dask_scheduler: str):
+    def __init__(self, expression: str, extracted_regions: Mapping[VariableId, xr.DataArray], dask_scheduler: str):
         self.__expression = expression
         self.__stack = list()
         self.__intermediate_results = dict()

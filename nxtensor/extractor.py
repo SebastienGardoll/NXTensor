@@ -14,7 +14,7 @@ from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.tensor_dimensions import TensorDimension
 from nxtensor.extraction import ExtractionShape
 from nxtensor.variable import VariableVisitor, SingleLevelVariable, MultiLevelVariable, ComputedVariable, Variable, \
-    VariableNetcdfFilePathVisitor
+    VariableNetcdfFilePathVisitor, VariableId
 
 import nxtensor.core.xarray_extractions as xtract
 import nxtensor.utils.time_utils as tu
@@ -39,7 +39,7 @@ class ExtractionVisitor(VariableVisitor):
         self.__shape: ExtractionShape = shape
         self.result: List[Tuple[LabelId, xr.DataArray, MetaDataBlock]] = list()
 
-    def __core_extraction(self, var: Variable, datasets: Mapping[str, xr.Dataset]) -> None:
+    def __core_extraction(self, var: Variable, datasets: Mapping[VariableId, xr.Dataset]) -> None:
 
         for label_id, extraction_metadata_block in self.__extraction_metadata_blocks:
             # noinspection PyTypeChecker
@@ -81,7 +81,7 @@ class ExtractionVisitor(VariableVisitor):
     def visit_computed_variable(self, var: ComputedVariable) -> None:
         time_dict = tu.from_time_list_to_dict(self.__period)
         visitor = VariableNetcdfFilePathVisitor(time_dict)
-        datasets: Dict[str, xr.Dataset] = dict()
+        datasets: Dict[VariableId, xr.Dataset] = dict()
         for var_id, netcdf_file_path in visitor.result:
             datasets[var_id] = xtract.open_netcdf(netcdf_file_path)
         self.__core_extraction(var, datasets)
