@@ -5,7 +5,7 @@ Created on Wed Apr  22 11:14:54 2020
 
 @author: sebastien@gardoll.fr
 """
-from typing import Dict, Tuple, Mapping
+from typing import Dict, Tuple, List
 
 from nxtensor.core.xarray_channel_extraction import Block, Period
 from nxtensor.extraction import ExtractionConfig
@@ -14,6 +14,7 @@ from nxtensor.utils.db_utils import DBMetadataMapping
 from nxtensor.variable import Variable
 
 import nxtensor.core.xarray_channel_extraction as chan_xtract
+from nxtensor.core.xarray_channel_extraction import LabelId
 
 import pandas as pd
 
@@ -29,8 +30,8 @@ def extract(extraction_conf: ExtractionConfig, variable_id: str):
     variable: Variable = extraction_conf.get_variables()[variable_id]
     file_prefix_path = path.join(extraction_conf.blocks_dir_path, extraction_conf.str_id)
 
-    def process_block(period: Period, extraction_metadata_blocks: Mapping[str, Block]) -> \
-            Tuple[str, Dict[str, xr.DataArray]]:
+    def process_block(period: Period, extraction_metadata_blocks: List[Tuple[LabelId, Block]]) \
+            -> Tuple[str, List[Tuple[LabelId, xr.DataArray, Block]]]:
         # Must be a integer !!! TODO: check for that when designing an extraction.
         half_lat_frame = int((extraction_conf.y_size * variable.lat_resolution)/2)
         half_lon_frame = int((extraction_conf.y_size * variable.lat_resolution)/2)
@@ -41,7 +42,7 @@ def extract(extraction_conf: ExtractionConfig, variable_id: str):
                                                          dask_scheduler=extraction_conf.dask_scheduler,
                                                          shape=extraction_conf.extraction_shape)
         variable.accept(extractor)
-        result: Tuple[str, Dict[str, xr.DataArray]] = (file_prefix_path, extractor.get_result())
+        result: Tuple[str, List[Tuple[LabelId, xr.DataArray, Block]]] = (file_prefix_path, extractor.get_result())
         return result
 
     db_metadata_mappings: Dict[str, DBMetadataMapping] = dict()

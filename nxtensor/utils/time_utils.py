@@ -38,13 +38,16 @@ class TimeResolution(Enum):
     HOUR2D       = 'hour2d'
     DAY2D        = 'day2d'
 
-    KEYS   = (YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, MILLISECOND, MICROSECOND)
+
+TIME_RESOLUTION_KEYS   = (TimeResolution.YEAR, TimeResolution.MONTH, TimeResolution.DAY, TimeResolution.HOUR,
+                          TimeResolution.MINUTE, TimeResolution.SECOND, TimeResolution.MILLISECOND,
+                          TimeResolution.MICROSECOND)
 
 
 def from_time_list_to_dict(time_list: Sequence[int]) -> Dict[TimeResolution, Union[str, int]]:
-    # Time_list is a list that contains the value of the TimeResolution::KEYS (see tensor_utils.py).
+    # Time_list is a list that contains the value of the TimeResolution::TIME_RESOLUTION_KEYS (see tensor_utils.py).
     # We cannot instantiate a date without the day number. That's why this function
-    # was created. The list must have the same order than the TimeResolution::KEYS .
+    # was created. The list must have the same order than the TimeResolution::TIME_RESOLUTION_KEYS .
     # Python 3.7 dict preserves the insertion order.
     result: Dict[TimeResolution, Union[str, int]] = dict()
 

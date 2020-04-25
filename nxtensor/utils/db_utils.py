@@ -67,7 +67,7 @@ def create_db_metadata_mapping(lon: str = None, lat: str = None, year: str = Non
                                hour: str = None, minute: str = None, second: str = None, millisecond: str = None,
                                microsecond: str = None) -> DBMetadataMapping:
 
-    result: DBMetadataMapping = DBMetadataMapping()
+    result: DBMetadataMapping = dict()
 
     if lat:
         result[Coordinate.LAT] = lat

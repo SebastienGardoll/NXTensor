@@ -5,7 +5,7 @@ Created on Wed Apr  22 09:20:10 2020
 
 @author: sebastien@gardoll.fr
 """
-from typing import Dict, Set, NewType, Tuple, Callable, Mapping, Union, Sequence
+from typing import Dict, Set, NewType, Tuple, Callable, Mapping, Union, Sequence, List
 
 import pandas as pd
 import xarray as xr
@@ -13,6 +13,7 @@ import xarray as xr
 from nxtensor.exceptions import ConfigurationError
 from nxtensor.utils.coordinate_utils import Coordinate
 from nxtensor.utils.time_utils import TimeResolution
+import nxtensor.utils.time_utils as tu
 from nxtensor.utils.db_utils import CsvOptNames, DBMetadataMapping, create_db_metadata_mapping
 
 from multiprocessing import Pool
@@ -27,10 +28,13 @@ from nxtensor.utils.file_utils import FileExtension
 # [Types]
 
 
+LabelId = str
+
 # A block of extraction metadata (lat, lon, year, month, etc.).
 Block = NewType('Block', pd.DataFrame)
 
-# A Period is a tuple composed of values that correspond to the values of TimeResolution::KEYS (same order).
+# A Period is a tuple composed of values that correspond to the values of
+# TimeResolution::TIME_RESOLUTION_KEYS (same order).
 Period = NewType('Period', Tuple[Union[float, int], ...])
 
 # Constants
@@ -39,8 +43,8 @@ DEFAULT_CSV_SAVE_OPTIONS: Mapping[CsvOptNames, str] = {CsvOptNames.SEPARATOR: ',
 INDEX_NAME = 'index'
 
 
-__extraction_metadata_block_processing_function: Callable[[Period, Mapping[str, Block]],
-                                                          Tuple[str, Dict[str, xr.DataArray]]]
+__extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, Block]]],
+                                                          Tuple[str, List[Tuple[LabelId, xr.DataArray, Block]]]]
 __extraction_metadata_block_csv_save_options: Mapping[CsvOptNames, str]
 
 
@@ -54,8 +58,9 @@ def convert_block_to_dict(extraction_metadata_block: Block) -> Sequence[Mapping[
     return result
 
 
-def extract(extraction_metadata_block_processing_function: Callable[[Period, Mapping[str, Block]],
-                                                                    Tuple[str, Dict[str, xr.DataArray]]],
+def extract(extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, Block]]],
+                                                                    Tuple[str, List[Tuple[LabelId, xr.DataArray,
+                                                                                          Block]]]],
             extraction_metadata_blocks: Mapping[str, pd.DataFrame],
             db_metadata_mappings: Mapping[str, DBMetadataMapping],
             netcdf_file_time_period: TimeResolution,
@@ -71,8 +76,10 @@ def extract(extraction_metadata_block_processing_function: Callable[[Period, Map
         structure = __build_blocks_structure(dataframe, db_metadata_mapping, netcdf_file_time_period, inplace)
         structures[label_id] = structure
 
-    merged_structures: Dict[Period, Dict[str, Block]] = __merge_block_structures(structures)
+    # Merged_structures guarantees the order (following period, label_id and extraction metadata).
+    merged_structures: List[Tuple[Period, List[Tuple[LabelId, Block]]]] = __merge_block_structures(structures)
     del structures
+
     if CsvOptNames.SAVE_LINE_TERMINATOR in extraction_metadata_block_csv_save_options:
         if extraction_metadata_block_csv_save_options[CsvOptNames.SAVE_LINE_TERMINATOR] == \
                 DEFAULT_CSV_SAVE_OPTIONS[CsvOptNames.SAVE_LINE_TERMINATOR]:
@@ -87,28 +94,30 @@ def extract(extraction_metadata_block_processing_function: Callable[[Period, Map
 
     if nb_workers:
         with Pool(processes=nb_workers) as pool:
-            tmp_result = pool.map(func=__core_extraction, iterable=merged_structures.items(), chunksize=1)
+            tmp_result = pool.map(func=__core_extraction, iterable=merged_structures, chunksize=1)
     else:
-        for item in merged_structures.items():
-            tmp_result = __core_extraction(item)
+        for merged_structure in merged_structures:
+            tmp_result = __core_extraction(merged_structure)
 
     result = dict(tmp_result)
     return result
 
 
-def __core_extraction(merged_structures_item) -> Tuple[Period, Dict[str, Dict[str, str]]]:
-    period, extraction_metadata_blocks = merged_structures_item
+def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, Block]]])\
+                      -> Tuple[Period, Dict[str, Dict[str, str]]]:
+    period, extraction_metadata_blocks = merged_structure
     result: Dict[str, Dict[str, str]] = dict()
     file_prefix_path, extracted_data_blocks = \
         __extraction_metadata_block_processing_function(period, extraction_metadata_blocks)
 
-    for label_id, data_block in extracted_data_blocks:
+    for extracted_data_block in extracted_data_blocks:
+        label_id, data_block, metadata_block = extracted_data_block
         specific_label_file_prefix_path = path.join(file_prefix_path, label_id, f"{period}{fu.NAME_SEPARATOR}")
         os.makedirs(path.dirname(file_prefix_path), exist_ok=True)
 
         extraction_metadata_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.CSV_FILE_EXTENSION}"
-        extraction_metadata_blocks[label_id].to_csv(path_or_buf=extraction_metadata_block_file_path,
-                                                    **__extraction_metadata_block_csv_save_options)
+        metadata_block.to_csv(path_or_buf=extraction_metadata_block_file_path,
+                              **__extraction_metadata_block_csv_save_options)
 
         data_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.HDF5_FILE_EXTENSION}"
         fu.write_ndarray_to_hdf5(specific_label_file_prefix_path, data_block.values)
@@ -120,7 +129,9 @@ def __core_extraction(merged_structures_item) -> Tuple[Period, Dict[str, Dict[st
 
 
 # Enable processing of extractions period by period so as to open a netcdf file only one time.
-def __merge_block_structures(structures: Mapping[str, Dict[Period, Block]]) -> Dict[Period, Dict[str, Block]]:
+# The returned data structure is ordered following the Period and the LabelId.
+def __merge_block_structures(structures: Mapping[str, Dict[Period, Block]]) -> List[Tuple[Period,
+                                                                                          List[Tuple[LabelId, Block]]]]:
     # str for label_id.
     # Build a set of periods.
     # (like (year, month), e.g. (2000, 10)).
@@ -128,14 +139,20 @@ def __merge_block_structures(structures: Mapping[str, Dict[Period, Block]]) -> D
     for structure in structures.values():
         periods.update(structure.keys())
 
-    result: Dict[Period, Dict[str, Block]] = dict()
+    # Sort the period ascending order.
+    periods: List[Period] = sorted(periods)
+
+    # Sort list of labels.
+    label_ids = sorted(structures.keys())
+
+    result: List[Tuple[Period, List[Tuple[LabelId, Block]]]] = list()
+
     for period in periods:
-        for label_id, structure in structures.items():
-            if period in structure:
-                if period not in result:
-                    result[period] = dict()
-                blocks = result[period]
-                blocks[label_id] = structure[period]
+        current_blocks: List[Tuple[LabelId, Block]] = list()
+        for label_id in label_ids:
+            if period in structures[label_id]:
+                current_blocks.append((label_id, structures[label_id][period]))
+        result.append((period, current_blocks))
 
     return result
 
@@ -162,12 +179,12 @@ def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMet
     #     ...
     #  ...
     try:
-        resolution_degree = TimeResolution.KEYS.index(netcdf_file_time_period)
+        resolution_degree = tu.TIME_RESOLUTION_KEYS.index(netcdf_file_time_period)
     except ValueError as e:
         msg = f"'{netcdf_file_time_period}' is not a known time resolution"
         raise ConfigurationError(msg, e)
 
-    list_keys = TimeResolution.KEYS[0:(resolution_degree+1)]
+    list_keys = tu.TIME_RESOLUTION_KEYS[0:(resolution_degree + 1)]
     list_column_names = [db_metadata_mapping[key] for key in list_keys]
     indices = dataframe.groupby(list_column_names).indices
 
@@ -207,15 +224,25 @@ def __unit_test1():
     structures['cyclone'] = __unit_test_build_blocks_from_csv(cyclone_csv_file_path, period_resolution)
     structures['no_cyclone'] = __unit_test_build_blocks_from_csv(no_cyclone_csv_file_path, period_resolution)
 
-    merged_structures = __merge_block_structures(structures)
-    assert str(merged_structures.keys()) == 'dict_keys([(2000, 9), (2000, 10)])'
-    period1 = list(merged_structures.keys())[0]
-    period2 = list(merged_structures.keys())[1]
-    assert len(merged_structures[period2]['cyclone']) == 49
-    assert len(merged_structures[period2]['no_cyclone']) == 51
-    assert 'cyclone' not in merged_structures[period1]
-    assert len(merged_structures[period1]['no_cyclone']) == 47
-    converted_block = convert_block_to_dict(structures['cyclone'][period2])
+    merged_structures: List[Tuple[Period, List[Tuple[LabelId, Block]]]] = __merge_block_structures(structures)
+    period1 = merged_structures[0][0]
+    period2 = merged_structures[1][0]
+
+    assert period1 == (2000, 9)
+    assert period2 == (2000, 10)
+
+    label_id1 = merged_structures[1][1][0][0]
+    label_id2 = merged_structures[1][1][1][0]
+
+    assert label_id1 == 'cyclone'
+    assert label_id2 == 'no_cyclone'
+
+    assert len(merged_structures[1][1][0][1]) == 49
+    assert len(merged_structures[1][1][1][1]) == 51
+
+    assert len(merged_structures[0][1]) == 1  # Cyclone not in period (2000, 9).
+
+    converted_block = convert_block_to_dict(merged_structures[1][1][0][1])
     print(converted_block[0:2])
 
 

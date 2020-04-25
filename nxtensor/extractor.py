@@ -5,7 +5,7 @@ Created on Fri Apr 23 14:50:20 2020
 
 @author: sebastien@gardoll.fr
 """
-from typing import Dict, List, Mapping, Union, Sequence
+from typing import Dict, List, Mapping, Union, Sequence, Tuple
 
 from nxtensor.core.square_extractor import SquareRegionExtractionVisitor
 from nxtensor.core.xarray_channel_extraction import Block, Period
@@ -19,6 +19,7 @@ import nxtensor.core.xarray_extractions as xtract
 import nxtensor.utils.time_utils as tu
 
 import nxtensor.core.xarray_channel_extraction as chan_xtract
+from nxtensor.core.xarray_channel_extraction import LabelId
 
 import xarray as xr
 
@@ -26,20 +27,20 @@ import xarray as xr
 class ExtractionVisitor(VariableVisitor):
 
     # TODO: instantiate the visitor thanks to a factory (shape).
-    def __init__(self, period: Period, extraction_metadata_blocks: Mapping[str, Block], half_lat_frame: int,
+    def __init__(self, period: Period, extraction_metadata_blocks: List[Tuple[LabelId, Block]], half_lat_frame: int,
                  half_lon_frame: int, dask_scheduler: str = 'single-threaded',
                  shape: ExtractionShape = ExtractionShape.SQUARE):
         self.__period: Period = period
-        self.__extraction_metadata_blocks: Mapping[str, Block] = extraction_metadata_blocks
+        self.__extraction_metadata_blocks: List[Tuple[LabelId, Block]] = extraction_metadata_blocks
         self.__half_lat_frame: int = half_lat_frame
         self.__half_lon_frame: int = half_lon_frame
         self.__dask_scheduler: str = dask_scheduler
         self.__shape: ExtractionShape = shape
-        self.result: Dict[str, xr.DataArray] = dict()
+        self.result: List[Tuple[LabelId, xr.DataArray, Block]] = list()
 
     def __core_extraction(self, var: Variable, datasets: Mapping[str, xr.Dataset]) -> None:
 
-        for label_id, extraction_metadata_block in self.__extraction_metadata_blocks.items():
+        for label_id, extraction_metadata_block in self.__extraction_metadata_blocks:
             # noinspection PyTypeChecker
             extraction_data_list: Sequence[Mapping[Union[Coordinate, tu.TimeResolution], Union[int, float]]] = \
                 chan_xtract.convert_block_to_dict(extraction_metadata_block)
@@ -62,7 +63,7 @@ class ExtractionVisitor(VariableVisitor):
             dims = (var.str_id, TensorDimension.X, TensorDimension.Y)
             # Stack the extracted regions in a xarray data array => data extraction_metadata_blocks.
             data = xr.DataArray(extracted_regions, dims=dims)
-            self.result[label_id] = data
+            self.result.append((label_id, data, extraction_metadata_block))
 
         [dataset.close() for dataset in datasets.values()]
 
@@ -83,5 +84,5 @@ class ExtractionVisitor(VariableVisitor):
             datasets[var_id] = xtract.open_netcdf(netcdf_file_path)
         self.__core_extraction(var, datasets)
 
-    def get_result(self) -> Dict[str, xr.DataArray]:
+    def get_result(self) -> List[Tuple[LabelId, xr.DataArray, Block]]:
         return self.result
