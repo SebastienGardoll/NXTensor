@@ -8,7 +8,7 @@ Created on Fri Apr 23 14:50:20 2020
 from typing import Dict, List, Mapping, Union, Sequence, Tuple
 
 import nxtensor.utils.time_resolutions
-from nxtensor.core.square_extractor import SquareRegionExtractionVisitor
+from nxtensor.square_extractor import SquareRegionExtractionVisitor
 from nxtensor.core.xarray_channel_extraction import MetaDataBlock, Period
 from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.tensor_dimensions import TensorDimension
