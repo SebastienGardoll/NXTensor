@@ -58,7 +58,10 @@ def to_csv(data: Sequence[Mapping[str, any]], file_path: str,
 
         header = sorted(data[0].keys())
         csv_writer = csv.writer(file, **csv_options)
-        csv_writer.writerow(header)
+
+        if CsvOptName.HEADER in csv_options:
+            csv_writer.writerow(header)
+
         for mapping in data:
             ordered_values = [mapping[key] for key in header]
             csv_writer.writerow(ordered_values)

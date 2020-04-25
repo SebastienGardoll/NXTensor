@@ -9,6 +9,7 @@ import pandas as pd
 
 from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.csv_option_names import CsvOptName
+from nxtensor.utils.csv_utils import DEFAULT_CSV_OPTIONS
 from nxtensor.utils.db_types import DBType
 from nxtensor.utils.time_resolutions import TimeResolution
 
@@ -17,17 +18,12 @@ from nxtensor.utils.time_resolutions import TimeResolution
 
 DBMetadataMapping = Dict[Union[Coordinate, TimeResolution], str]
 
-DEFAULT_CVS_OPTIONS: Mapping[CsvOptName, Union[str, int]] = {CsvOptName.SEPARATOR: ',',
-                                                             CsvOptName.HEADER: 0,
-                                                             CsvOptName.ENCODING: 'utf8',
-                                                             CsvOptName.LINE_TERMINATOR: '\\n'}
 
-
-def load_csv_file(db_file_path: str, options: Mapping[CsvOptName, Union[str, int]] = DEFAULT_CVS_OPTIONS)\
+def load_csv_file(db_file_path: str, options: Mapping[CsvOptName, any] = DEFAULT_CSV_OPTIONS)\
                   -> pd.DataFrame:
     with open(db_file_path, 'r') as db_file:
         try:
-            if options[CsvOptName.LINE_TERMINATOR] == DEFAULT_CVS_OPTIONS[CsvOptName.LINE_TERMINATOR]:
+            if options[CsvOptName.LINE_TERMINATOR] == DEFAULT_CSV_OPTIONS[CsvOptName.LINE_TERMINATOR]:
                 options = {k: v for k, v in options.items()}
                 options[CsvOptName.LINE_TERMINATOR] = '\n'
             result = pd.read_csv(filepath_or_buffer=db_file, **options)
@@ -37,7 +33,7 @@ def load_csv_file(db_file_path: str, options: Mapping[CsvOptName, Union[str, int
             raise Exception(msg, e)
 
 
-def get_dataframe_load_function(db_type: DBType) -> Callable[[str, Dict[CsvOptName, str]], pd.DataFrame]:
+def get_dataframe_load_function(db_type: DBType) -> Callable[[str, Mapping[CsvOptName, any]], pd.DataFrame]:
     try:
         return __LOAD_TYPE_FUNCTIONS[db_type]
     except KeyError:
@@ -45,7 +41,7 @@ def get_dataframe_load_function(db_type: DBType) -> Callable[[str, Dict[CsvOptNa
         raise Exception(msg)
 
 
-__LOAD_TYPE_FUNCTIONS: Mapping[DBType, Callable[[str, Mapping[CsvOptName, Union[str, int]]], pd.DataFrame]] =\
+__LOAD_TYPE_FUNCTIONS: Mapping[DBType, Callable[[str, Mapping[CsvOptName, any]], pd.DataFrame]] =\
     {DBType.CSV: load_csv_file}
 
 
