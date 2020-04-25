@@ -7,11 +7,10 @@ Created on Wed Mar 27 13:35:52 2019
 
 import yaml
 import logging
-from abc import ABC
 import os
 
 
-class YamlSerializable(ABC):
+class YamlSerializable(yaml.YAMLObject):
 
     YAML_FILENAME_EXTENSION: str = 'yml'
 

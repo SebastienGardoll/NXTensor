@@ -24,6 +24,8 @@ class ExtractionShape(Enum):
 
 class ExtractionConfig(YamlSerializable):
 
+    yaml_tag = u'ExtractionConfig'
+
     FILE_NAME_POSTFIX: str = 'extraction_config.yml'
 
     def compute_filename(self) -> str:
@@ -107,6 +109,8 @@ class ExtractionConfig(YamlSerializable):
 class ClassificationLabel(YamlSerializable):
 
     FILE_NAME_POSTFIX: str = 'label.yml'
+
+    yaml_tag = u'ClassificationLabel'
 
     def compute_filename(self) -> str:
         return ClassificationLabel.generate_filename(self.dataset_id, self.str_id)

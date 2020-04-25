@@ -7,6 +7,7 @@ from nxtensor.utils.db_types import DBType
 from nxtensor.variable import Variable
 import csv
 
+
 def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
     dataset_ids = ['2ka', '2kb', '2000', '2000_10', 'all']
     data_parent_dir = '/data/sgardoll/cyclone_data/dataset'

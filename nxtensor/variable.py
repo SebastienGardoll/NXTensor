@@ -17,7 +17,7 @@ from abc import ABC, abstractmethod
 VariableId = str
 
 
-class Variable(YamlSerializable, ABC):
+class Variable(YamlSerializable):
 
     FILE_NAME_POSTFIX: str = 'variable.yml'
 
@@ -53,6 +53,8 @@ class Variable(YamlSerializable, ABC):
 
 class SingleLevelVariable(Variable):
 
+    yaml_tag = u'SingleLevelVariable'
+
     def __init__(self, str_id: str):
         super().__init__(str_id)
         # noinspection PyTypeChecker
@@ -69,6 +71,8 @@ class SingleLevelVariable(Variable):
 
 class MultiLevelVariable(SingleLevelVariable):
 
+    yaml_tag = u'MultiLevelVariable'
+
     def __init__(self, str_id: str):
         super().__init__(str_id)
         # noinspection PyTypeChecker
@@ -80,6 +84,8 @@ class MultiLevelVariable(SingleLevelVariable):
 
 
 class ComputedVariable(Variable):
+
+    yaml_tag = u'ComputedVariable'
 
     def __init__(self, str_id: str):
         super().__init__(str_id)
