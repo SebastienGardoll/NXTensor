@@ -1,5 +1,5 @@
 import os.path as path
-from nxtensor.utils.time_utils import TimeResolution
+from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.variable import SingleLevelVariable, MultiLevelVariable, Variable, ComputedVariable
 
 

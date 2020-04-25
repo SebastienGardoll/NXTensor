@@ -6,10 +6,8 @@ Created on Tue Mar 26 12:13:52 2019
 @author: sebastien@gardoll.fr
 """
 
-from enum import Enum
 
-
-class TensorDimension(Enum):
+class TensorDimension:
 
     IMG     = 'img'
     MEAN    = 'mean'

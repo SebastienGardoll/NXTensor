@@ -8,14 +8,6 @@ Created on Wed Apr  22 17:06:18 2020
 
 import numpy as np
 import h5py
-from enum import Enum
-
-
-class FileExtension(Enum):
-
-    CSV_FILE_EXTENSION    = 'csv'
-    NETCDF_FILE_EXTENSION = 'nc'
-    HDF5_FILE_EXTENSION = 'h5'
 
 
 NAME_SEPARATOR: str = '_'

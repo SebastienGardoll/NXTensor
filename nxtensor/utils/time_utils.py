@@ -9,7 +9,8 @@ Created on Thu Mar 28 12:04:09 2019
 import datetime
 import logging
 from typing import Dict, Sequence, Union, Mapping
-from enum import Enum
+
+from nxtensor.utils.time_resolutions import TimeResolution
 
 
 def build_date_dictionary(date: datetime.datetime) -> Mapping[str, Union[str, int]]:
@@ -23,29 +24,9 @@ def build_date_dictionary(date: datetime.datetime) -> Mapping[str, Union[str, in
         raise Exception(msg)
 
 
-class TimeResolution(Enum):
-
-    YEAR         = 'year'
-    MONTH        = 'month'
-    DAY          = 'day'
-    HOUR         = 'hour'
-    MINUTE       = 'minute'
-    SECOND       = 'second'
-    MILLISECOND  = 'millisecond'
-    MICROSECOND  = 'microsecond'
-
-    MONTH2D      = 'month2d'
-    HOUR2D       = 'hour2d'
-    DAY2D        = 'day2d'
-
-
-TIME_RESOLUTION_KEYS   = (TimeResolution.YEAR, TimeResolution.MONTH, TimeResolution.DAY, TimeResolution.HOUR,
-                          TimeResolution.MINUTE, TimeResolution.SECOND, TimeResolution.MILLISECOND,
-                          TimeResolution.MICROSECOND)
-
-
 def from_time_list_to_dict(time_list: Sequence[int]) -> Dict[TimeResolution, Union[str, int]]:
-    # Time_list is a list that contains the value of the TimeResolution::TIME_RESOLUTION_KEYS (see tensor_utils.py).
+    # Time_list is a list that contains the value of the TimeResolution::TIME_RESOLUTION_KEYS
+    # (see tensor_dimensions.py).
     # We cannot instantiate a date without the day number. That's why this function
     # was created. The list must have the same order than the TimeResolution::TIME_RESOLUTION_KEYS .
     # Python 3.7 dict preserves the insertion order.

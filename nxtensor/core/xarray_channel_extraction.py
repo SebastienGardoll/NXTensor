@@ -11,10 +11,10 @@ import pandas as pd
 import xarray as xr
 
 from nxtensor.exceptions import ConfigurationError
-from nxtensor.utils.coordinate_utils import Coordinate
-from nxtensor.utils.time_utils import TimeResolution
-import nxtensor.utils.time_utils as tu
-from nxtensor.utils.db_utils import CsvOptNames, DBMetadataMapping, create_db_metadata_mapping
+from nxtensor.utils.coordinates import Coordinate
+from nxtensor.utils.time_resolutions import TimeResolution
+from nxtensor.utils.db_utils import DBMetadataMapping, create_db_metadata_mapping
+from nxtensor.utils.csv_option_names import CsvOptNames
 
 from multiprocessing import Pool
 import os.path as path
@@ -22,8 +22,7 @@ import os
 
 import nxtensor.utils.file_utils as fu
 
-from nxtensor.utils.file_utils import FileExtension
-
+from nxtensor.utils.file_extensions import FileExtension
 
 # [Types]
 
@@ -179,12 +178,12 @@ def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMet
     #     ...
     #  ...
     try:
-        resolution_degree = tu.TIME_RESOLUTION_KEYS.index(netcdf_file_time_period)
+        resolution_degree = TimeResolution.KEYS.index(netcdf_file_time_period)
     except ValueError as e:
         msg = f"'{netcdf_file_time_period}' is not a known time resolution"
         raise ConfigurationError(msg, e)
 
-    list_keys = tu.TIME_RESOLUTION_KEYS[0:(resolution_degree + 1)]
+    list_keys = TimeResolution.KEYS[0:(resolution_degree + 1)]
     list_column_names = [db_metadata_mapping[key] for key in list_keys]
     indices = dataframe.groupby(list_column_names).indices
 

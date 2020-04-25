@@ -9,8 +9,8 @@ from typing import Dict, Union, Mapping
 
 import xarray as xr
 import nxtensor.core.xarray_extractions as xtract
-from nxtensor.utils.coordinate_utils import Coordinate
-from nxtensor.utils.time_utils import TimeResolution
+from nxtensor.utils.coordinates import Coordinate
+from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.xarray_rpn_calulator import XarrayRpnCalculator
 from nxtensor.variable import MultiLevelVariable, SingleLevelVariable, ComputedVariable, VariableVisitor, \
     VariableNetcdfFilePathVisitor, Variable

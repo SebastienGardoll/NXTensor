@@ -1,8 +1,9 @@
 from os import path
 
 from nxtensor.extraction import ClassificationLabel, ExtractionConfig, ExtractionShape
-from nxtensor.utils.time_utils import TimeResolution
-from nxtensor.utils.db_utils import DBType, CsvOptNames
+from nxtensor.utils.time_resolutions import TimeResolution
+from nxtensor.utils.csv_option_names import CsvOptNames
+from nxtensor.utils.db_types import DBType
 from nxtensor.variable import Variable
 
 

@@ -5,8 +5,10 @@ Created on Wed Apr  3 13:26:39 2019
 
 @author: sebastien@gardoll.fr
 """
-from nxtensor.utils.time_utils import TimeResolution
-from nxtensor.utils.db_utils import DBType, CsvOptNames, DBMetadataMapping
+from nxtensor.utils.time_resolutions import TimeResolution
+from nxtensor.utils.db_utils import DBMetadataMapping
+from nxtensor.utils.csv_option_names import CsvOptNames
+from nxtensor.utils.db_types import DBType
 from nxtensor.yaml_serializable import YamlSerializable
 from nxtensor.variable import Variable
 import logging

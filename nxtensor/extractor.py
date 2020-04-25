@@ -7,10 +7,11 @@ Created on Fri Apr 23 14:50:20 2020
 """
 from typing import Dict, List, Mapping, Union, Sequence, Tuple
 
+import nxtensor.utils.time_resolutions
 from nxtensor.core.square_extractor import SquareRegionExtractionVisitor
 from nxtensor.core.xarray_channel_extraction import Block, Period
-from nxtensor.utils.coordinate_utils import Coordinate
-from nxtensor.utils.tensor_utils import TensorDimension
+from nxtensor.utils.coordinates import Coordinate
+from nxtensor.utils.tensor_dimensions import TensorDimension
 from nxtensor.extraction import ExtractionShape
 from nxtensor.variable import VariableVisitor, SingleLevelVariable, MultiLevelVariable, ComputedVariable, Variable, \
     VariableNetcdfFilePathVisitor
@@ -42,7 +43,8 @@ class ExtractionVisitor(VariableVisitor):
 
         for label_id, extraction_metadata_block in self.__extraction_metadata_blocks:
             # noinspection PyTypeChecker
-            extraction_data_list: Sequence[Mapping[Union[Coordinate, tu.TimeResolution], Union[int, float]]] = \
+            extraction_data_list: Sequence[Mapping[Union[Coordinate, nxtensor.utils.time_resolutions.TimeResolution],
+                                                   Union[int, float]]] = \
                 chan_xtract.convert_block_to_dict(extraction_metadata_block)
 
             extracted_regions: List[xr.DataArray] = list()

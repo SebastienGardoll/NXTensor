@@ -9,7 +9,7 @@ from typing import Dict, List, Mapping
 
 from nxtensor.yaml_serializable import YamlSerializable
 import logging
-from nxtensor.utils.time_utils import TimeResolution
+from nxtensor.utils.time_resolutions import TimeResolution
 from abc import ABC, abstractmethod
 
 

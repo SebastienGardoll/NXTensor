@@ -6,30 +6,16 @@ Created on Fri Apr 24 11:01:15 2020
 """
 from typing import Dict, Callable, Union, Mapping
 import pandas as pd
-from enum import Enum
 
-from nxtensor.utils.coordinate_utils import Coordinate
-from nxtensor.utils.time_utils import TimeResolution
+from nxtensor.utils.coordinates import Coordinate
+from nxtensor.utils.csv_option_names import CsvOptNames
+from nxtensor.utils.db_types import DBType
+from nxtensor.utils.time_resolutions import TimeResolution
 
 # [TYPES]
 
 
 DBMetadataMapping = Dict[Union[Coordinate, TimeResolution], str]
-
-
-class CsvOptNames(Enum):
-
-    SEPARATOR            = 'sep'
-    HEADER               = 'header'
-    SAVE_LINE_TERMINATOR = 'line_terminator'
-    READ_LINE_TERMINATOR = 'lineterminator'
-    ENCODING             = 'encoding'
-
-
-class DBType(Enum):
-
-    CSV = 'csv'
-
 
 DEFAULT_CVS_OPTIONS: Mapping[CsvOptNames, Union[str, int]] = {CsvOptNames.SEPARATOR: ',',
                                                               CsvOptNames.HEADER: 0,
