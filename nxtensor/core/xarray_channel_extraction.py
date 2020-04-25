@@ -42,7 +42,7 @@ INDEX_NAME = 'index'
 
 __extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, MetaDataBlock]]],
                                                           Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]]
-__extraction_metadata_block_csv_save_options: Mapping[CsvOptName, str]
+__extraction_metadata_block_csv_save_options: Mapping[CsvOptName, any]
 
 
 def convert_block_to_dict(extraction_metadata_block: pd.DataFrame) -> MetaDataBlock:
@@ -60,7 +60,7 @@ def extract(extraction_metadata_block_processing_function: Callable[[Period, Lis
             extraction_metadata_blocks: Mapping[LabelId, pd.DataFrame],
             db_metadata_mappings: Mapping[LabelId, DBMetadataMapping],
             netcdf_file_time_period: TimeResolution,
-            extraction_metadata_block_csv_save_options: Mapping[CsvOptName, str] = None,
+            extraction_metadata_block_csv_save_options: Mapping[CsvOptName, any] = None,
             nb_workers: int = 1,
             inplace=False) -> Dict[Period, Dict[str, Dict[str, str]]]:
     # Returns the data extraction_metadata_blocks and the extraction data extraction_metadata_blocks according to

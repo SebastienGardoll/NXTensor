@@ -7,6 +7,7 @@ Created on Wed Apr  22 17:06:18 2020
 """
 from collections import Sequence, Mapping
 import csv
+
 import numpy as np
 import h5py
 
@@ -27,7 +28,7 @@ def read_ndarray_from_hdf5(file_path: str) -> np.ndarray:
     return np.array(data)
 
 
-DEFAULT_CSV_OPTIONS: Mapping[CsvOptName, str] = {CsvOptName.SEPARATOR: ',',
+DEFAULT_CSV_OPTIONS: Mapping[CsvOptName, any] = {CsvOptName.SEPARATOR: ',',
                                                  CsvOptName.LINE_TERMINATOR: '\\n',
                                                  CsvOptName.QUOTE_CHAR: '"',
                                                  CsvOptName.QUOTING: csv.QUOTE_NONNUMERIC,
@@ -35,7 +36,7 @@ DEFAULT_CSV_OPTIONS: Mapping[CsvOptName, str] = {CsvOptName.SEPARATOR: ',',
 
 
 def to_csv(data: Sequence[Mapping[str, any]], file_path: str,
-           csv_options: Mapping[CsvOptName, str] = DEFAULT_CSV_OPTIONS) -> None:
+           csv_options: Mapping[CsvOptName, any] = DEFAULT_CSV_OPTIONS) -> None:
 
     if CsvOptName.ENCODING in csv_options or\
        CsvOptName.LINE_TERMINATOR in csv_options or\
