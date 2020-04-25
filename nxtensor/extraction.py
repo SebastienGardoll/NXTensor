@@ -5,6 +5,7 @@ Created on Wed Apr  3 13:26:39 2019
 
 @author: sebastien@gardoll.fr
 """
+from nxtensor.core.xarray_channel_extraction import LabelId
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.db_utils import DBMetadataMapping
 from nxtensor.utils.csv_option_names import CsvOptNames
@@ -88,7 +89,7 @@ class ExtractionConfig(YamlSerializable):
 
         return self.__variables
 
-    def get_labels(self) -> Mapping[str, 'ClassificationLabel']:
+    def get_labels(self) -> Mapping[LabelId, 'ClassificationLabel']:
         labels_value = getattr(self, '__labels', None)
         if labels_value is None:
             logging.debug(f"loading the labels of {self.str_id}:")

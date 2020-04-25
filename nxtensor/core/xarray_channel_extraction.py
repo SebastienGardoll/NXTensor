@@ -47,8 +47,8 @@ __extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[La
 __extraction_metadata_block_csv_save_options: Mapping[CsvOptNames, str]
 
 
-def convert_block_to_dict(extraction_metadata_block: MetaDataBlock) -> Sequence[Mapping[Union[TimeResolution, Coordinate],
-                                                                                        Union[int, float, str]]]:
+def convert_block_to_dict(extraction_metadata_block: MetaDataBlock)\
+        -> Sequence[Mapping[Union[TimeResolution, Coordinate], Union[int, float, str]]]:
     result = extraction_metadata_block.to_dict('records')
     for dictionary in result:
         dictionary[TimeResolution.MONTH2D] = f"{dictionary[TimeResolution.MONTH]:02d}"
@@ -129,8 +129,8 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
 
 # Enable processing of extractions period by period so as to open a netcdf file only one time.
 # The returned data structure is ordered following the Period and the LabelId.
-def __merge_block_structures(structures: Mapping[str, Dict[Period, MetaDataBlock]]) -> List[Tuple[Period,
-                                                                                                  List[Tuple[LabelId, MetaDataBlock]]]]:
+def __merge_block_structures(structures: Mapping[LabelId, Dict[Period, MetaDataBlock]])\
+        -> List[Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]]]:
     # str for label_id.
     # Build a set of periods.
     # (like (year, month), e.g. (2000, 10)).
@@ -207,7 +207,8 @@ def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMet
     return result
 
 
-def __unit_test_build_blocks_from_csv(csv_file_path: str, period_resolution: TimeResolution) -> Dict[Period, MetaDataBlock]:
+def __unit_test_build_blocks_from_csv(csv_file_path: str, period_resolution: TimeResolution)\
+        -> Dict[Period, MetaDataBlock]:
     dataframe = pd.read_csv(filepath_or_buffer=csv_file_path, sep=',', header=0)
     db_metadata_mapping = create_db_metadata_mapping(year='year', month='month', day='day', hour='hour',
                                                      lat='lat', lon='lon')

@@ -42,11 +42,12 @@ def extract(extraction_conf: ExtractionConfig, variable_id: str):
                                                          dask_scheduler=extraction_conf.dask_scheduler,
                                                          shape=extraction_conf.extraction_shape)
         variable.accept(extractor)
-        result: Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]] = (file_prefix_path, extractor.get_result())
+        result: Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]] = \
+            (file_prefix_path, extractor.get_result())
         return result
 
-    db_metadata_mappings: Dict[str, DBMetadataMapping] = dict()
-    extraction_metadata_blocks: Dict[str, pd.DataFrame] = dict()
+    db_metadata_mappings: Dict[LabelId, DBMetadataMapping] = dict()
+    extraction_metadata_blocks: Dict[LabelId, pd.DataFrame] = dict()
     for label_id, label in extraction_conf.get_labels().items():
         db_metadata_mappings[label_id] = label.db_meta_data_mapping
         dataframe_load_function = du.get_dataframe_load_function(label.db_format)
