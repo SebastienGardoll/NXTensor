@@ -11,12 +11,12 @@ import nxtensor.utils.csv_utils as cu
 
 def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
     dataset_ids = ['2ka', '2kb', '2000', '2000_10', 'all']
-    data_parent_dir = '/data/sgardoll/cyclone_data/dataset'
+    data_parent_dir = label_parent_dir
     filename_postfix = 'dataset.csv'
     db_filename_template = '{dataset_id}_{label_id}_{filename_postfix}'
     db_format = DBType.CSV
     db_time_resolution = TimeResolution.HOUR
-    db_format_options = cu.create_csv_options(separator=',', header=0, line_terminator='utf8', encoding='\\n',
+    db_format_options = cu.create_csv_options(separator=',', header=0, line_terminator='\\n', encoding='utf8',
                                               quote_char='"', quoting=csv.QUOTE_NONNUMERIC)
 
     db_meta_data_mapping = dict(lat='lat', lon='lon', year='year', month='month', day='day', hour='hour')
@@ -42,7 +42,7 @@ def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
 
 
 def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:
-    output_parent_dir = '/data/sgardoll/cyclone_data'
+    output_parent_dir = path.join(config_parent_dir, 'output')
     dataset_ids = ['2ka', '2kb', '2000', '2000_10', 'all']
     era5_variables = ['msl', 'tcwv', 'u10', 'v10', 'ta200', 'ta500', 'u850', 'v850', 'wsl10']
     dask_scheduler = 'single-threaded'
@@ -85,7 +85,6 @@ def test_load(config_parent_dir_path: str) -> None:
         conf = ExtractionConfig.load(path.join(config_parent_dir_path, filename))
         conf.get_variables()
         labels = conf.get_labels()
-        print(labels['no_cyclone'].db_format_options)
 
 
 if __name__ == '__main__':
