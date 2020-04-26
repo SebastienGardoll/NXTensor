@@ -25,6 +25,8 @@ import nxtensor.utils.file_utils as fu
 
 from nxtensor.utils.file_extensions import FileExtension
 
+import pickle
+
 # [Types]
 
 
@@ -55,17 +57,12 @@ def convert_block_to_dict(extraction_metadata_block: pd.DataFrame) -> MetaDataBl
     return result
 
 
-def extract(extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, MetaDataBlock]]],
-                                                                    Tuple[str, List[Tuple[LabelId, xr.DataArray,
-                                                                                          MetaDataBlock]]]],
-            extraction_metadata_blocks: Mapping[LabelId, pd.DataFrame],
-            db_metadata_mappings: Mapping[LabelId, DBMetadataMapping],
-            netcdf_file_time_period: TimeResolution,
-            extraction_metadata_block_csv_save_options: Mapping[CsvOptName, any] = None,
-            nb_workers: int = 1,
-            inplace=False) -> Dict[Period, Dict[str, Dict[str, str]]]:
-    # Returns the data extraction_metadata_blocks and the extraction data extraction_metadata_blocks according to
-    # the label for all the period of time.
+def preprocess_extraction(preprocess_result_file_path: str,
+                          extraction_metadata_blocks: Mapping[LabelId, pd.DataFrame],
+                          db_metadata_mappings: Mapping[LabelId, DBMetadataMapping],
+                          netcdf_file_time_period: TimeResolution,
+                          inplace: bool = False):
+    # Compute the extraction_metadata_blocks according to the label for all the period of time.
     structures = dict()
     for label_id, dataframe in extraction_metadata_blocks.items():
         db_metadata_mapping = db_metadata_mappings[label_id]
@@ -75,6 +72,23 @@ def extract(extraction_metadata_block_processing_function: Callable[[Period, Lis
     # Merged_structures guarantees the order (following period, label_id and extraction metadata).
     merged_structures: List[Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]]] = __merge_block_structures(structures)
     del structures
+    # TODO: rethrow exception.
+    with open(preprocess_result_file_path, 'w') as file:
+        pickle.dump(obj=merged_structures, file=file, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def extract(preprocess_result_file_path: str,
+            extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, MetaDataBlock]]],
+                                                                    Tuple[str, List[Tuple[LabelId, xr.DataArray,
+                                                                                          MetaDataBlock]]]],
+            extraction_metadata_block_csv_save_options: Mapping[CsvOptName, any] = None,
+            nb_workers: int = 1) -> Dict[Period, Dict[str, Dict[str, str]]]:
+
+    # Returns the extraction data and extraction metadata blocks file paths.
+
+    # TODO: rethrow exception.
+    with open(preprocess_result_file_path, 'r') as file:
+        merged_structures = pickle.load(file=file)
 
     global __extraction_metadata_block_csv_save_options
     __extraction_metadata_block_csv_save_options = extraction_metadata_block_csv_save_options
