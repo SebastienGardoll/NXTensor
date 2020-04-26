@@ -51,9 +51,9 @@ __extraction_metadata_block_csv_save_options: Mapping[CsvOptName, any]
 def convert_block_to_dict(extraction_metadata_block: pd.DataFrame) -> MetaDataBlock:
     result = extraction_metadata_block.to_dict('records')
     for dictionary in result:
-        dictionary[TimeResolution.MONTH2D] = f"{dictionary[TimeResolution.MONTH]:02d}"
-        dictionary[TimeResolution.DAY2D] = f"{dictionary[TimeResolution.DAY]:02d}"
-        dictionary[TimeResolution.HOUR2D] = f"{dictionary[TimeResolution.HOUR]:02d}"
+        dictionary[TimeResolution.MONTH2D] = f"{int(dictionary[TimeResolution.MONTH]):02d}"
+        dictionary[TimeResolution.DAY2D] = f"{int(dictionary[TimeResolution.DAY]):02d}"
+        dictionary[TimeResolution.HOUR2D] = f"{int(dictionary[TimeResolution.HOUR]):02d}"
     return result
 
 
@@ -73,7 +73,7 @@ def preprocess_extraction(preprocess_result_file_path: str,
     merged_structures: List[Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]]] = __merge_block_structures(structures)
     del structures
     # TODO: rethrow exception.
-    with open(preprocess_result_file_path, 'w') as file:
+    with open(preprocess_result_file_path, 'wb') as file:
         pickle.dump(obj=merged_structures, file=file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
