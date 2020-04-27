@@ -68,7 +68,6 @@ def to_csv(data: Sequence[Mapping[str, any]], file_path: str,
     else:
         file = open(file_path, 'w')
 
-
     fieldnames = sorted(data[0].keys())
     csv_writer = csv.DictWriter(file, fieldnames=fieldnames, **csv_options)
 
