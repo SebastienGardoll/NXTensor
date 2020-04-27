@@ -15,7 +15,7 @@ class YamlSerializable(yaml.YAMLObject):
     YAML_FILENAME_EXTENSION: str = 'yml'
 
     def __init__(self, str_id: str):
-        self.str_id = str_id
+        self.str_id: str = str_id
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(str_id={self.str_id})"
