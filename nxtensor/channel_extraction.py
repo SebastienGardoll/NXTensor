@@ -20,6 +20,7 @@ import pandas as pd
 
 import xarray as xr
 
+import os
 import os.path as path
 
 import nxtensor.utils.db_utils as du

@@ -31,6 +31,7 @@ def create_csv_options(separator: str = None, header: int = None, line_terminato
 
 DEFAULT_CSV_OPTIONS: Mapping[CsvOptName, any] = {CsvOptName.SEPARATOR: ',',
                                                  CsvOptName.LINE_TERMINATOR: '\\n',
+                                                 CsvOptName.HEADER: 0,
                                                  CsvOptName.QUOTE_CHAR: '"',
                                                  CsvOptName.QUOTING: csv.QUOTE_NONNUMERIC,
                                                  CsvOptName.ENCODING: 'utf-8'}
@@ -41,13 +42,14 @@ def to_csv(data: Sequence[Mapping[str, any]], file_path: str,
 
     if CsvOptName.ENCODING in csv_options or\
        CsvOptName.LINE_TERMINATOR in csv_options or\
-       CsvOptName.SEPARATOR in csv_options:
+       CsvOptName.SEPARATOR in csv_options or\
+       CsvOptName.HEADER in csv_options:
         csv_options = {k: v for k, v in csv_options.items()}
+
         if CsvOptName.ENCODING in csv_options:
             encoding = csv_options.pop(CsvOptName.ENCODING)
-            file = open(file_path, 'w', encoding=encoding)
         else:
-            file = open(file_path, 'w')
+            encoding = None
 
         if csv_options[CsvOptName.LINE_TERMINATOR] == DEFAULT_CSV_OPTIONS[CsvOptName.LINE_TERMINATOR]:
             csv_options[CsvOptName.LINE_TERMINATOR] = '\n'
@@ -56,13 +58,24 @@ def to_csv(data: Sequence[Mapping[str, any]], file_path: str,
             separator = csv_options.pop(CsvOptName.SEPARATOR)
             csv_options['delimiter'] = separator
 
-        header = sorted(data[0].keys())
-        csv_writer = csv.writer(file, **csv_options)
-
         if CsvOptName.HEADER in csv_options:
-            csv_writer.writerow(header)
+            header = csv_options.pop(CsvOptName.HEADER)
+        else:
+            header = -1
 
-        for mapping in data:
-            ordered_values = [mapping[key] for key in header]
-            csv_writer.writerow(ordered_values)
-        file.close()
+    if encoding:
+        file = open(file_path, 'w', encoding=encoding)
+    else:
+        file = open(file_path, 'w')
+
+
+    fieldnames = sorted(data[0].keys())
+    csv_writer = csv.DictWriter(file, fieldnames=fieldnames, **csv_options)
+
+    if header >= 0:
+        csv_writer.writeheader()
+
+    for mapping in data:
+        csv_writer.writerow(mapping)
+
+    file.close()

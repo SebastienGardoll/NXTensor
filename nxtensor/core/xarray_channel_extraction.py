@@ -27,6 +27,8 @@ from nxtensor.utils.file_extensions import FileExtension
 
 import pickle
 
+import functools
+
 # [Types]
 
 
@@ -95,7 +97,7 @@ def extract(preprocess_result_file_path: str,
     global __extraction_metadata_block_processing_function
     __extraction_metadata_block_processing_function = extraction_metadata_block_processing_function
 
-    if nb_workers:
+    if nb_workers > 1:
         with Pool(processes=nb_workers) as pool:
             tmp_result = pool.map(func=__core_extraction, iterable=merged_structures, chunksize=1)
     else:
@@ -115,8 +117,9 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
 
     for extracted_data_block in extracted_data_blocks:
         label_id, data_block, metadata_block = extracted_data_block
-        specific_label_file_prefix_path = path.join(file_prefix_path, label_id, f"{period}{fu.NAME_SEPARATOR}")
-        os.makedirs(path.dirname(file_prefix_path), exist_ok=True)
+        period_str = functools.reduce(lambda x, y: f'{x}_{y}', period)
+        specific_label_file_prefix_path = path.join(file_prefix_path, label_id, f"{period_str}")
+        os.makedirs(path.dirname(specific_label_file_prefix_path), exist_ok=True)
 
         extraction_metadata_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.CSV_FILE_EXTENSION}"
         if __extraction_metadata_block_csv_save_options is None:
@@ -126,7 +129,7 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
                                             csv_options=__extraction_metadata_block_csv_save_options)
 
         data_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.HDF5_FILE_EXTENSION}"
-        fu.write_ndarray_to_hdf5(specific_label_file_prefix_path, data_block.values)
+        fu.write_ndarray_to_hdf5(data_block_file_path, data_block.values)
 
         result[label_id] = dict()
         result[label_id]['data_block'] = data_block_file_path

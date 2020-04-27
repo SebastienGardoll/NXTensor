@@ -4,7 +4,6 @@ from nxtensor.extraction import ClassificationLabel, ExtractionConfig, Extractio
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.db_types import DBType
 from nxtensor.variable import Variable
-import csv
 
 import nxtensor.utils.csv_utils as cu
 
@@ -49,7 +48,7 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:
     x_size = 32
     y_size = 32
     extraction_shape = ExtractionShape.SQUARE
-    block_dir_path = path.join(output_parent_dir, 'extraction_metadata_blocks')
+    block_dir_path = path.join(output_parent_dir, 'blocks')
     channel_dir_path = path.join(output_parent_dir, 'channel')
     tmp_dir_path = path.join(output_parent_dir, 'tmp')
     nb_process = 4
