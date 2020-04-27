@@ -104,12 +104,15 @@ __GENERATOR = {
     }
 
 
-if __name__ == '__main__':
-    dataframeFilePath = '/Users/seb/tmp/extraction_config/2000_10_cyclone_dataset.csv'
-    df = pd.read_csv(filepath_or_buffer=dataframeFilePath, sep=',', header=0)
+def test_reformat_coordinates(dataframe_file_path: str):
+    df = pd.read_csv(filepath_or_buffer=dataframe_file_path, sep=',', header=0)
     reformat_coordinates(df, 'lat', CoordinateFormat.INCREASING_DEGREE_NORTH, CoordinateFormat.DECREASING_DEGREE_NORTH,
                          0.25, 2)
     reformat_coordinates(df, 'lon', CoordinateFormat.M_180_TO_180_DEGREE_EAST, CoordinateFormat.ZERO_TO_360_DEGREE_EAST,
                          0.25, 2)
-    reformatted_dataframe_file_path = f'{dataframeFilePath}.reformatted'
+    reformatted_dataframe_file_path = f'{dataframe_file_path}.reformatted'
     df.to_csv(reformatted_dataframe_file_path, sep=',', encoding='utf-8', line_terminator='\n')
+
+
+if __name__ == '__main__':
+    test_reformat_coordinates('/Users/seb/tmp/extraction_config/2000_10_cyclone_dataset.csv')
