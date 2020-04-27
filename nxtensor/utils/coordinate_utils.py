@@ -11,7 +11,8 @@ from nxtensor.utils.coordinates import CoordinateFormat
 import numpy as np
 import pandas as pd
 
-_CONVERT_MAPPING = dict()
+
+__CONVERT_MAPPING = dict()
 
 
 def round_nearest(value, resolution, num_decimal):
@@ -31,8 +32,8 @@ def reformat_coordinates(dataframe: pd.DataFrame, column_name: str, from_format:
 
 
 def __get_convert_mapping(from_format, to_format, resolution):
-    if from_format in _CONVERT_MAPPING:
-        from_format_dict = _CONVERT_MAPPING[from_format]
+    if from_format in __CONVERT_MAPPING:
+        from_format_dict = __CONVERT_MAPPING[from_format]
         if to_format in from_format_dict:
             to_format_dict = from_format_dict[to_format]
             if resolution in to_format_dict:
@@ -45,7 +46,7 @@ def __get_convert_mapping(from_format, to_format, resolution):
             return __compute_mapping(from_format, to_format, resolution, to_format_dict)
     else:
         from_format_dict = dict()
-        _CONVERT_MAPPING[from_format] = from_format_dict
+        __CONVERT_MAPPING[from_format] = from_format_dict
         to_format_dict = dict()
         from_format_dict[to_format] = to_format_dict
         return __compute_mapping(from_format, to_format, resolution, to_format_dict)
@@ -104,4 +105,11 @@ __GENERATOR = {
 
 
 if __name__ == '__main__':
-    pass
+    dataframeFilePath = '/Users/seb/tmp/extraction_config/2000_10_cyclone_dataset.csv'
+    df = pd.read_csv(filepath_or_buffer=dataframeFilePath, sep=',', header=0)
+    reformat_coordinates(df, 'lat', CoordinateFormat.INCREASING_DEGREE_NORTH, CoordinateFormat.DECREASING_DEGREE_NORTH,
+                         0.25, 2)
+    reformat_coordinates(df, 'lon', CoordinateFormat.M_180_TO_180_DEGREE_EAST, CoordinateFormat.ZERO_TO_360_DEGREE_EAST,
+                         0.25, 2)
+    reformatted_dataframe_file_path = f'{dataframeFilePath}.reformatted'
+    df.to_csv(reformatted_dataframe_file_path, sep=',', encoding='utf-8', line_terminator='\n')
