@@ -59,7 +59,7 @@ def convert_block_to_dict(extraction_metadata_block: pd.DataFrame) -> MetaDataBl
     return result
 
 
-def preprocess_extraction(preprocess_result_file_path: str,
+def preprocess_extraction(preprocess_output_file_path: str,
                           extraction_metadata_blocks: Mapping[LabelId, pd.DataFrame],
                           db_metadata_mappings: Mapping[LabelId, DBMetadataMapping],
                           netcdf_file_time_period: TimeResolution,
@@ -75,11 +75,11 @@ def preprocess_extraction(preprocess_result_file_path: str,
     merged_structures: List[Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]]] = __merge_block_structures(structures)
     del structures
     # TODO: rethrow exception.
-    with open(preprocess_result_file_path, 'wb') as file:
+    with open(preprocess_output_file_path, 'wb') as file:
         pickle.dump(obj=merged_structures, file=file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def extract(preprocess_result_file_path: str,
+def extract(preprocess_input_file_path: str,
             extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, MetaDataBlock]]],
                                                                     Tuple[str, List[Tuple[LabelId, xr.DataArray,
                                                                                           MetaDataBlock]]]],
@@ -89,7 +89,7 @@ def extract(preprocess_result_file_path: str,
     # Returns the extraction data and extraction metadata blocks file paths.
 
     # TODO: rethrow exception.
-    with open(preprocess_result_file_path, 'rb') as file:
+    with open(preprocess_input_file_path, 'rb') as file:
         merged_structures = pickle.load(file=file)
 
     global __extraction_metadata_block_csv_save_options

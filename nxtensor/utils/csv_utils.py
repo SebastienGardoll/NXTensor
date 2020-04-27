@@ -40,6 +40,9 @@ DEFAULT_CSV_OPTIONS: Mapping[CsvOptName, any] = {CsvOptName.SEPARATOR: ',',
 def to_csv(data: Sequence[Mapping[str, any]], file_path: str,
            csv_options: Mapping[CsvOptName, any] = DEFAULT_CSV_OPTIONS) -> None:
 
+    encoding = None
+    header = -1
+
     if CsvOptName.ENCODING in csv_options or\
        CsvOptName.LINE_TERMINATOR in csv_options or\
        CsvOptName.SEPARATOR in csv_options or\
@@ -48,8 +51,6 @@ def to_csv(data: Sequence[Mapping[str, any]], file_path: str,
 
         if CsvOptName.ENCODING in csv_options:
             encoding = csv_options.pop(CsvOptName.ENCODING)
-        else:
-            encoding = None
 
         if csv_options[CsvOptName.LINE_TERMINATOR] == DEFAULT_CSV_OPTIONS[CsvOptName.LINE_TERMINATOR]:
             csv_options[CsvOptName.LINE_TERMINATOR] = '\n'
@@ -60,8 +61,6 @@ def to_csv(data: Sequence[Mapping[str, any]], file_path: str,
 
         if CsvOptName.HEADER in csv_options:
             header = csv_options.pop(CsvOptName.HEADER)
-        else:
-            header = -1
 
     if encoding:
         file = open(file_path, 'w', encoding=encoding)
