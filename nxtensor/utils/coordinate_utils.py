@@ -110,7 +110,7 @@ def test_reformat_coordinates(dataframe_file_path: str):
                          0.25, 2)
     reformat_coordinates(df, 'lon', CoordinateFormat.M_180_TO_180_DEGREE_EAST, CoordinateFormat.ZERO_TO_360_DEGREE_EAST,
                          0.25, 2)
-    reformatted_dataframe_file_path = f'{dataframe_file_path}.reformatted'
+    reformatted_dataframe_file_path = f'{dataframe_file_path}'  # .reformatted
     df.to_csv(reformatted_dataframe_file_path, sep=',', encoding='utf-8', line_terminator='\n')
 
 
