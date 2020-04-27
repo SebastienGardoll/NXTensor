@@ -17,7 +17,7 @@ def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
     db_format = DBType.CSV
     db_time_resolution = TimeResolution.HOUR
     db_format_options = cu.create_csv_options(separator=',', header=0, line_terminator='\\n', encoding='utf8',
-                                              quote_char='"', quoting=csv.QUOTE_NONNUMERIC)
+                                              quote_char='"')
 
     db_meta_data_mapping = dict(lat='lat', lon='lon', year='year', month='month', day='day', hour='hour')
 
