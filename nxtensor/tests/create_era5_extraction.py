@@ -11,7 +11,7 @@ import nxtensor.utils.csv_utils as cu
 
 def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
     dataset_ids = ['2ka', '2kb', '2000', '2000_10', 'all']
-    data_parent_dir = label_parent_dir
+    data_parent_dir = '/data/sgardoll/cyclone_data/dataset'
     filename_postfix = 'dataset.csv'
     db_filename_template = '{dataset_id}_{label_id}_{filename_postfix}'
     db_format = DBType.CSV
@@ -84,11 +84,11 @@ def test_load(config_parent_dir_path: str) -> None:
         filename = ExtractionConfig.generate_filename(str_id)
         conf = ExtractionConfig.load(path.join(config_parent_dir_path, filename))
         conf.get_variables()
-        labels = conf.get_labels()
+        conf.get_labels()
 
 
 if __name__ == '__main__':
-    config_files_parent_dir_path = '/Users/seb/tmp/extraction_config'
+    config_files_parent_dir_path = '/home/sgardoll/extraction_config'
 
     print("> creating the labels")
     bootstrap_cyclone_labels(config_files_parent_dir_path)

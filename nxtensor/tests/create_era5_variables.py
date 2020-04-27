@@ -85,5 +85,5 @@ def bootstrap_all(config_file_parent_dir_path: str) -> None:
 # TODO: recursive computed variable with common variables between the nested computed variables.
 
 if __name__ == '__main__':
-    bootstrap_all('/Users/seb/tmp/extraction_config')
-    test_load('/Users/seb/tmp/extraction_config')
+    bootstrap_all('/home/sgardoll/extraction_config')
+    test_load('/home/sgardoll/extraction_config')

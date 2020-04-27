@@ -87,8 +87,8 @@ def extract(preprocess_result_file_path: str,
     # Returns the extraction data and extraction metadata blocks file paths.
 
     # TODO: rethrow exception.
-    with open(preprocess_result_file_path, 'r') as file:
-        merged_structures = pickle.load(file=file)
+    with open(preprocess_result_file_path, 'rb') as file:
+        merged_structures = pickle.load(file=f)
 
     global __extraction_metadata_block_csv_save_options
     __extraction_metadata_block_csv_save_options = extraction_metadata_block_csv_save_options

@@ -27,7 +27,7 @@ import nxtensor.utils.db_utils as du
 
 # Single process - single thread.
 def preprocess_extraction(preprocess_result_file_path: str, extraction_conf_file_path: str) -> None:
-    # TODO: error handling.
+    # TODO: error handling. Factorize !
     extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
     db_metadata_mappings: Dict[LabelId, DBMetadataMapping] = dict()
     extraction_metadata_blocks: Dict[LabelId, pd.DataFrame] = dict()
@@ -50,8 +50,11 @@ def preprocess_extraction(preprocess_result_file_path: str, extraction_conf_file
 
 
 def extract(preprocess_result_file_path: str,
-            extraction_conf: ExtractionConfig, variable_id: str) -> None:
+            extraction_conf_file_path: ExtractionConfig, variable_id: str)\
+            -> Dict[Period, Dict[str, Dict[str, str]]]:
 
+    # TODO: error handling. Factorize !
+    extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
     variable: Variable = extraction_conf.get_variables()[variable_id]
     file_prefix_path = path.join(extraction_conf.blocks_dir_path, extraction_conf.str_id)
 
@@ -72,16 +75,27 @@ def extract(preprocess_result_file_path: str,
         return result
 
         # TODO: save metadata options (csv).
-    chan_xtract.extract(preprocess_result_file_path=preprocess_result_file_path,
-                        extraction_metadata_block_processing_function=process_block,
-                        nb_workers=extraction_conf.nb_process)
+    file_paths = chan_xtract.extract(preprocess_result_file_path=preprocess_result_file_path,
+                                     extraction_metadata_block_processing_function=process_block,
+                                     nb_workers=extraction_conf.nb_process)
+    return file_paths
 
 
-def test_preprocess_extraction():
-    preprocess_result_file_path = '/Users/seb/tmp/extraction_config/preprocessing.pkl'
-    extraction_conf_file_path = '/Users/seb/tmp/extraction_config/2000_extraction_config.yml'
+def test_preprocess_extraction(preprocess_result_file_path: str, extraction_conf_file_path: str) -> None:
     preprocess_extraction(preprocess_result_file_path, extraction_conf_file_path)
 
 
+def test_extract(preprocess_result_file_path: str, extraction_conf_file_path: str,
+                 variable_id: str) -> None:
+    extract(preprocess_result_file_path, extraction_conf_file_path, variable_id)
+
+
 if __name__ == '__main__':
-    test_preprocess_extraction()
+    config_dir_path = '/home/sgardoll/extraction_config'
+    preprocess_result_file_path = path.join(config_dir_path, 'preprocessing.pkl')
+    extraction_conf_file_path = path.join(config_dir_path, '2000_10_extraction_config.yml')
+
+    test_preprocess_extraction(preprocess_result_file_path, extraction_conf_file_path)
+
+    variable_id = 'msl'
+    test_extract(preprocess_result_file_path, extraction_conf_file_path, variable_id)
