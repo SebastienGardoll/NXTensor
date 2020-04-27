@@ -115,4 +115,14 @@ def test_reformat_coordinates(dataframe_file_path: str):
 
 
 if __name__ == '__main__':
-    test_reformat_coordinates('/Users/seb/tmp/extraction_config/2000_10_cyclone_dataset.csv')
+    import os.path as path
+    dataframes_dir_path = '/data/sgardoll/cyclone_data/dataset'
+
+    dataframe_file_names = ('2000_10_cyclone_dataset.csv', '2000_10_no_cyclone_dataset.csv',
+                            '2000_cyclone_dataset.csv', '2000_no_cyclone_dataset.csv',
+                            '2ka_cyclone_dataset.csv', '2ka_no_cyclone_dataset.csv',
+                            '2kb_cyclone_dataset.csv', '2kb_no_cyclone_dataset.csv',
+                            'all_cyclone_dataset.csv', 'all_no_cyclone_dataset.csv')
+    for dataframe_file_name in dataframe_file_names:
+        dataframeFilePath = path.join(dataframes_dir_path, dataframe_file_name)
+        test_reformat_coordinates(dataframeFilePath)
