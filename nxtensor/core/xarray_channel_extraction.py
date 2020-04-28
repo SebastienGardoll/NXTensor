@@ -74,6 +74,8 @@ def preprocess_extraction(preprocess_output_file_path: str,
     # Merged_structures guarantees the order (following period, label_id and extraction metadata).
     merged_structures: List[Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]]] = __merge_block_structures(structures)
     del structures
+
+    os.makedirs(path.dirname(preprocess_output_file_path), exist_ok=True)
     # TODO: rethrow exception.
     with open(preprocess_output_file_path, 'wb') as file:
         pickle.dump(obj=merged_structures, file=file, protocol=pickle.HIGHEST_PROTOCOL)
