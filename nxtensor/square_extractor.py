@@ -103,9 +103,6 @@ class SquareRegionExtractionVisitor(VariableVisitor):
         return self.result
 
 
-# TODO: recursive computed variable with common variables between the nested computed variables.
-
-
 def __unit_test_create_extraction_data(lat: float, lon: float, year: int, month: int, day: int, hour: int) \
                              -> Mapping[Union[Coordinate, TimeResolution], Union[int, float]]:
     result = {Coordinate.LAT: lat, Coordinate.LON: lon, TimeResolution.YEAR: year, TimeResolution.MONTH: month,
@@ -127,11 +124,20 @@ def __unit_test_computed_variable() -> None:
     lat       = 39.7
     lon       = 312  # Equivalent to -48 .
     extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
-
     extracted_region = __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data,
                                               half_lat_frame, half_lon_frame)
-    # DEBUG
-    print(extracted_region.shape)
+
+    str_id    = 'dummy'
+    year      = 2000
+    month     = 10
+    day       = 1
+    hour      = 0
+    lat       = 39.7
+    lon       = 312  # Equivalent to -48 .
+    extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
+    extracted_region = __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data,
+                                              half_lat_frame, half_lon_frame)
+
 
 
 def __unit_test_single_multi_level() -> None:
@@ -199,5 +205,5 @@ def __unit_test_extraction(str_id, variable_parent_dir_path,
 
 
 if __name__ == '__main__':
-    # __unit_test_single_multi_level()
+    __unit_test_single_multi_level()
     __unit_test_computed_variable()

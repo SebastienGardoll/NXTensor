@@ -52,7 +52,7 @@ def __bootstrap_era5_variable(str_id: str, attribute_name: str, netcdf_path_temp
 
 
 def test_load(variable_parent_dir_path: str) -> None:
-    era5_variables = ['msl', 'tcwv', 'u10', 'v10', 'ta200', 'ta500', 'u850', 'v850', 'wsl10']
+    era5_variables = ['msl', 'tcwv', 'u10', 'v10', 'ta200', 'ta500', 'u850', 'v850', 'wsl10', 'dummy']
     for str_id in era5_variables:
         var = Variable.load(path.join(variable_parent_dir_path, Variable.generate_filename(str_id)))
         print(var)
@@ -65,6 +65,24 @@ def create_computed_variables(variable_parent_dir_path: str) -> None:
                                               f"u10_{Variable.FILE_NAME_POSTFIX}"),
                                     path.join(variable_parent_dir_path,
                                               f"v10_{Variable.FILE_NAME_POSTFIX}")]
+
+    variable.netcdf_period_resolution = TimeResolution.MONTH
+    variable.time_resolution = TimeResolution.HOUR
+    variable.date_template = '{year}-{month2d}-{day}T{hour2d}'
+    variable.lat_nb_decimal = 2
+    variable.lat_resolution = 0.25
+    variable.lon_nb_decimal = 2
+    variable.lon_resolution = 0.25
+    variable_file_path = path.join(variable_parent_dir_path, variable.compute_filename())
+    variable.save(variable_file_path)
+
+    # Recursive computed variable.
+    variable = ComputedVariable('dummy')
+    variable.computation_expression = 'u10 wsl10 + 2 /'
+    variable.variable_file_paths = [path.join(variable_parent_dir_path,
+                                              f"u10_{Variable.FILE_NAME_POSTFIX}"),
+                                    path.join(variable_parent_dir_path,
+                                              f"wsl10_{Variable.FILE_NAME_POSTFIX}")]
 
     variable.netcdf_period_resolution = TimeResolution.MONTH
     variable.time_resolution = TimeResolution.HOUR
