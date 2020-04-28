@@ -103,12 +103,12 @@ def extract(preprocess_input_file_path: str,
     __extraction_metadata_block_processing_function = extraction_metadata_block_processing_function
     start = time.time()
     if nb_workers > 1:
-        print(f"> parallel extractions (number of workers: {nb_workers})")
+        print(f"> starting parallel extractions (number of workers: {nb_workers})")
 
         with Pool(processes=nb_workers) as pool:
             tmp_result = pool.map(func=__core_extraction, iterable=merged_structures, chunksize=1)
     else:
-        print("> sequential extractions")
+        print("> starting sequential extractions")
         for merged_structure in merged_structures:
             tmp_result = __core_extraction(merged_structure)
     print(f"> elapsed time: {tu.display_duration(time.time()-start)}")
