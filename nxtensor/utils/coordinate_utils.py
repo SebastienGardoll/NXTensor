@@ -104,7 +104,7 @@ __GENERATOR = {
     }
 
 
-def test_reformat_coordinates(dataframe_file_path: str):
+def __test_reformat_coordinates(dataframe_file_path: str):
     df = pd.read_csv(filepath_or_buffer=dataframe_file_path, sep=',', header=0)
     reformat_coordinates(df, 'lat', CoordinateFormat.INCREASING_DEGREE_NORTH, CoordinateFormat.DECREASING_DEGREE_NORTH,
                          0.25, 2)
@@ -125,4 +125,4 @@ if __name__ == '__main__':
                             'all_cyclone_dataset.csv', 'all_no_cyclone_dataset.csv')
     for dataframe_file_name in dataframe_file_names:
         dataframeFilePath = path.join(dataframes_dir_path, dataframe_file_name)
-        test_reformat_coordinates(dataframeFilePath)
+        __test_reformat_coordinates(dataframeFilePath)

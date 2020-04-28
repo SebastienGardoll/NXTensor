@@ -106,7 +106,7 @@ def __era5_unit_test_extraction(variable_name: str,
         return extracted_region
 
 
-def __unit_test1():
+def __test_simple_variable():
     variable_name = 'msl'
     year = 2000
     month = 10
@@ -117,7 +117,7 @@ def __unit_test1():
     return __era5_unit_test_extraction(variable_name, year, month, day, hour, lat, lon)
 
 
-def __unit_test2():
+def __test_multilevel_variable():
     variable_name = 'ta'
     variable_level = 200
     year = 2011
@@ -129,6 +129,10 @@ def __unit_test2():
     return __era5_unit_test_extraction(variable_name, year, month, day, hour, lat, lon, variable_level)
 
 
+def __all_test():
+    __test_simple_variable()
+    __test_multilevel_variable()
+
+
 if __name__ == '__main__':
-    __unit_test1()
-    __unit_test2()
+    __all_test()

@@ -108,12 +108,12 @@ def extract(variable_id: str,
 
     start = time.time()
     if nb_workers > 1:
-        print(f"> starting parallel extractions (number of workers: {nb_workers})")
+        print(f"> variable {__variable_id} starting parallel extractions (number of workers: {nb_workers})")
 
         with Pool(processes=nb_workers) as pool:
             tmp_result = pool.map(func=__core_extraction, iterable=merged_structures, chunksize=1)
     else:
-        print("> starting sequential extractions")
+        print("> variable {__variable_id} starting sequential extractions")
         for merged_structure in merged_structures:
             tmp_result = __core_extraction(merged_structure)
     print(f"> elapsed time: {tu.display_duration(time.time()-start)}")
@@ -265,3 +265,11 @@ def __test__merge_block_structures():
     assert len(merged_structures[1][1][1][1]) == 51
 
     assert len(merged_structures[0][1]) == 1  # Cyclone not in period (2000, 9).
+
+
+def __all_test():
+    __test__merge_block_structures()
+
+
+if __name__ == '__main__':
+    __all_test()

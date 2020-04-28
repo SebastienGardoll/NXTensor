@@ -100,8 +100,6 @@ def bootstrap_all(config_file_parent_dir_path: str) -> None:
     create_computed_variables(config_file_parent_dir_path)
 
 
-# TODO: recursive computed variable with common variables between the nested computed variables.
-
 if __name__ == '__main__':
     config_files_parent_dir_path = '/home/sgardoll/extraction_config'
     bootstrap_all(config_files_parent_dir_path)

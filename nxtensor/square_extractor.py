@@ -103,7 +103,7 @@ class SquareRegionExtractionVisitor(VariableVisitor):
         return self.result
 
 
-def __unit_test_create_extraction_data(lat: float, lon: float, year: int, month: int, day: int, hour: int) \
+def __test_create_extraction_data(lat: float, lon: float, year: int, month: int, day: int, hour: int) \
                              -> Mapping[Union[Coordinate, TimeResolution], Union[int, float]]:
     result = {Coordinate.LAT: lat, Coordinate.LON: lon, TimeResolution.YEAR: year, TimeResolution.MONTH: month,
               TimeResolution.MONTH2D: f"{month:02d}", TimeResolution.DAY: day, TimeResolution.DAY2D: f"{day:02d}",
@@ -111,7 +111,7 @@ def __unit_test_create_extraction_data(lat: float, lon: float, year: int, month:
     return result
 
 
-def __unit_test_computed_variable() -> None:
+def __test_computed_variable() -> None:
     half_lat_frame = 4
     half_lon_frame = 4
     variable_parent_dir_path = '/home/sgardoll/extraction_config'
@@ -123,9 +123,9 @@ def __unit_test_computed_variable() -> None:
     hour      = 0
     lat       = 39.7
     lon       = 312  # Equivalent to -48 .
-    extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
-    extracted_region = __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data,
-                                              half_lat_frame, half_lon_frame)
+    extraction_data = __test_create_extraction_data(lat, lon, year, month, day, hour)
+    __test_extraction(str_id, variable_parent_dir_path, extraction_data,
+                      half_lat_frame, half_lon_frame)
 
     str_id    = 'dummy'
     year      = 2000
@@ -134,13 +134,12 @@ def __unit_test_computed_variable() -> None:
     hour      = 0
     lat       = 39.7
     lon       = 312  # Equivalent to -48 .
-    extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
-    extracted_region = __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data,
-                                              half_lat_frame, half_lon_frame)
+    extraction_data = __test_create_extraction_data(lat, lon, year, month, day, hour)
+    __test_extraction(str_id, variable_parent_dir_path, extraction_data,
+                      half_lat_frame, half_lon_frame)
 
 
-
-def __unit_test_single_multi_level() -> None:
+def __test_single_multi_level() -> None:
     half_lat_frame = 8
     half_lon_frame = 8
     variable_parent_dir_path = '/home/sgardoll/extraction_config'
@@ -152,8 +151,8 @@ def __unit_test_single_multi_level() -> None:
     hour   = 0
     lat    = 39.7
     lon    = 312  # Equivalent to -48 .
-    extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
-    __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data, half_lat_frame, half_lon_frame)
+    extraction_data = __test_create_extraction_data(lat, lon, year, month, day, hour)
+    __test_extraction(str_id, variable_parent_dir_path, extraction_data, half_lat_frame, half_lon_frame)
 
     str_id = 'ta200'
     year   = 2011
@@ -162,8 +161,8 @@ def __unit_test_single_multi_level() -> None:
     hour   = 18
     lat    = 26.5
     lon    = 282.8  # Equivalent to -77.2 .
-    extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
-    __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data, half_lat_frame, half_lon_frame)
+    extraction_data = __test_create_extraction_data(lat, lon, year, month, day, hour)
+    __test_extraction(str_id, variable_parent_dir_path, extraction_data, half_lat_frame, half_lon_frame)
 
     str_id = 'msl'
     year   = 2011
@@ -172,13 +171,13 @@ def __unit_test_single_multi_level() -> None:
     hour   = 0
     lat    = 15
     lon    = 301  # Equivalent to -59 .
-    extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
-    __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data, half_lat_frame, half_lon_frame)
+    extraction_data = __test_create_extraction_data(lat, lon, year, month, day, hour)
+    __test_extraction(str_id, variable_parent_dir_path, extraction_data, half_lat_frame, half_lon_frame)
 
 
-def __unit_test_extraction(str_id, variable_parent_dir_path,
-                           extraction_data: Mapping[Union[Coordinate, TimeResolution], Union[int, float]],
-                           half_lat_frame, half_lon_frame, has_to_plot=True):
+def __test_extraction(str_id, variable_parent_dir_path,
+                      extraction_data: Mapping[Union[Coordinate, TimeResolution], Union[int, float]],
+                      half_lat_frame, half_lon_frame, has_to_plot=True):
     import os.path as path
     from matplotlib import pyplot as plt
     import nxtensor.utils.file_utils as fu
@@ -189,7 +188,8 @@ def __unit_test_extraction(str_id, variable_parent_dir_path,
     visitor = VariableNetcdfFilePathVisitor(extraction_data)
     var.accept(visitor)
     netcdf_file_path_dict = visitor.get_result()
-    datasets = {var_id: xtract.open_netcdf(netcdf_file_path) for var_id, netcdf_file_path in netcdf_file_path_dict.items()}
+    datasets = {var_id: xtract.open_netcdf(netcdf_file_path) for var_id, netcdf_file_path in
+                netcdf_file_path_dict.items()}
     extractor = SquareRegionExtractionVisitor(datasets=datasets, extraction_data=extraction_data,
                                               half_lat_frame=half_lat_frame, half_lon_frame=half_lon_frame,
                                               dask_scheduler='single-threaded')
@@ -204,6 +204,10 @@ def __unit_test_extraction(str_id, variable_parent_dir_path,
     return extracted_region
 
 
+def __all_test():
+    __test_single_multi_level()
+    __test_computed_variable()
+
+
 if __name__ == '__main__':
-    __unit_test_single_multi_level()
-    __unit_test_computed_variable()
+    __all_test()

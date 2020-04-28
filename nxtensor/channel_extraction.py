@@ -94,26 +94,26 @@ def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Di
     return file_paths
 
 
-def test_preprocess_extraction(extraction_conf_file_path: str) -> None:
+def __test_preprocess_extraction(extraction_conf_file_path: str) -> None:
     preprocess_extraction(extraction_conf_file_path)
 
 
-def test_extract(extraction_conf_file_path: str, variable_id: str) -> None:
+def __test_extract(extraction_conf_file_path: str, variable_id: str) -> None:
     extract(extraction_conf_file_path, variable_id)
 
 
-def __test_all():
+def __all_test():
     config_dir_path = '/home/sgardoll/extraction_config'
     extraction_conf_file_path = path.join(config_dir_path, '2000_10_extraction_config.yml')
 
-    test_preprocess_extraction(extraction_conf_file_path)
+    __test_preprocess_extraction(extraction_conf_file_path)
 
     # Test a simple, multilevel, computed, recursive computed variables.
     variable_ids = ('msl', 'ta500', 'wsl10', 'dummy')
     for variable_id in variable_ids:
         print(f"> extraction variable {variable_id}")
-        test_extract(extraction_conf_file_path, variable_id)
+        __test_extract(extraction_conf_file_path, variable_id)
 
 
 if __name__ == '__main__':
-    __test_all()
+    __all_test()
