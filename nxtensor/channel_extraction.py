@@ -103,7 +103,9 @@ def test_extract(extraction_conf_file_path: str, variable_id: str) -> None:
 if __name__ == '__main__':
     config_dir_path = '/home/sgardoll/extraction_config'
     extractionConfFilePath = path.join(config_dir_path, '2000_10_extraction_config.yml')
-    variableId = 'msl'
 
     test_preprocess_extraction(extractionConfFilePath)
-    test_extract(extractionConfFilePath, variableId)
+
+    # Test a simple, multilevel, computed, recursive computed variables.
+    variable_ids = ('msl', 'ta500', 'wsl10', 'dummy')
+    [test_extract(extractionConfFilePath, variableId) for variableId in variable_ids]

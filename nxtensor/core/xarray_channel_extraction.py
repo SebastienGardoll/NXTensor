@@ -225,7 +225,7 @@ def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMet
     return result
 
 
-def __unit_test_build_blocks_from_csv(csv_file_path: str, period_resolution: TimeResolution)\
+def __test_build_blocks_structure(csv_file_path: str, period_resolution: TimeResolution)\
         -> Dict[Period, MetaDataBlock]:
     dataframe = pd.read_csv(filepath_or_buffer=csv_file_path, sep=',', header=0)
     db_metadata_mapping = create_db_metadata_mapping(year='year', month='month', day='day', hour='hour',
@@ -233,14 +233,14 @@ def __unit_test_build_blocks_from_csv(csv_file_path: str, period_resolution: Tim
     return __build_blocks_structure(dataframe, db_metadata_mapping, period_resolution, True)
 
 
-def __unit_test1():
+def __test__merge_block_structures():
     cyclone_csv_file_path = '/Users/seb/tmp/extraction_config/2000_10_cyclone_dataset.csv'
     no_cyclone_csv_file_path = '/Users/seb/tmp/extraction_config/2000_10_no_cyclone_dataset.csv'
     period_resolution = TimeResolution.MONTH
 
     structures = dict()
-    structures['cyclone'] = __unit_test_build_blocks_from_csv(cyclone_csv_file_path, period_resolution)
-    structures['no_cyclone'] = __unit_test_build_blocks_from_csv(no_cyclone_csv_file_path, period_resolution)
+    structures['cyclone'] = __test_build_blocks_structure(cyclone_csv_file_path, period_resolution)
+    structures['no_cyclone'] = __test_build_blocks_structure(no_cyclone_csv_file_path, period_resolution)
 
     merged_structures: List[Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]]] = __merge_block_structures(structures)
     period1 = merged_structures[0][0]
@@ -259,12 +259,3 @@ def __unit_test1():
     assert len(merged_structures[1][1][1][1]) == 51
 
     assert len(merged_structures[0][1]) == 1  # Cyclone not in period (2000, 9).
-
-
-def __unit_test2():
-    # TODO: test extraction.
-    cyclone_csv_file_path = '/Users/seb/tmp/extraction_config/2000_10_cyclone_dataset.csv'
-    no_cyclone_csv_file_path = '/Users/seb/tmp/extraction_config/2000_10_no_cyclone_dataset.csv'
-    extraction_metadata = dict()
-    extraction_metadata['cyclone'] = pd.read_csv(filepath_or_buffer=cyclone_csv_file_path, sep=',', header=0)
-    extraction_metadata['no_cyclone'] = pd.read_csv(filepath_or_buffer=no_cyclone_csv_file_path, sep=',', header=0)
