@@ -83,8 +83,8 @@ class SquareRegionExtractionVisitor(VariableVisitor):
     def visit_computed_variable(self, var: ComputedVariable) -> None:
         if var.str_id not in self.__extracted_regions:
             self.__recursive_call_count = self.__recursive_call_count + 1
-            for var in var.get_variables().values():
-                var.accept(self)
+            for internal_var in var.get_variables().values():
+                internal_var.accept(self)
 
             calculator = XarrayRpnCalculator(var.computation_expression, self.__extracted_regions,
                                              self.__dask_scheduler)
@@ -117,9 +117,9 @@ def __unit_test_create_extraction_data(lat: float, lon: float, year: int, month:
 def __unit_test_computed_variable() -> None:
     lat_frame = 8
     lon_frame = 8
-    variable_parent_dir_path = '/Users/seb/tmp/extraction_config'
+    variable_parent_dir_path = '/home/sgardoll/extraction_config'
 
-    str_id    = 'wsl'
+    str_id    = 'wsl10'
     year      = 2000
     month     = 10
     day       = 1
@@ -130,13 +130,14 @@ def __unit_test_computed_variable() -> None:
 
     extracted_region = __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data,
                                               lat_frame, lon_frame)
-    print(extracted_region)
+    # DEBUG
+    print(extracted_region.shape)
 
 
 def __unit_test_single_multi_level() -> None:
     lat_frame = 8
     lon_frame = 8
-    variable_parent_dir_path = '/Users/seb/tmp/extraction_config'
+    variable_parent_dir_path = '/home/sgardoll/extraction_config'
 
     str_id = 'msl'
     year   = 2000
@@ -174,14 +175,15 @@ def __unit_test_extraction(str_id, variable_parent_dir_path,
                            half_lat_frame, half_lon_frame, has_to_plot=True):
     import os.path as path
     from matplotlib import pyplot as plt
+    import nxtensor.utils.file_utils as fu
     var = Variable.load(path.join(variable_parent_dir_path,
-                        f"{str_id}{Variable.FILE_NAME_POSTFIX}"))
+                        f"{str_id}{fu.NAME_SEPARATOR}{Variable.FILE_NAME_POSTFIX}"))
 
     # noinspection PyTypeChecker
     visitor = VariableNetcdfFilePathVisitor(extraction_data)
     var.accept(visitor)
     netcdf_file_path_dict = visitor.get_result()
-    datasets = {var_id: xtract.open_netcdf(netcdf_file_path) for var_id, netcdf_file_path in netcdf_file_path_dict}
+    datasets = {var_id: xtract.open_netcdf(netcdf_file_path) for var_id, netcdf_file_path in netcdf_file_path_dict.items()}
     extractor = SquareRegionExtractionVisitor(datasets=datasets, extraction_data=extraction_data,
                                               half_lat_frame=half_lat_frame, half_lon_frame=half_lon_frame,
                                               dask_scheduler='single-threaded')
@@ -197,5 +199,5 @@ def __unit_test_extraction(str_id, variable_parent_dir_path,
 
 
 if __name__ == '__main__':
-    __unit_test_single_multi_level()
+    # __unit_test_single_multi_level()
     __unit_test_computed_variable()
