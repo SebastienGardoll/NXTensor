@@ -51,6 +51,7 @@ INDEX_NAME = 'index'
 __extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, MetaDataBlock]]],
                                                           Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]]
 __extraction_metadata_block_csv_save_options: Mapping[CsvOptName, any]
+__variable_id: str
 
 
 def convert_block_to_dict(extraction_metadata_block: pd.DataFrame) -> MetaDataBlock:
@@ -84,7 +85,8 @@ def preprocess_extraction(preprocess_output_file_path: str,
         pickle.dump(obj=merged_structures, file=file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def extract(preprocess_input_file_path: str,
+def extract(variable_id: str,
+            preprocess_input_file_path: str,
             extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, MetaDataBlock]]],
                                                                     Tuple[str, List[Tuple[LabelId, xr.DataArray,
                                                                                           MetaDataBlock]]]],
@@ -101,6 +103,9 @@ def extract(preprocess_input_file_path: str,
     __extraction_metadata_block_csv_save_options = extraction_metadata_block_csv_save_options
     global __extraction_metadata_block_processing_function
     __extraction_metadata_block_processing_function = extraction_metadata_block_processing_function
+    global __variable_id
+    __variable_id = variable_id
+
     start = time.time()
     if nb_workers > 1:
         print(f"> starting parallel extractions (number of workers: {nb_workers})")
@@ -120,14 +125,14 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
                       -> Tuple[Period, Dict[str, Dict[str, str]]]:
     period, extraction_metadata_blocks = merged_structure
     result: Dict[str, Dict[str, str]] = dict()
-    file_prefix_path, extracted_data_blocks = \
+    parent_dir_path, extracted_data_blocks = \
         __extraction_metadata_block_processing_function(period, extraction_metadata_blocks)
 
     for extracted_data_block in extracted_data_blocks:
         label_id, data_block, metadata_block = extracted_data_block
         period_str = functools.reduce(lambda x, y: f'{x}_{y}', period)
         print(f'> saving {label_id} data block (shape: {data_block.shape}) for period {period_str}')
-        specific_label_file_prefix_path = path.join(file_prefix_path, label_id, f"{period_str}")
+        specific_label_file_prefix_path = path.join(parent_dir_path, f"{period_str}", label_id, __variable_id)
         os.makedirs(path.dirname(specific_label_file_prefix_path), exist_ok=True)
 
         extraction_metadata_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.CSV_FILE_EXTENSION}"

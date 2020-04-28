@@ -65,8 +65,7 @@ def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Di
     # TODO: error handling.
     extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
     variable: Variable = extraction_conf.get_variables()[variable_id]
-    file_prefix_path = path.join(extraction_conf.blocks_dir_path, extraction_conf.str_id)
-    file_prefix_path = f"{file_prefix_path}{fu.NAME_SEPARATOR}{variable_id}"
+    parent_dir_path = path.join(extraction_conf.blocks_dir_path, extraction_conf.str_id)
 
     def process_block(period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]]) \
             -> Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]:
@@ -81,14 +80,15 @@ def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Di
                                                          shape=extraction_conf.extraction_shape)
         variable.accept(extractor)
         result: Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]] = \
-            (file_prefix_path, extractor.get_result())
+            (parent_dir_path, extractor.get_result())
 
         return result
 
     preprocess_input_file_path = __generate_preprocessing_file_path(extraction_conf)
 
     # TODO: save metadata options (csv).
-    file_paths = chan_xtract.extract(preprocess_input_file_path=preprocess_input_file_path,
+    file_paths = chan_xtract.extract(variable_id=variable_id,
+                                     preprocess_input_file_path=preprocess_input_file_path,
                                      extraction_metadata_block_processing_function=process_block,
                                      nb_workers=extraction_conf.nb_process)
     return file_paths
@@ -104,15 +104,15 @@ def test_extract(extraction_conf_file_path: str, variable_id: str) -> None:
 
 def __test_all():
     config_dir_path = '/home/sgardoll/extraction_config'
-    extractionConfFilePath = path.join(config_dir_path, '2000_10_extraction_config.yml')
+    extraction_conf_file_path = path.join(config_dir_path, '2000_10_extraction_config.yml')
 
-    test_preprocess_extraction(extractionConfFilePath)
+    test_preprocess_extraction(extraction_conf_file_path)
 
     # Test a simple, multilevel, computed, recursive computed variables.
     variable_ids = ('msl', 'ta500', 'wsl10', 'dummy')
     for variable_id in variable_ids:
         print(f"> extraction variable {variable_id}")
-        test_extract(extractionConfFilePath, variable_id)
+        test_extract(extraction_conf_file_path, variable_id)
 
 
 if __name__ == '__main__':
