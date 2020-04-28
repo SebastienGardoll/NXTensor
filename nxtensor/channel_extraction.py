@@ -66,6 +66,7 @@ def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Di
     extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
     variable: Variable = extraction_conf.get_variables()[variable_id]
     file_prefix_path = path.join(extraction_conf.blocks_dir_path, extraction_conf.str_id)
+    file_prefix_path = f"{file_prefix_path}{fu.NAME_SEPARATOR}{variable_id}"
 
     def process_block(period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]]) \
             -> Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]:
@@ -81,6 +82,7 @@ def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Di
         variable.accept(extractor)
         result: Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]] = \
             (file_prefix_path, extractor.get_result())
+
         return result
 
     preprocess_input_file_path = __generate_preprocessing_file_path(extraction_conf)
@@ -100,7 +102,7 @@ def test_extract(extraction_conf_file_path: str, variable_id: str) -> None:
     extract(extraction_conf_file_path, variable_id)
 
 
-if __name__ == '__main__':
+def __test_all():
     config_dir_path = '/home/sgardoll/extraction_config'
     extractionConfFilePath = path.join(config_dir_path, '2000_10_extraction_config.yml')
 
@@ -108,4 +110,10 @@ if __name__ == '__main__':
 
     # Test a simple, multilevel, computed, recursive computed variables.
     variable_ids = ('msl', 'ta500', 'wsl10', 'dummy')
-    [test_extract(extractionConfFilePath, variableId) for variableId in variable_ids]
+    for variable_id in variable_ids:
+        print(f"> extraction variable {variable_id}")
+        test_extract(extractionConfFilePath, variable_id)
+
+
+if __name__ == '__main__':
+    __test_all()

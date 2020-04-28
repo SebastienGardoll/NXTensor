@@ -126,6 +126,7 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
     for extracted_data_block in extracted_data_blocks:
         label_id, data_block, metadata_block = extracted_data_block
         period_str = functools.reduce(lambda x, y: f'{x}_{y}', period)
+        print(f'> saving {label_id} data block (shape: {data_block.shape}) for period {period_str}')
         specific_label_file_prefix_path = path.join(file_prefix_path, label_id, f"{period_str}")
         os.makedirs(path.dirname(specific_label_file_prefix_path), exist_ok=True)
 

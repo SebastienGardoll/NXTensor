@@ -43,7 +43,7 @@ def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
 def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:
     output_parent_dir = path.join(config_parent_dir, 'output')
     dataset_ids = ['2ka', '2kb', '2000', '2000_10', 'all']
-    era5_variables = ['msl', 'tcwv', 'u10', 'v10', 'ta200', 'ta500', 'u850', 'v850', 'wsl10']
+    era5_variables = ['msl', 'tcwv', 'u10', 'v10', 'ta200', 'ta500', 'u850', 'v850', 'wsl10', 'dummy']
     dask_scheduler = 'single-threaded'
     x_size = 32
     y_size = 32

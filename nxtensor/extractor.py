@@ -74,8 +74,9 @@ class ExtractionVisitor(VariableVisitor):
     def visit_computed_variable(self, var: ComputedVariable) -> None:
         time_dict = tu.from_time_list_to_dict(self.__period)
         visitor = VariableNetcdfFilePathVisitor(time_dict)
+        var.accept(visitor)
         datasets: Dict[VariableId, xr.Dataset] = dict()
-        for var_id, netcdf_file_path in visitor.result:
+        for var_id, netcdf_file_path in visitor.result.items():
             datasets[var_id] = xtract.open_netcdf(netcdf_file_path)
         self.__core_extraction(var, datasets)
 
