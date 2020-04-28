@@ -115,8 +115,8 @@ def __unit_test_create_extraction_data(lat: float, lon: float, year: int, month:
 
 
 def __unit_test_computed_variable() -> None:
-    lat_frame = 8
-    lon_frame = 8
+    half_lat_frame = 4
+    half_lon_frame = 4
     variable_parent_dir_path = '/home/sgardoll/extraction_config'
 
     str_id    = 'wsl10'
@@ -129,14 +129,14 @@ def __unit_test_computed_variable() -> None:
     extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
 
     extracted_region = __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data,
-                                              lat_frame, lon_frame)
+                                              half_lat_frame, half_lon_frame)
     # DEBUG
     print(extracted_region.shape)
 
 
 def __unit_test_single_multi_level() -> None:
-    lat_frame = 8
-    lon_frame = 8
+    half_lat_frame = 8
+    half_lon_frame = 8
     variable_parent_dir_path = '/home/sgardoll/extraction_config'
 
     str_id = 'msl'
@@ -147,7 +147,7 @@ def __unit_test_single_multi_level() -> None:
     lat    = 39.7
     lon    = 312  # Equivalent to -48 .
     extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
-    __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data, lat_frame, lon_frame)
+    __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data, half_lat_frame, half_lon_frame)
 
     str_id = 'ta200'
     year   = 2011
@@ -157,7 +157,7 @@ def __unit_test_single_multi_level() -> None:
     lat    = 26.5
     lon    = 282.8  # Equivalent to -77.2 .
     extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
-    __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data, lat_frame, lon_frame)
+    __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data, half_lat_frame, half_lon_frame)
 
     str_id = 'msl'
     year   = 2011
@@ -167,7 +167,7 @@ def __unit_test_single_multi_level() -> None:
     lat    = 15
     lon    = 301  # Equivalent to -59 .
     extraction_data = __unit_test_create_extraction_data(lat, lon, year, month, day, hour)
-    __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data, lat_frame, lon_frame)
+    __unit_test_extraction(str_id, variable_parent_dir_path, extraction_data, half_lat_frame, half_lon_frame)
 
 
 def __unit_test_extraction(str_id, variable_parent_dir_path,
