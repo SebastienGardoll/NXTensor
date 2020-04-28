@@ -131,7 +131,6 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
     for extracted_data_block in extracted_data_blocks:
         label_id, data_block, metadata_block = extracted_data_block
         period_str = functools.reduce(lambda x, y: f'{x}_{y}', period)
-        print(f'> saving {label_id} data block (shape: {data_block.shape}) for period {period_str}')
         specific_label_file_prefix_path = path.join(parent_dir_path, f"{period_str}", label_id, __variable_id)
         os.makedirs(path.dirname(specific_label_file_prefix_path), exist_ok=True)
 
@@ -144,7 +143,7 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
 
         data_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.HDF5_FILE_EXTENSION}"
         fu.write_ndarray_to_hdf5(data_block_file_path, data_block.values)
-
+        print(f'> saved {label_id} data block (shape: {data_block.shape}) for period {period_str}')
         result[label_id] = dict()
         result[label_id]['data_block'] = data_block_file_path
         result[label_id]['metadata_block'] = extraction_metadata_block_file_path
