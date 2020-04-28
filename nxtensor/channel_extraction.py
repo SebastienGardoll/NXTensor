@@ -8,6 +8,7 @@ Created on Wed Apr  22 11:14:54 2020
 from typing import Dict, Tuple, List
 
 from nxtensor.core.xarray_channel_extraction import MetaDataBlock, Period
+from nxtensor.exceptions import ConfigurationError
 from nxtensor.extraction import ExtractionConfig
 from nxtensor.extractor import ExtractionVisitor
 from nxtensor.utils.db_utils import DBMetadataMapping
@@ -27,10 +28,17 @@ import nxtensor.utils.db_utils as du
 import nxtensor.utils.file_utils as fu
 
 
+def __load_extraction_conf(extraction_conf_file_path: str):
+    try:
+        return ExtractionConfig.load(extraction_conf_file_path)
+    except Exception as e:
+        msg = f'> [ERROR] unable to load extraction conf file located at {extraction_conf_file_path}'
+        raise ConfigurationError(msg, e)
+
+
 # Single process - single thread.
 def preprocess_extraction(extraction_conf_file_path: str) -> None:
-    # TODO: error handling.
-    extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
+    extraction_conf = __load_extraction_conf(extraction_conf_file_path)
     db_metadata_mappings: Dict[LabelId, DBMetadataMapping] = dict()
     extraction_metadata_blocks: Dict[LabelId, pd.DataFrame] = dict()
     for label_id, label in extraction_conf.get_labels().items():
@@ -61,9 +69,7 @@ def __generate_preprocessing_file_path(extraction_conf: ExtractionConfig):
 
 
 def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Dict[str, Dict[str, str]]]:
-
-    # TODO: error handling.
-    extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
+    extraction_conf = __load_extraction_conf(extraction_conf_file_path)
     variable: Variable = extraction_conf.get_variables()[variable_id]
     parent_dir_path = path.join(extraction_conf.blocks_dir_path, extraction_conf.str_id)
 

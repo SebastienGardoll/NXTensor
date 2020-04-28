@@ -5,6 +5,7 @@ Created on Fri Apr 17 17:00:00 2020
 
 @author: sebastien@gardoll.fr
 """
+from abc import abstractmethod
 from typing import Dict, Union, Mapping
 
 import xarray as xr
@@ -12,12 +13,12 @@ import nxtensor.core.xarray_extractions as xtract
 from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.xarray_rpn_calulator import XarrayRpnCalculator
-from nxtensor.variable import MultiLevelVariable, SingleLevelVariable, ComputedVariable, VariableVisitor, \
-    VariableNetcdfFilePathVisitor, Variable, VariableId
+from nxtensor.variable import MultiLevelVariable, SingleLevelVariable, ComputedVariable, \
+    VariableNetcdfFilePathVisitor, Variable, VariableId, VariableVisitor
 
 
-class SquareRegionExtractionVisitor(VariableVisitor):
-
+class RegionExtractionVisitor(VariableVisitor):
+    @abstractmethod
     def __init__(self, datasets: Mapping[VariableId, xr.Dataset],
                  extraction_data: Mapping[Union[Coordinate, TimeResolution], Union[int, float]],
                  half_lat_frame: int, half_lon_frame: int, dask_scheduler: str = 'single-threaded'):
@@ -32,6 +33,16 @@ class SquareRegionExtractionVisitor(VariableVisitor):
         self.__recursive_call_count: int = 0
         # noinspection PyTypeChecker
         self.result: xr.DataArray = None
+
+
+class SquareRegionExtractionVisitor(RegionExtractionVisitor):
+
+    def __init__(self, datasets: Mapping[VariableId, xr.Dataset],
+                 extraction_data: Mapping[Union[Coordinate, TimeResolution], Union[int, float]], half_lat_frame: int,
+                 half_lon_frame: int, dask_scheduler: str = 'single-threaded'):
+        # Buffer of extracted regions: optimization for computed variables.
+        # Computed variables may contain computed variables, recursively !
+        super().__init__(datasets, extraction_data, half_lat_frame, half_lon_frame, dask_scheduler)
 
     def __bootstrap(self, var: SingleLevelVariable) -> str:
         # month2d, day2d and hour2d are computed when calling convert_block_to_dict function from module

@@ -5,9 +5,10 @@ Created on Fri Apr 23 14:50:20 2020
 
 @author: sebastien@gardoll.fr
 """
-from typing import Dict, List, Mapping, Tuple
+from typing import Dict, List, Mapping, Tuple, Type
 
-from nxtensor.square_extractor import SquareRegionExtractionVisitor
+from nxtensor.exceptions import ConfigurationError
+from nxtensor.square_extractor import SquareRegionExtractionVisitor, RegionExtractionVisitor
 from nxtensor.core.xarray_channel_extraction import MetaDataBlock, Period
 from nxtensor.utils.tensor_dimensions import TensorDimension
 from nxtensor.extraction import ExtractionShape
@@ -24,7 +25,17 @@ import xarray as xr
 
 class ExtractionVisitor(VariableVisitor):
 
-    # TODO: instantiate the visitor thanks to a factory (shape).
+    __EXTRACTOR_FACTORY: Mapping[ExtractionShape, Type[RegionExtractionVisitor]] = \
+        {ExtractionShape.SQUARE: SquareRegionExtractionVisitor}
+
+    @staticmethod
+    def __create_extractor(shape: ExtractionShape) -> Type[RegionExtractionVisitor]:
+        try:
+            return ExtractionVisitor.__EXTRACTOR_FACTORY[shape]
+        except KeyError:
+            msg = f"> [ERROR] unknown extraction shape '{shape}'"
+            raise ConfigurationError(msg)
+
     def __init__(self, period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]],
                  half_lat_frame: int,
                  half_lon_frame: int, dask_scheduler: str = 'single-threaded',
@@ -44,13 +55,11 @@ class ExtractionVisitor(VariableVisitor):
             # The order of extraction_data_list must be deterministic so as all the channel
             # match their extracted region line by line.
             for extraction_data in extraction_metadata_block:
-                # TODO: instantiate the visitor thanks to a factory (shape).
-                extractor: SquareRegionExtractionVisitor = \
-                    SquareRegionExtractionVisitor(datasets=datasets,
-                                                  extraction_data=extraction_data,
-                                                  half_lat_frame=self.__half_lat_frame,
-                                                  half_lon_frame=self.__half_lon_frame,
-                                                  dask_scheduler=self.__dask_scheduler)
+                extractor = ExtractionVisitor.__create_extractor(self.__shape)(datasets=datasets,
+                                                                               extraction_data=extraction_data,
+                                                                               half_lat_frame=self.__half_lat_frame,
+                                                                               half_lon_frame=self.__half_lon_frame,
+                                                                               dask_scheduler=self.__dask_scheduler)
                 var.accept(extractor)
                 extracted_regions.append(extractor.get_result())
 

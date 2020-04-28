@@ -80,9 +80,12 @@ def preprocess_extraction(preprocess_output_file_path: str,
     del structures
 
     os.makedirs(path.dirname(preprocess_output_file_path), exist_ok=True)
-    # TODO: rethrow exception.
-    with open(preprocess_output_file_path, 'wb') as file:
-        pickle.dump(obj=merged_structures, file=file, protocol=pickle.HIGHEST_PROTOCOL)
+    try:
+        with open(preprocess_output_file_path, 'wb') as file:
+            pickle.dump(obj=merged_structures, file=file, protocol=pickle.HIGHEST_PROTOCOL)
+    except Exception as e:
+        msg = f'> [ERROR] unable to persist extraction preprocessing in {preprocess_output_file_path}'
+        raise Exception(msg, e)
 
 
 def extract(variable_id: str,
@@ -95,9 +98,12 @@ def extract(variable_id: str,
 
     # Returns the extraction data and extraction metadata blocks file paths.
 
-    # TODO: rethrow exception.
-    with open(preprocess_input_file_path, 'rb') as file:
-        merged_structures = pickle.load(file=file)
+    try:
+        with open(preprocess_input_file_path, 'rb') as file:
+            merged_structures = pickle.load(file=file)
+    except Exception as e:
+        msg = f'unable to load extraction preprocessing located at {preprocess_input_file_path}'
+        raise Exception(msg, e)
 
     global __extraction_metadata_block_csv_save_options
     __extraction_metadata_block_csv_save_options = extraction_metadata_block_csv_save_options
