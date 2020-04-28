@@ -67,3 +67,25 @@ def remove_2d_time_dict(time_dict: Dict[str, str]) -> Dict[str, str]:
     time_dict.pop('month2d', None)
     time_dict.pop('hour2d', None)
     return time_dict
+
+
+def display_duration(time_in_sec):
+  remainder = time_in_sec % 60
+  if remainder == time_in_sec:
+    return f'{time_in_sec:.2f} seconds'
+  else:
+    seconds = remainder
+    minutes = int(time_in_sec / 60)
+    remainder = minutes % 60
+    if remainder == minutes:
+      return f'{minutes} mins, {seconds:.2f} seconds'
+    else:
+      hours   = int(minutes / 60)
+      minutes = remainder
+      remainder = hours % 24
+      if remainder == hours:
+        return f'{hours} hours, {minutes} mins, {seconds:.2f} seconds'
+      else:
+        days = int(hours / 24)
+        hours = remainder
+        return f'{days} days, {hours} hours, {minutes} mins, {seconds:.2f} seconds'

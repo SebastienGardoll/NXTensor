@@ -22,12 +22,15 @@ import os.path as path
 import os
 
 import nxtensor.utils.file_utils as fu
+import nxtensor.utils.time_utils as tu
 
 from nxtensor.utils.file_extensions import FileExtension
 
 import pickle
 
 import functools
+
+import time
 
 # [Types]
 
@@ -98,14 +101,17 @@ def extract(preprocess_input_file_path: str,
     __extraction_metadata_block_csv_save_options = extraction_metadata_block_csv_save_options
     global __extraction_metadata_block_processing_function
     __extraction_metadata_block_processing_function = extraction_metadata_block_processing_function
-
+    start = time.time()
     if nb_workers > 1:
+        print(f"> parallel extractions (number of workers: {nb_workers})")
+
         with Pool(processes=nb_workers) as pool:
             tmp_result = pool.map(func=__core_extraction, iterable=merged_structures, chunksize=1)
     else:
+        print("> sequential extractions")
         for merged_structure in merged_structures:
             tmp_result = __core_extraction(merged_structure)
-
+    print(f"> elapsed time: {tu.display_duration(time.time()-start)}")
     result = dict(tmp_result)
     return result
 
