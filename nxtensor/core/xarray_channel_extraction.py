@@ -11,6 +11,7 @@ import pandas as pd
 import xarray as xr
 
 import nxtensor.utils.csv_utils
+import nxtensor.utils.hdf5_utils
 from nxtensor.exceptions import ConfigurationError
 from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.time_resolutions import TimeResolution
@@ -148,7 +149,7 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
                                             csv_options=__extraction_metadata_block_csv_save_options)
 
         data_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.HDF5_FILE_EXTENSION}"
-        fu.write_ndarray_to_hdf5(data_block_file_path, data_block.values)
+        nxtensor.utils.hdf5_utils.write_ndarray_to_hdf5(data_block_file_path, data_block.values)
         print(f'> saved {label_id} data block (shape: {data_block.shape}) for period {period_str}')
         result[label_id] = dict()
         result[label_id]['data_block'] = data_block_file_path
