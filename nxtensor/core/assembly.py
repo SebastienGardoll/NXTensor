@@ -173,14 +173,20 @@ def normalize_scale_with_params(channel_data: np.ndarray, mean: float = None, st
     return std_channel_data
 
 
-# TODO: problem when with_mean or with_std not True.
-def normalize_scale(channel_data: np.ndarray, with_mean: bool, with_std: bool) -> Tuple[np.ndarray, float, float]:
+def normalize_scale(channel_data: np.ndarray, with_mean: bool, with_std: bool) -> Tuple:
     tmp = channel_data.reshape((-1, 1), order='C')
     scaler = StandardScaler(copy=False, with_mean=with_mean, with_std=with_std)
     scaler.fit(tmp)
     scaler.transform(tmp)
     std_channel_data = tmp.reshape(channel_data.shape, order='C')
-    return std_channel_data, scaler.mean_, scaler.scale_
+    if with_mean and with_std:
+        return std_channel_data, scaler.mean_, scaler.scale_
+    elif with_mean:
+        return std_channel_data, scaler.mean_
+    elif with_std:
+        return std_channel_data, scaler.scale_
+    else:
+        return std_channel_data
 
 
 def split_channel(channel_data: np.ndarray, channel_metadata: pd.DataFrame, dataset_indexes: Sequence[int]) \

@@ -19,6 +19,8 @@ import nxtensor.core.assembly as assembly
 import os
 import os.path as path
 
+from nxtensor.utils.tensor_dimensions import TensorDimension
+
 
 def preprocessing(blocks_dir_path: str, metadata_block_has_header: bool,
                   preprocessing_output_file_path: str) -> None:
@@ -96,7 +98,7 @@ def channel_building(variable_id: VariableId, channel_output_dir_path: str,
         hu.write_ndarray_to_hdf5(dataset_data_file_path, dataset_data)
         du.save_to_csv_file(dataset_metadata, dataset_metadata_file_path)
 
-    stat_data = [{'mean': mean, 'scale': scale}]
+    stat_data = [{TensorDimension.MEAN: mean, TensorDimension.STD: scale}]
     stat_file_path = nu.compute_stat_file_path(variable_id, channel_output_dir_path)
     cu.to_csv(data=stat_data, file_path=stat_file_path)
 
