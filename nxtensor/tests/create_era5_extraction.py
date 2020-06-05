@@ -41,16 +41,12 @@ def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
 
 
 def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:
-    output_parent_dir = path.join(config_parent_dir, 'output')
     dataset_ids = ['2ka', '2kb', '2000', '2000_10', 'all']
     era5_variables = ['msl', 'tcwv', 'u10', 'v10', 'ta200', 'ta500', 'u850', 'v850', 'wsl10', 'dummy']
     dask_scheduler = 'single-threaded'
     x_size = 32
     y_size = 32
     extraction_shape = ExtractionShape.SQUARE
-    block_dir_path = path.join(output_parent_dir, 'blocks')
-    channel_dir_path = path.join(output_parent_dir, 'channel')
-    tmp_dir_path = path.join(output_parent_dir, 'tmp')
     nb_process = 4
 
     variable_file_paths = list()
@@ -61,6 +57,8 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:
     for dataset_id in dataset_ids:
         labels = [f"{config_parent_dir}/{ClassificationLabel.generate_filename(dataset_id, 'cyclone')}",
                   f"{config_parent_dir}/{ClassificationLabel.generate_filename(dataset_id, 'no_cyclone')}"]
+
+        output_parent_dir = path.join(config_parent_dir, f'{dataset_id}_extraction')
         extract_config = ExtractionConfig(dataset_id)
         extract_config.dask_scheduler = dask_scheduler
         extract_config.x_size = x_size
@@ -68,9 +66,8 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:
         extract_config.variable_file_paths = variable_file_paths
         extract_config.label_file_paths = labels
         extract_config.extraction_shape = extraction_shape
-        extract_config.blocks_dir_path = block_dir_path
-        extract_config.channel_dir_path = channel_dir_path
-        extract_config.tmp_dir_path = tmp_dir_path
+        extract_config.blocks_dir_path = path.join(output_parent_dir, 'blocks')
+        extract_config.tmp_dir_path = path.join(output_parent_dir, 'tmp')
         extract_config.nb_process = nb_process
 
         file_path = path.join(config_parent_dir, ExtractionConfig.generate_filename(dataset_id))

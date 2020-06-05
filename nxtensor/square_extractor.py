@@ -10,11 +10,13 @@ from typing import Dict, Union, Mapping
 
 import xarray as xr
 import nxtensor.core.xarray_extractions as xtract
+import nxtensor.utils.naming_utils
 from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.xarray_rpn_calulator import XarrayRpnCalculator
 from nxtensor.variable import MultiLevelVariable, SingleLevelVariable, ComputedVariable, \
-    VariableNetcdfFilePathVisitor, Variable, VariableId, VariableVisitor
+    VariableNetcdfFilePathVisitor, Variable, VariableVisitor
+from nxtensor.core.types import VariableId
 
 
 class RegionExtractionVisitor(VariableVisitor):
@@ -193,7 +195,7 @@ def __test_extraction(str_id, variable_parent_dir_path,
     from matplotlib import pyplot as plt
     import nxtensor.utils.file_utils as fu
     var = Variable.load(path.join(variable_parent_dir_path,
-                        f"{str_id}{fu.NAME_SEPARATOR}{Variable.FILE_NAME_POSTFIX}"))
+                        f"{str_id}{nxtensor.utils.naming_utils.NAME_SEPARATOR}{Variable.FILE_NAME_POSTFIX}"))
 
     # noinspection PyTypeChecker
     visitor = VariableNetcdfFilePathVisitor(extraction_data)

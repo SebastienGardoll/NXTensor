@@ -7,16 +7,15 @@ Created on Wed Apr  22 11:14:54 2020
 """
 from typing import Dict, Tuple, List
 
-from nxtensor.core.xarray_channel_extraction import MetaDataBlock, Period
+import nxtensor.utils.naming_utils
 from nxtensor.exceptions import ConfigurationError
 from nxtensor.extraction import ExtractionConfig
 from nxtensor.extractor import ExtractionVisitor
 from nxtensor.utils.db_utils import DBMetadataMapping
-from nxtensor.utils.file_extensions import FileExtension
 from nxtensor.variable import Variable
 
 import nxtensor.core.xarray_channel_extraction as chan_xtract
-from nxtensor.core.xarray_channel_extraction import LabelId
+from nxtensor.core.types import LabelId, MetaDataBlock, Period
 
 import pandas as pd
 
@@ -52,9 +51,9 @@ def preprocess_extraction(extraction_conf_file_path: str) -> None:
         netcdf_period_resolution = variable.netcdf_period_resolution
         break
 
-    preprocess_output_file_path = __generate_preprocessing_file_path(extraction_conf)
+    preprocessing_output_file_path = __generate_preprocessing_file_path(extraction_conf)
 
-    chan_xtract.preprocess_extraction(preprocess_output_file_path=preprocess_output_file_path,
+    chan_xtract.preprocess_extraction(preprocessing_output_file_path=preprocessing_output_file_path,
                                       extraction_metadata_blocks=extraction_metadata_blocks,
                                       db_metadata_mappings=db_metadata_mappings,
                                       netcdf_file_time_period=netcdf_period_resolution,
@@ -62,8 +61,8 @@ def preprocess_extraction(extraction_conf_file_path: str) -> None:
 
 
 def __generate_preprocessing_file_path(extraction_conf: ExtractionConfig):
-    file_name = f'{extraction_conf.str_id}{fu.NAME_SEPARATOR}preprocessing' + \
-                                  f'.{FileExtension.PICKLE_FILE_EXTENSION}'
+    file_name = f'{extraction_conf.str_id}{nxtensor.utils.naming_utils.NAME_SEPARATOR}preprocessing' + \
+                                  f'.{fu.PICKLE_FILE_EXTENSION}'
     file_path = path.join(extraction_conf.tmp_dir_path, file_name)
     return file_path
 
@@ -71,7 +70,6 @@ def __generate_preprocessing_file_path(extraction_conf: ExtractionConfig):
 def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Dict[str, Dict[str, str]]]:
     extraction_conf = __load_extraction_conf(extraction_conf_file_path)
     variable: Variable = extraction_conf.get_variables()[variable_id]
-    parent_dir_path = path.join(extraction_conf.blocks_dir_path, extraction_conf.str_id)
 
     def process_block(period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]]) \
             -> Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]:
@@ -86,7 +84,7 @@ def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Di
                                                          shape=extraction_conf.extraction_shape)
         variable.accept(extractor)
         result: Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]] = \
-            (parent_dir_path, extractor.get_result())
+            (extraction_conf.blocks_dir_path, extractor.get_result())
 
         return result
 

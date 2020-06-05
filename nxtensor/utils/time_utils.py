@@ -8,9 +8,26 @@ Created on Thu Mar 28 12:04:09 2019
 
 import datetime
 import logging
-from typing import Dict, Sequence, Union, Mapping
+from typing import Dict, Sequence, Union, Mapping, Iterable, List
 
+import nxtensor.utils.naming_utils
+from nxtensor.core.types import Period
 from nxtensor.utils.time_resolutions import TimeResolution
+
+
+# Sort the period ascending order.
+def sort_periods(periods: Iterable[Period]) -> Sequence[Period]:
+    return sorted(periods)
+
+
+def create_period(period_str: str) -> Period:
+    splits: List[str] = period_str.split(nxtensor.utils.naming_utils.NAME_SEPARATOR)
+    try:
+        # noinspection PyTypeChecker
+        result: Period = tuple(map(int, splits))
+    except Exception:
+        raise Exception(f"> [ERROR] cannot create a period from string '{period_str}'")
+    return result
 
 
 def build_date_dictionary(date: datetime.datetime) -> Mapping[str, Union[str, int]]:

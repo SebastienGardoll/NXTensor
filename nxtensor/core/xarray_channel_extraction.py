@@ -5,7 +5,7 @@ Created on Wed Apr  22 09:20:10 2020
 
 @author: sebastien@gardoll.fr
 """
-from typing import Dict, Set, NewType, Tuple, Callable, Mapping, Union, Sequence, List
+from typing import Dict, Set, Tuple, Callable, Mapping, Sequence, List
 
 import pandas as pd
 import xarray as xr
@@ -13,7 +13,6 @@ import xarray as xr
 import nxtensor.utils.csv_utils
 import nxtensor.utils.hdf5_utils
 from nxtensor.exceptions import ConfigurationError
-from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.db_utils import DBMetadataMapping, create_db_metadata_mapping
 from nxtensor.utils.csv_option_names import CsvOptName
@@ -22,37 +21,25 @@ from multiprocessing import Pool
 import os.path as path
 import os
 
-import nxtensor.utils.file_utils as fu
 import nxtensor.utils.time_utils as tu
-
-from nxtensor.utils.file_extensions import FileExtension
+import nxtensor.utils.naming_utils as nu
+import nxtensor.utils.csv_utils as cu
 
 import pickle
 
-import functools
-
 import time
 
-# [Types]
-
-
-LabelId = str
-
-# A block of extraction metadata (lat, lon, year, month, etc.).
-MetaDataBlock = NewType('MetaDataBlock', Sequence[Mapping[Union[TimeResolution, Coordinate], Union[int, float, str]]])
-
-# A Period is a tuple composed of values that correspond to the values of
-# TimeResolution::TIME_RESOLUTION_KEYS (same order).
-Period = NewType('Period', Tuple[Union[float, int], ...])
+from nxtensor.core.types import VariableId, LabelId, MetaDataBlock, Period
 
 
 INDEX_NAME = 'index'
 
 
+# TODO: get rid of these global variables.
 __extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, MetaDataBlock]]],
                                                           Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]]
 __extraction_metadata_block_csv_save_options: Mapping[CsvOptName, any]
-__variable_id: str
+__variable_id: VariableId
 
 
 def convert_block_to_dict(extraction_metadata_block: pd.DataFrame) -> MetaDataBlock:
@@ -64,7 +51,7 @@ def convert_block_to_dict(extraction_metadata_block: pd.DataFrame) -> MetaDataBl
     return result
 
 
-def preprocess_extraction(preprocess_output_file_path: str,
+def preprocess_extraction(preprocessing_output_file_path: str,
                           extraction_metadata_blocks: Mapping[LabelId, pd.DataFrame],
                           db_metadata_mappings: Mapping[LabelId, DBMetadataMapping],
                           netcdf_file_time_period: TimeResolution,
@@ -80,12 +67,12 @@ def preprocess_extraction(preprocess_output_file_path: str,
     merged_structures: List[Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]]] = __merge_block_structures(structures)
     del structures
 
-    os.makedirs(path.dirname(preprocess_output_file_path), exist_ok=True)
+    os.makedirs(path.dirname(preprocessing_output_file_path), exist_ok=True)
     try:
-        with open(preprocess_output_file_path, 'wb') as file:
+        with open(preprocessing_output_file_path, 'wb') as file:
             pickle.dump(obj=merged_structures, file=file, protocol=pickle.HIGHEST_PROTOCOL)
     except Exception as e:
-        msg = f'> [ERROR] unable to persist extraction preprocessing in {preprocess_output_file_path}'
+        msg = f'> [ERROR] unable to persist extraction preprocessing in {preprocessing_output_file_path}'
         raise Exception(msg, e)
 
 
@@ -98,7 +85,6 @@ def extract(variable_id: str,
             nb_workers: int = 1) -> Dict[Period, Dict[str, Dict[str, str]]]:
 
     # Returns the extraction data and extraction metadata blocks file paths.
-
     try:
         with open(preprocess_input_file_path, 'rb') as file:
             merged_structures = pickle.load(file=file)
@@ -137,23 +123,22 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
 
     for extracted_data_block in extracted_data_blocks:
         label_id, data_block, metadata_block = extracted_data_block
-        period_str = functools.reduce(lambda x, y: f'{x}_{y}', period)
-        specific_label_file_prefix_path = path.join(parent_dir_path, f"{period_str}", label_id, __variable_id)
-        os.makedirs(path.dirname(specific_label_file_prefix_path), exist_ok=True)
-
-        extraction_metadata_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.CSV_FILE_EXTENSION}"
+        period_str = nu.create_period_str(period)
+        data_metadata_parent_dir = path.join(parent_dir_path, f"{period_str}", label_id)
+        os.makedirs(path.dirname(data_metadata_parent_dir), exist_ok=True)
+        data_block_file_path, metadata_block_file_path = \
+            nu.compute_data_meta_data_file_path(__variable_id, data_metadata_parent_dir)
         if __extraction_metadata_block_csv_save_options is None:
-            nxtensor.utils.csv_utils.to_csv(data=metadata_block, file_path=extraction_metadata_block_file_path)
+            cu.to_csv(data=metadata_block, file_path=metadata_block_file_path)
         else:
-            nxtensor.utils.csv_utils.to_csv(data=metadata_block, file_path=extraction_metadata_block_file_path,
-                                            csv_options=__extraction_metadata_block_csv_save_options)
+            cu.to_csv(data=metadata_block, file_path=metadata_block_file_path,
+                      csv_options=__extraction_metadata_block_csv_save_options)
 
-        data_block_file_path = f"{specific_label_file_prefix_path}.{FileExtension.HDF5_FILE_EXTENSION}"
         nxtensor.utils.hdf5_utils.write_ndarray_to_hdf5(data_block_file_path, data_block.values)
         print(f'> saved {label_id} data block (shape: {data_block.shape}) for period {period_str}')
         result[label_id] = dict()
         result[label_id]['data_block'] = data_block_file_path
-        result[label_id]['metadata_block'] = extraction_metadata_block_file_path
+        result[label_id]['metadata_block'] = metadata_block_file_path
     return period, result
 
 
@@ -168,11 +153,8 @@ def __merge_block_structures(structures: Mapping[LabelId, Dict[Period, MetaDataB
     for structure in structures.values():
         periods.update(structure.keys())
 
-    # Sort the period ascending order.
-    periods: List[Period] = sorted(periods)
-
-    # Sort list of labels.
-    label_ids = sorted(structures.keys())
+    periods: Sequence[Period] = tu.sort_periods(periods)
+    label_ids = nu.sort_labels(structures.keys())
 
     result: List[Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]]] = list()
 

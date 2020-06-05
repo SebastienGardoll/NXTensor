@@ -9,16 +9,14 @@ from typing import Dict, List, Mapping, Tuple, Type
 
 from nxtensor.exceptions import ConfigurationError
 from nxtensor.square_extractor import SquareRegionExtractionVisitor, RegionExtractionVisitor
-from nxtensor.core.xarray_channel_extraction import MetaDataBlock, Period
 from nxtensor.utils.tensor_dimensions import TensorDimension
 from nxtensor.extraction import ExtractionShape
 from nxtensor.variable import VariableVisitor, SingleLevelVariable, MultiLevelVariable, ComputedVariable, Variable, \
-    VariableNetcdfFilePathVisitor, VariableId
+    VariableNetcdfFilePathVisitor
+from nxtensor.core.types import VariableId, LabelId, MetaDataBlock, Period
 
 import nxtensor.core.xarray_extractions as xtract
 import nxtensor.utils.time_utils as tu
-
-from nxtensor.core.xarray_channel_extraction import LabelId
 
 import xarray as xr
 

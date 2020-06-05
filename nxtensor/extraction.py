@@ -5,13 +5,13 @@ Created on Wed Apr  3 13:26:39 2019
 
 @author: sebastien@gardoll.fr
 """
-from nxtensor.core.xarray_channel_extraction import LabelId
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.db_utils import DBMetadataMapping
 from nxtensor.utils.csv_option_names import CsvOptName
 from nxtensor.utils.db_types import DBType
 from nxtensor.yaml_serializable import YamlSerializable
-from nxtensor.variable import Variable, VariableId
+from nxtensor.variable import Variable
+from nxtensor.core.types import VariableId, LabelId
 import logging
 from typing import List, Dict, Mapping
 
@@ -52,7 +52,6 @@ class ExtractionConfig(YamlSerializable):
         self.extraction_shape: ExtractionShape = ExtractionShape.SQUARE
         # The path of required directories for an extraction.
         self.blocks_dir_path: str = None
-        self.channel_dir_path: str = None
         self.tmp_dir_path: str = None
 
         # The maximum number of process spawn during the extraction.
@@ -123,7 +122,7 @@ class ClassificationLabel(YamlSerializable):
     def __init__(self, str_id: str, dataset_id: str):
         super().__init__(str_id)
 
-        # Numerical id that encode the label.
+        # Numerical str_id that encode the label.
         self.num_id: float = None
         # The dataset identifier.
         self.dataset_id: str = dataset_id

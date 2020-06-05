@@ -7,14 +7,11 @@ Created on Tue Mar 26 11:58:46 2019
 """
 from typing import Dict, List, Mapping
 
+from nxtensor.core.types import VariableId
 from nxtensor.yaml_serializable import YamlSerializable
 import logging
 from nxtensor.utils.time_resolutions import TimeResolution
 from abc import ABC, abstractmethod
-
-# [TYPES]
-
-VariableId = str
 
 
 class Variable(YamlSerializable):

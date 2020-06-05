@@ -16,7 +16,7 @@ import xarray as xr
 
 
 # This class implement RPN calculator for Xarray's DataArray and scalars.
-from nxtensor.variable import VariableId
+from nxtensor.core.types import VariableId
 
 
 class XarrayRpnCalculator:
