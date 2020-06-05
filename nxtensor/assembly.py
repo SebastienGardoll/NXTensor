@@ -129,7 +129,6 @@ def channel_stacking_batch(tensor_id: str,
 
 def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
                      channels_dir: str, variable_ids: Sequence[VariableId], has_to_shuffle: bool) -> Tuple[str, str]:
-    # TODO: cvs optional.
     channel_data_list = list()
     channel_metadata_file_path = ''
     for variable_id in variable_ids:
@@ -137,14 +136,16 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
             nu.compute_data_meta_data_file_path(variable_id, channels_dir, dataset_name)
         channel_data = hu.read_ndarray_from_hdf5(channel_data_file_path)
         channel_data_list.append(channel_data)
-    tensor_data = assembly.stack_channel(channel_data_list)
 
-    metadata = pd.read_csv(filepath_or_buffer=channel_metadata_file_path, **cu.DEFAULT_CSV_OPTIONS)
+    tensor_data = assembly.stack_channel(channel_data_list)
+    metadata = du.load_csv_file(channel_metadata_file_path)
+
     if has_to_shuffle:  # TODO: error handling.
         tensor_data, metadata = assembly.shuffle_data(tensor_data, metadata)
 
     tensor_data_file_path, tensor_metadata_file_path = \
         nu.compute_data_meta_data_file_path(tensor_id, tensor_output_dir, dataset_name)
-    metadata.to_csv(path_or_buf=tensor_metadata_file_path)  # TODO: CSV options and refactoring.
+
+    du.save_to_csv_file(metadata, tensor_metadata_file_path)
     hu.write_ndarray_to_hdf5(tensor_data_file_path, tensor_data)
     return tensor_data_file_path, tensor_metadata_file_path

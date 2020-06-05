@@ -24,6 +24,7 @@ import os
 import nxtensor.utils.time_utils as tu
 import nxtensor.utils.naming_utils as nu
 import nxtensor.utils.csv_utils as cu
+import nxtensor.utils.db_utils as du
 
 import pickle
 
@@ -221,7 +222,7 @@ def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMet
 
 def __test_build_blocks_structure(csv_file_path: str, period_resolution: TimeResolution)\
         -> Dict[Period, MetaDataBlock]:
-    dataframe = pd.read_csv(filepath_or_buffer=csv_file_path, sep=',', header=0)
+    dataframe = du.load_csv_file(csv_file_path)
     db_metadata_mapping = create_db_metadata_mapping(year='year', month='month', day='day', hour='hour',
                                                      lat='lat', lon='lon')
     return __build_blocks_structure(dataframe, db_metadata_mapping, period_resolution, True)

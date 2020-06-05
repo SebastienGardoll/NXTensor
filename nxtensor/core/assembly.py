@@ -8,10 +8,10 @@ from nxtensor.exceptions import ConfigurationError
 from nxtensor.core.types import VariableId, LabelId, Period
 
 import nxtensor.utils.hdf5_utils as hu
-import nxtensor.utils.csv_utils as cu
 import nxtensor.utils.file_utils as fu
 import nxtensor.utils.naming_utils as nu
 import nxtensor.utils.time_utils as tu
+import nxtensor.utils.db_utils as du
 
 from sklearn.preprocessing import StandardScaler
 
@@ -144,8 +144,7 @@ def concatenate_data(data: Sequence[np.ndarray]) -> np.ndarray:
 
 
 def load_data_blocks(variable_id: VariableId, periods: Sequence[Period], label_ids: Sequence[LabelId],
-                     block_file_structure: Mapping[Period, Mapping[LabelId, Tuple[str, str, int]]],
-                     csv_options=cu.DEFAULT_CSV_OPTIONS) \
+                     block_file_structure: Mapping[Period, Mapping[LabelId, Tuple[str, str, int]]]) \
                      -> Mapping[Period, Mapping[LabelId, Tuple[np.ndarray, pd.DataFrame, int]]]:
     print(f'> loading {variable_id} channel data')
     block_data_structure = dict()
@@ -156,7 +155,7 @@ def load_data_blocks(variable_id: VariableId, periods: Sequence[Period], label_i
                 data_file_template = block_file_structure[period][label_id][0]
                 data = hu.read_ndarray_from_hdf5(data_file_template.format(variable_id))
                 metadata_file_template = block_file_structure[period][label_id][1]
-                metadata = pd.read_csv(filepath_or_buffer=metadata_file_template.format(variable_id), **csv_options)
+                metadata = du.load_csv_file(metadata_file_template.format(variable_id))
                 image_number = block_file_structure[period][label_id][2]
                 label_data_structure[label_id] = (data, metadata, image_number)
         block_data_structure[period] = label_data_structure
