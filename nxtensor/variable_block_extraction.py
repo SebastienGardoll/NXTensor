@@ -43,7 +43,7 @@ def preprocess_extraction(extraction_conf_file_path: str) -> None:
     for label_id, label in extraction_conf.get_labels().items():
         db_metadata_mappings[label_id] = label.db_meta_data_mapping
         dataframe_load_function = du.get_dataframe_load_function(label.db_format)
-        extraction_metadata_block = dataframe_load_function(label.db_file_path, label.db_format_options)
+        extraction_metadata_block = dataframe_load_function(label.db_file_path, label.db_open_options)
         extraction_metadata_blocks[label_id] = extraction_metadata_block
 
     netcdf_period_resolution = None

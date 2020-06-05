@@ -10,6 +10,7 @@ from nxtensor.core.types import VariableId, LabelId, Period
 import nxtensor.utils.hdf5_utils as hu
 import nxtensor.utils.naming_utils as nu
 import nxtensor.utils.csv_utils as cu
+import nxtensor.utils.db_utils as du
 
 from multiprocessing import Pool
 
@@ -93,7 +94,7 @@ def channel_building(variable_id: VariableId, channel_output_dir_path: str,
         dataset_data_file_path, dataset_metadata_file_path = \
             nu.compute_data_meta_data_file_path(variable_id, channel_output_dir_path, dataset_name)
         hu.write_ndarray_to_hdf5(dataset_data_file_path, dataset_data)
-        dataset_metadata.to_csv(dataset_metadata_file_path, **cu.DEFAULT_CSV_OPTIONS)
+        du.save_to_csv_file(dataset_metadata, dataset_metadata_file_path)
 
     stat_data = [{'mean': mean, 'scale': scale}]
     stat_file_path = nu.compute_stat_file_path(variable_id, channel_output_dir_path)

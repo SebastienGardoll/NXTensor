@@ -25,7 +25,7 @@ def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
         label.num_id = num_id
         label.db_file_path = ''
         label.db_format = db_format
-        label.db_format_options = db_format_options
+        label.db_open_options = db_format_options
         label.db_meta_data_mapping = db_meta_data_mapping
         label.db_time_resolution = db_time_resolution
         db_filename = db_filename_template.format(dataset_id=dataset_id,

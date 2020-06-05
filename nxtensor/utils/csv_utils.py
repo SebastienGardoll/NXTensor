@@ -30,7 +30,7 @@ def create_csv_options(separator: str = None, header: int = None, line_terminato
 
 
 DEFAULT_CSV_OPTIONS: Mapping[CsvOptName, any] = {CsvOptName.SEPARATOR: ',',
-                                                 CsvOptName.LINE_TERMINATOR: '\\n',
+                                                 CsvOptName.LINE_TERMINATOR: '\n',
                                                  CsvOptName.HEADER: 0,
                                                  CsvOptName.QUOTE_CHAR: '"',
                                                  CsvOptName.QUOTING: csv.QUOTE_NONNUMERIC,
@@ -51,9 +51,6 @@ def to_csv(data: Sequence[Mapping[str, any]], file_path: str,
 
         if CsvOptName.ENCODING in csv_options:
             encoding = csv_options.pop(CsvOptName.ENCODING)
-
-        if csv_options[CsvOptName.LINE_TERMINATOR] == DEFAULT_CSV_OPTIONS[CsvOptName.LINE_TERMINATOR]:
-            csv_options[CsvOptName.LINE_TERMINATOR] = '\n'
 
         if CsvOptName.SEPARATOR in csv_options:
             separator = csv_options.pop(CsvOptName.SEPARATOR)

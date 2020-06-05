@@ -132,7 +132,7 @@ class ClassificationLabel(YamlSerializable):
         self.db_format: DBType = None
 
         # The description of the db options (dictionary).
-        self.db_format_options: Dict[CsvOptName, str] = None
+        self.db_open_options: Dict[CsvOptName, str] = None
 
         # Dictionary that maps required information about the labels:
         # convert keys (see enum_utils) into db column names.
@@ -141,6 +141,25 @@ class ClassificationLabel(YamlSerializable):
 
         # Time resolution in the db.
         self.db_time_resolution: TimeResolution = None
+
+    def save(self, file_path: str) -> None:
+        if CsvOptName.LINE_TERMINATOR in self.db_open_options:
+            line_terminator = self.db_open_options[CsvOptName.LINE_TERMINATOR]
+            if line_terminator == '\n':
+                self.db_open_options[CsvOptName.LINE_TERMINATOR] = '\\n'
+            super().save(file_path)
+            self.db_open_options[CsvOptName.LINE_TERMINATOR] = line_terminator
+        else:
+            super().save(file_path)
+
+    @staticmethod
+    def load(file_path: str) -> 'ClassificationLabel':
+        result = super().load(file_path)
+        if CsvOptName.LINE_TERMINATOR in result.db_open_options:
+            line_terminator = result.db_open_options[CsvOptName.LINE_TERMINATOR]
+            if line_terminator == '\\n':
+                result.db_open_options[CsvOptName.LINE_TERMINATOR] = '\n'
+        return result
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(str_id={self.str_id}, dataset_id={self.dataset_id}, " + \

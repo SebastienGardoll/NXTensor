@@ -19,17 +19,28 @@ from nxtensor.utils.time_resolutions import TimeResolution
 DBMetadataMapping = Dict[Union[Coordinate, TimeResolution], str]
 
 
-def load_csv_file(db_file_path: str, options: Mapping[CsvOptName, any] = DEFAULT_CSV_OPTIONS)\
+def save_to_csv_file(data: pd.DataFrame, csv_file_path: str, options: Mapping[CsvOptName, any] = DEFAULT_CSV_OPTIONS):
+    try:
+        # Line terminator parameter name is not compatible with pandas.to_csv.
+        options = {k: v for k, v in options.items()}
+        line_terminator = options[CsvOptName.LINE_TERMINATOR]
+        del options[CsvOptName.LINE_TERMINATOR]
+        options['line_terminator'] = line_terminator
+
+        data.to_csv(path_or_buf=csv_file_path, **options)
+    except Exception as e:
+        msg = f"error while saving cvs file '{csv_file_path}' with options {options}"
+        raise Exception(msg, e)
+
+
+def load_csv_file(csv_file_path: str, options: Mapping[CsvOptName, any] = DEFAULT_CSV_OPTIONS)\
                   -> pd.DataFrame:
-    with open(db_file_path, 'r') as db_file:
+    with open(csv_file_path, 'r') as db_file:
         try:
-            if options[CsvOptName.LINE_TERMINATOR] == DEFAULT_CSV_OPTIONS[CsvOptName.LINE_TERMINATOR]:
-                options = {k: v for k, v in options.items()}
-                options[CsvOptName.LINE_TERMINATOR] = '\n'
             result = pd.read_csv(filepath_or_buffer=db_file, **options)
             return result
         except Exception as e:
-            msg = f"error while loading cvs file '{db_file_path}' with options {options}"
+            msg = f"error while loading cvs file '{csv_file_path}' with options {options}"
             raise Exception(msg, e)
 
 
