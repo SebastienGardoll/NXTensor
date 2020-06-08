@@ -74,6 +74,9 @@ def channel_building_batch(extraction_conf_file_path: str, ratios: Sequence[Tupl
 
     variable_ids = list(extraction_conf.get_variables().keys())
 
+    static_parameters = (extraction_conf.channels_dir_path, periods, label_ids,
+                                 total_number_images, block_file_structure, ratios, user_specific_block_processing)
+    parameters_list = [(variable_id, *static_parameters) for variable_id in variable_ids]
     if nb_workers > 1:
         len_variable_ids = len(variable_ids)
         if nb_workers > len_variable_ids:
@@ -81,18 +84,15 @@ def channel_building_batch(extraction_conf_file_path: str, ratios: Sequence[Tupl
 
         print(f"> assembling the channels '{nu.list_to_string(variable_ids)}' in parallel (nb worker: {nb_workers})")
         with Pool(processes=nb_workers) as pool:
-            static_parameters = (extraction_conf.channels_dir_path, periods, label_ids,
-                                 total_number_images, block_file_structure, ratios, user_specific_block_processing)
-            parameters_list = [(variable_id, static_parameters) for variable_id in variable_ids]
-
-            def map_channel_building_splitting(parameters):
-                channel_building(*parameters)
-            pool.map(func=map_channel_building_splitting, iterable=parameters_list, chunksize=1)
+            pool.map(func=__map_channel_building, iterable=parameters_list, chunksize=1)
     else:
         print(f"> assembling the channels '{nu.list_to_string(variable_ids)}' sequentially")
-        for variable_id in variable_ids:
-            channel_building(variable_id, extraction_conf.channels_dir_path, periods, label_ids,
-                             total_number_images, block_file_structure, ratios, user_specific_block_processing)
+        for parameters in parameters_list:
+            channel_building(*parameters)
+
+
+def __map_channel_building(parameters):
+    channel_building(*parameters)
 
 
 def channel_building(variable_id: VariableId, channel_output_dir_path: str,
@@ -132,6 +132,11 @@ def channel_stacking_batch(tensor_id: str,
                            variable_ids: Sequence[VariableId],
                            has_to_shuffle: bool,
                            nb_workers: int = 1) -> None:
+
+    static_parameters = (tensor_id, tensor_output_dir, channels_dir, variable_ids,
+                                 has_to_shuffle)
+    parameters_list = [(dataset_name, *static_parameters) for dataset_name in dataset_names]
+
     if nb_workers > 1:
         len_dataset_types = len(dataset_names)
         if nb_workers > len_dataset_types:
@@ -139,17 +144,15 @@ def channel_stacking_batch(tensor_id: str,
 
         print(f"> stacking the dataset '{nu.list_to_string(dataset_names)}' in parallel (nb worker: {nb_workers})")
         with Pool(processes=nb_workers) as pool:
-            static_parameters = (tensor_id, tensor_output_dir, channels_dir, variable_ids,
-                                 has_to_shuffle)
-            parameters_list = [(dataset_type, static_parameters) for dataset_type in dataset_names]
-
-            def map_channel_stacking(parameters):
-                channel_stacking(*parameters)
-            pool.map(func=map_channel_stacking, iterable=parameters_list, chunksize=1)
+            pool.map(func=__map_channel_stacking, iterable=parameters_list, chunksize=1)
     else:
         print(f"> stacking the dataset '{nu.list_to_string(dataset_names)}' sequentially")
-        for dataset_type in dataset_names:
-            channel_stacking(dataset_type, tensor_id, tensor_output_dir, channels_dir, variable_ids, has_to_shuffle)
+        for parameters in parameters_list:
+            channel_stacking(*parameters)
+
+
+def __map_channel_stacking(parameters):
+    channel_stacking(*parameters)
 
 
 def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
@@ -182,7 +185,7 @@ def __test_preprocess(extraction_conf_file_path: str) -> None:
 
 def __test_channel_building_batch(extraction_conf_file_path: str) -> None:
     ratios = [('validation', 0.1), ('training', 0.9)]
-    channel_building_batch(extraction_conf_file_path, ratios, 4)
+    channel_building_batch(extraction_conf_file_path, ratios, 10)
 
 def __all_tests():
     config_dir_path = '/home/sgardoll/extraction_config'
