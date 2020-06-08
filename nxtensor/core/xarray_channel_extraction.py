@@ -14,7 +14,7 @@ import nxtensor.utils.csv_utils
 import nxtensor.utils.hdf5_utils
 from nxtensor.exceptions import ConfigurationError
 from nxtensor.utils.time_resolutions import TimeResolution
-from nxtensor.utils.db_utils import DBMetadataMapping, create_db_metadata_mapping
+from nxtensor.utils.db_utils import create_db_metadata_mapping
 from nxtensor.utils.csv_option_names import CsvOptName
 
 from multiprocessing import Pool
@@ -30,8 +30,7 @@ import pickle
 
 import time
 
-from nxtensor.core.types import VariableId, LabelId, MetaDataBlock, Period
-
+from nxtensor.core.types import VariableId, LabelId, MetaDataBlock, Period, DBMetadataMapping
 
 INDEX_NAME = 'index'
 
@@ -256,9 +255,9 @@ def __test__merge_block_structures():
     assert len(merged_structures[0][1]) == 1  # Cyclone not in period (2000, 9).
 
 
-def __all_test():
+def __all_tests():
     __test__merge_block_structures()
 
 
 if __name__ == '__main__':
-    __all_test()
+    __all_tests()

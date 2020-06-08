@@ -129,10 +129,10 @@ def __test_multilevel_variable():
     return __era5_unit_test_extraction(variable_name, year, month, day, hour, lat, lon, variable_level)
 
 
-def __all_test():
+def __all_tests():
     __test_simple_variable()
     __test_multilevel_variable()
 
 
 if __name__ == '__main__':
-    __all_test()
+    __all_tests()

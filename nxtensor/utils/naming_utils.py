@@ -76,7 +76,7 @@ def __create_path_prefix(parent_dir_path: str, *identifiers) -> str:
     return path.join(parent_dir_path, filename_prefix)
 
 
-def __all_test():
+def __all_tests():
     parent_dir_path = '/parent_dir_path'
     str_id = 'id'
     print(compute_stat_file_path(str_id, parent_dir_path, 'otherId'))
@@ -86,4 +86,4 @@ def __all_test():
 
 
 if __name__ == '__main__':
-    __all_test()
+    __all_tests()

@@ -206,9 +206,9 @@ def shuffle_data(data: np.ndarray, metadata: pd.DataFrame) -> Tuple[np.ndarray, 
     return shuffled_data, shuffled_metadata
 
 
-def __all_test():
+def __all_tests():
     pass
 
 
 if __name__ == '__main__':
-    __all_test()
+    __all_tests()

@@ -4,19 +4,15 @@ Created on Fri Apr 24 11:01:15 2020
 
 @author: sebastien@gardoll.fr
 """
-from typing import Dict, Callable, Union, Mapping
+from typing import Callable, Mapping
 import pandas as pd
 
+from nxtensor.core.types import DBMetadataMapping
 from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.csv_option_names import CsvOptName
 from nxtensor.utils.csv_utils import DEFAULT_CSV_OPTIONS
 from nxtensor.utils.db_types import DBType
 from nxtensor.utils.time_resolutions import TimeResolution
-
-# [TYPES]
-
-
-DBMetadataMapping = Dict[Union[Coordinate, TimeResolution], str]
 
 
 def save_to_csv_file(data: pd.DataFrame, csv_file_path: str, options: Mapping[CsvOptName, any] = DEFAULT_CSV_OPTIONS):

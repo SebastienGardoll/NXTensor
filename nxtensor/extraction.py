@@ -6,12 +6,11 @@ Created on Wed Apr  3 13:26:39 2019
 @author: sebastien@gardoll.fr
 """
 from nxtensor.utils.time_resolutions import TimeResolution
-from nxtensor.utils.db_utils import DBMetadataMapping
 from nxtensor.utils.csv_option_names import CsvOptName
 from nxtensor.utils.db_types import DBType
 from nxtensor.yaml_serializable import YamlSerializable
 from nxtensor.variable import Variable
-from nxtensor.core.types import VariableId, LabelId
+from nxtensor.core.types import VariableId, LabelId, DBMetadataMapping
 import logging
 from typing import List, Dict, Mapping
 

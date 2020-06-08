@@ -9,11 +9,10 @@ from typing import Dict, Tuple, List
 
 from nxtensor.extraction import ExtractionConfig
 from nxtensor.extractor import ExtractionVisitor
-from nxtensor.utils.db_utils import DBMetadataMapping
 from nxtensor.variable import Variable
 
 import nxtensor.core.xarray_channel_extraction as chan_xtract
-from nxtensor.core.types import LabelId, MetaDataBlock, Period
+from nxtensor.core.types import LabelId, MetaDataBlock, Period, DBMetadataMapping
 
 import pandas as pd
 
@@ -93,7 +92,7 @@ def __test_extract(extraction_conf_file_path: str, variable_id: str) -> None:
     extract(extraction_conf_file_path, variable_id)
 
 
-def __all_test():
+def __all_tests():
     config_dir_path = '/home/sgardoll/extraction_config'
     extraction_conf_file_path = path.join(config_dir_path, '2000_10_extraction_config.yml')
 
@@ -107,4 +106,4 @@ def __all_test():
 
 
 if __name__ == '__main__':
-    __all_test()
+    __all_tests()

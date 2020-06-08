@@ -114,7 +114,7 @@ def __test_reformat_coordinates(dataframe_file_path: str):
     df.to_csv(reformatted_dataframe_file_path, sep=',', encoding='utf-8', line_terminator='\n')
 
 
-if __name__ == '__main__':
+def __all_tests():
     import os.path as path
     dataframes_dir_path = '/data/sgardoll/cyclone_data/dataset'
 
@@ -124,5 +124,9 @@ if __name__ == '__main__':
                             '2kb_cyclone_dataset.csv', '2kb_no_cyclone_dataset.csv',
                             'all_cyclone_dataset.csv', 'all_no_cyclone_dataset.csv')
     for dataframe_file_name in dataframe_file_names:
-        dataframeFilePath = path.join(dataframes_dir_path, dataframe_file_name)
-        __test_reformat_coordinates(dataframeFilePath)
+        dataframe_file_path = path.join(dataframes_dir_path, dataframe_file_name)
+        __test_reformat_coordinates(dataframe_file_path)
+
+
+if __name__ == '__main__':
+    __all_tests()

@@ -217,10 +217,10 @@ def __test_extraction(str_id, variable_parent_dir_path,
     return extracted_region
 
 
-def __all_test():
+def __all_tests():
     __test_single_multi_level()
     __test_computed_variable()
 
 
 if __name__ == '__main__':
-    __all_test()
+    __all_tests()
