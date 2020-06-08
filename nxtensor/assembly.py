@@ -72,10 +72,14 @@ def channel_building_batch(extraction_conf_file_path: str, ratios: Sequence[Tupl
         msg = f'> [ERROR] unable to load assembly preprocessing located at {preprocessing_file_path}'
         raise Exception(msg, e)
 
+    variable_ids = list(extraction_conf.get_variables().keys())
+
     if nb_workers > 1:
         len_variable_ids = len(variable_ids)
         if nb_workers > len_variable_ids:
             nb_workers = len_variable_ids
+
+        print(f"> assembling the channels '{nu.list_to_string(variable_ids)}' in parallel (nb worker: {nb_workers})")
         with Pool(processes=nb_workers) as pool:
             static_parameters = (extraction_conf.channels_dir_path, periods, label_ids,
                                  total_number_images, block_file_structure, ratios, user_specific_block_processing)
@@ -85,6 +89,7 @@ def channel_building_batch(extraction_conf_file_path: str, ratios: Sequence[Tupl
                 channel_building(*parameters)
             pool.map(func=map_channel_building_splitting, iterable=parameters_list, chunksize=1)
     else:
+        print(f"> assembling the channels '{nu.list_to_string(variable_ids)}' sequentially")
         for variable_id in variable_ids:
             channel_building(variable_id, extraction_conf.channels_dir_path, periods, label_ids,
                              total_number_images, block_file_structure, ratios, user_specific_block_processing)
@@ -106,7 +111,7 @@ def channel_building(variable_id: VariableId, channel_output_dir_path: str,
         assembly.concatenate_data_compute_dataset_indexes(periods, label_ids, total_number_images, block_data_structure,
                                                           ratios)
     channel_data, mean, scale = assembly.normalize_scale(channel_data, True, True)
-    os.makedirs(path.dirname(channel_output_dir_path), exist_ok=True)
+    os.makedirs(channel_output_dir_path, exist_ok=True)
     # Split the data and metadata according to the user's dataset specifications.
     for dataset_name, indexes in dataset_indexes:
         dataset_data, dataset_metadata = assembly.split_channel(channel_data, channel_metadata, indexes)
@@ -131,6 +136,8 @@ def channel_stacking_batch(tensor_id: str,
         len_dataset_types = len(dataset_names)
         if nb_workers > len_dataset_types:
             nb_workers = len_dataset_types
+
+        print(f"> stacking the dataset '{nu.list_to_string(dataset_names)}' in parallel (nb worker: {nb_workers})")
         with Pool(processes=nb_workers) as pool:
             static_parameters = (tensor_id, tensor_output_dir, channels_dir, variable_ids,
                                  has_to_shuffle)
@@ -140,6 +147,7 @@ def channel_stacking_batch(tensor_id: str,
                 channel_stacking(*parameters)
             pool.map(func=map_channel_stacking, iterable=parameters_list, chunksize=1)
     else:
+        print(f"> stacking the dataset '{nu.list_to_string(dataset_names)}' sequentially")
         for dataset_type in dataset_names:
             channel_stacking(dataset_type, tensor_id, tensor_output_dir, channels_dir, variable_ids, has_to_shuffle)
 
@@ -163,6 +171,7 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
     tensor_data_file_path, tensor_metadata_file_path = \
         nu.compute_data_meta_data_file_path(tensor_id, tensor_output_dir, dataset_name)
 
+    os.makedirs(tensor_output_dir, exist_ok=True)
     du.save_to_csv_file(metadata, tensor_metadata_file_path)
     hu.write_ndarray_to_hdf5(tensor_data_file_path, tensor_data)
     return tensor_data_file_path, tensor_metadata_file_path
@@ -171,12 +180,15 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
 def __test_preprocess(extraction_conf_file_path: str) -> None:
     preprocessing(extraction_conf_file_path)
 
+def __test_channel_building_batch(extraction_conf_file_path: str) -> None:
+    ratios = [('validation', 0.1), ('training', 0.9)]
+    channel_building_batch(extraction_conf_file_path, ratios, 4)
 
 def __all_tests():
     config_dir_path = '/home/sgardoll/extraction_config'
     extraction_conf_file_path = path.join(config_dir_path, '2000_10_extraction_config.yml')
     __test_preprocess(extraction_conf_file_path)
-
+    __test_channel_building_batch(extraction_conf_file_path)
 
 if __name__ == '__main__':
     __all_tests()
