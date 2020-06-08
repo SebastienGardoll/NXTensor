@@ -11,11 +11,11 @@ import os.path as path
 
 # extraction_id
 #     |
-#     |_ channel_id
+#     |_ channels
 #     |     |_ data and metadata variable channel files (see naming_utils for naming convention)
 #     |
-#     |_ tensor_id
-#     |     |_ data and metadata variable tensor files (see naming_utils for naming convention)
+#     |_ tensors
+#     |     |_ data and metadata dataset tensor files (see naming_utils for naming convention)
 #     |
 #     |_ blocks
 #          |_ extraction_id
@@ -27,9 +27,10 @@ import os.path as path
 NAME_SEPARATOR: str = '_'
 
 # {} stands for the str_id of the variable.
-__DATA_BLOCK_FILENAME_TEMPLATE: str = '{}.' + fu.HDF5_FILE_EXTENSION
-__METADATA_BLOCK_FILENAME_TEMPLATE: str = '{}.' + fu.CSV_FILE_EXTENSION
-__STAT_FILENAME_TEMPLATE: str = '{}_stats.' + fu.CSV_FILE_EXTENSION
+__DATA_BLOCK_FILENAME_TEMPLATE: str = '{}' + NAME_SEPARATOR + 'data.' + fu.HDF5_FILE_EXTENSION
+__METADATA_BLOCK_FILENAME_TEMPLATE: str = '{}' + NAME_SEPARATOR + 'metadata.' + fu.CSV_FILE_EXTENSION
+__STAT_FILENAME_TEMPLATE: str = '{}' + NAME_SEPARATOR + 'stats.' + fu.CSV_FILE_EXTENSION
+__PREPROCESSING_FILENAME_TEMPLATE: str = '{}' + NAME_SEPARATOR + 'preprocessing.' + fu.PICKLE_FILE_EXTENSION
 
 
 def compute_data_meta_data_file_path(str_id: str, parent_dir_path: str, *other_filename_prefixes: str)\
@@ -40,32 +41,49 @@ def compute_data_meta_data_file_path(str_id: str, parent_dir_path: str, *other_f
 
 
 def compute_data_meta_data_file_template_path(parent_dir_path: str, *other_filename_prefixes: str) -> Tuple[str, str]:
-    if other_filename_prefixes:
-        filename_prefix = functools.reduce(lambda x, y: f'{x}{NAME_SEPARATOR}{y}', other_filename_prefixes)
-        data_filename_template = f"{filename_prefix}{NAME_SEPARATOR}{__DATA_BLOCK_FILENAME_TEMPLATE}"
-        metadata_filename_template = f"{filename_prefix}{NAME_SEPARATOR}{__METADATA_BLOCK_FILENAME_TEMPLATE}"
-    else:
-        data_filename_template = __DATA_BLOCK_FILENAME_TEMPLATE
-        metadata_filename_template = __METADATA_BLOCK_FILENAME_TEMPLATE
-    data_file_path_template = path.join(parent_dir_path, data_filename_template)
-    metadata_file_path_template = path.join(parent_dir_path, metadata_filename_template)
-    return data_file_path_template, metadata_file_path_template
+    data_filename_template = __create_path_prefix(parent_dir_path, *other_filename_prefixes,
+                                                  __DATA_BLOCK_FILENAME_TEMPLATE)
+    metadata_filename_template = __create_path_prefix(parent_dir_path, *other_filename_prefixes,
+                                                      __METADATA_BLOCK_FILENAME_TEMPLATE)
+    return data_filename_template, metadata_filename_template
 
 
 def compute_stat_file_path(str_id: str, parent_dir_path: str, *other_filename_prefixes: str) -> str:
-    if other_filename_prefixes:
-        filename_prefix = functools.reduce(lambda x, y: f'{x}{NAME_SEPARATOR}{y}', other_filename_prefixes)
-        stat_filename_template = f"{filename_prefix}{NAME_SEPARATOR}{__STAT_FILENAME_TEMPLATE}"
-    else:
-        stat_filename_template = __STAT_FILENAME_TEMPLATE
-    stat_file_path_template = path.join(parent_dir_path, stat_filename_template)
-    return stat_file_path_template.format(str_id)
+    stat_file_path_prefix = __create_path_prefix(parent_dir_path, *other_filename_prefixes, str_id)
+    return __STAT_FILENAME_TEMPLATE.format(stat_file_path_prefix)
+
+
+def compute_preprocessing_file_path(str_id: str, preprocessing_kind: str, parent_dir_path: str) -> str:
+    preprocessing_file_path_prefix = __create_path_prefix(parent_dir_path, str_id, preprocessing_kind)
+    return __PREPROCESSING_FILENAME_TEMPLATE.format(preprocessing_file_path_prefix)
 
 
 def create_period_str(period: Period) -> str:
-    return functools.reduce(lambda x, y: f'{x}{NAME_SEPARATOR}{y}', period)
+    return __parts_concatenation(period)
 
 
 # Sort the labels alphabetically.
 def sort_labels(label_ids: Iterable[LabelId]) -> Sequence[LabelId]:
     return sorted(label_ids)
+
+
+def __parts_concatenation(parts: Iterable) -> str:
+    return functools.reduce(lambda x, y: f'{x}{NAME_SEPARATOR}{y}', parts)
+
+
+def __create_path_prefix(parent_dir_path: str, *identifiers) -> str:
+    filename_prefix = __parts_concatenation(identifiers)
+    return path.join(parent_dir_path, filename_prefix)
+
+
+def __all_test():
+    parent_dir_path = '/parent_dir_path'
+    str_id = 'id'
+    print(compute_stat_file_path(str_id, parent_dir_path, 'otherId'))
+    print(compute_data_meta_data_file_path(str_id, parent_dir_path, 'otherId'))
+    print(compute_data_meta_data_file_template_path(str_id, parent_dir_path, 'otherId'))
+    print(compute_preprocessing_file_path(str_id, 'kind', parent_dir_path))
+
+
+if __name__ == '__main__':
+    __all_test()

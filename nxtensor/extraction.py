@@ -50,13 +50,15 @@ class ExtractionConfig(YamlSerializable):
         # List of label file path descriptions.
         self.label_file_paths: List[str] = None
         self.extraction_shape: ExtractionShape = ExtractionShape.SQUARE
-        # The path of required directories for an extraction.
+        # The path of required directories for an extraction and assemble (channel and tensor).
         self.blocks_dir_path: str = None
+        self.channels_dir_path: str = None
+        self.tensors_dir_path: str = None
         self.tmp_dir_path: str = None
 
         # The maximum number of process spawn during the extraction.
         # Each process treats one extraction_metadata_blocks.
-        self.nb_process: int = 1
+        self.nb_process: int = 4
 
         # The number of processes and the number of extraction_metadata_blocks should be the same so
         # as to speed up the extraction. The less the number of extraction_metadata_blocks is, the greater

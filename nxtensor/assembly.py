@@ -19,33 +19,50 @@ import nxtensor.core.assembly as assembly
 import os
 import os.path as path
 
+from nxtensor.exceptions import ConfigurationError
+from nxtensor.extraction import ExtractionConfig
 from nxtensor.utils.tensor_dimensions import TensorDimension
 
 
-def preprocessing(blocks_dir_path: str, metadata_block_has_header: bool,
-                  preprocessing_output_file_path: str) -> None:
-
-    periods, label_ids, block_file_structure = assembly.compute_block_file_structure(blocks_dir_path)
+def preprocessing(extraction_conf_file_path: str) -> None:
+    extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
+    metadata_block_has_header = True
+    preprocessing_file_path = __generate_preprocessing_file_path(extraction_conf)
+    periods, label_ids, block_file_structure = assembly.compute_block_file_structure(extraction_conf.blocks_dir_path)
     total_number_images, block_file_structure = assembly.count_block_images(metadata_block_has_header,
                                                                             block_file_structure)
-    os.makedirs(path.dirname(preprocessing_output_file_path), exist_ok=True)
+    os.makedirs(path.dirname(preprocessing_file_path), exist_ok=True)
     try:
-        with open(preprocessing_output_file_path, 'wb') as file:
+        with open(preprocessing_file_path, 'wb') as file:
             pickle.dump(obj=(periods, label_ids, total_number_images, block_file_structure),
                         file=file, protocol=pickle.HIGHEST_PROTOCOL)
     except Exception as e:
-        msg = f'> [ERROR] unable to save assembly preprocessing in {preprocessing_output_file_path}'
+        msg = f'> [ERROR] unable to save assembly preprocessing in {preprocessing_file_path}'
         raise Exception(msg, e)
 
 
-def channel_building_batch(variable_ids: Sequence[VariableId], channel_output_dir_path: str,
-                           ratios: Sequence[Tuple[str, float]], preprocessing_file_path: str, nb_workers: int = 1,
+def __generate_preprocessing_file_path(extraction_conf: ExtractionConfig) -> str:
+    return nu.compute_preprocessing_file_path(extraction_conf.str_id, 'assembly', extraction_conf.tmp_dir_path)
+
+
+def __load_extraction_conf(extraction_conf_file_path: str):
+    try:
+        return ExtractionConfig.load(extraction_conf_file_path)
+    except Exception as e:
+        msg = f'> [ERROR] unable to load extraction conf file located at {extraction_conf_file_path}'
+        raise ConfigurationError(msg, e)
+
+
+def channel_building_batch(extraction_conf_file_path: str, variable_ids: Sequence[VariableId],
+                           ratios: Sequence[Tuple[str, float]], nb_workers: int = 1,
                            user_specific_block_processing:
                                Callable[[Sequence[Period], Sequence[LabelId],
                                          Mapping[Period, Mapping[LabelId, Tuple[np.ndarray, pd.DataFrame, int]]]],
                                         Tuple[Sequence[Period], Sequence[LabelId],
                                         Mapping[Period, Mapping[LabelId, Tuple[np.ndarray, pd.DataFrame, int]]]]] =
                                assembly.default_block_processing_func) -> None:
+    extraction_conf: ExtractionConfig = ExtractionConfig.load(extraction_conf_file_path)
+    preprocessing_file_path = __generate_preprocessing_file_path(extraction_conf)
     # Deserialize the preprocessing data.
     try:
         with open(preprocessing_file_path, 'rb') as file:
@@ -59,7 +76,7 @@ def channel_building_batch(variable_ids: Sequence[VariableId], channel_output_di
         if nb_workers > len_variable_ids:
             nb_workers = len_variable_ids
         with Pool(processes=nb_workers) as pool:
-            static_parameters = (channel_output_dir_path, periods, label_ids,
+            static_parameters = (extraction_conf.channels_dir_path, periods, label_ids,
                                  total_number_images, block_file_structure, ratios, user_specific_block_processing)
             parameters_list = [(variable_id, static_parameters) for variable_id in variable_ids]
 
@@ -68,7 +85,7 @@ def channel_building_batch(variable_ids: Sequence[VariableId], channel_output_di
             pool.map(func=map_channel_building_splitting, iterable=parameters_list, chunksize=1)
     else:
         for variable_id in variable_ids:
-            channel_building(variable_id, channel_output_dir_path, periods, label_ids,
+            channel_building(variable_id, extraction_conf.channels_dir_path, periods, label_ids,
                              total_number_images, block_file_structure, ratios, user_specific_block_processing)
 
 
@@ -82,7 +99,6 @@ def channel_building(variable_id: VariableId, channel_output_dir_path: str,
                                   Tuple[Sequence[Period], Sequence[LabelId],
                                   Mapping[Period, Mapping[LabelId, Tuple[np.ndarray, pd.DataFrame, int]]]]] =
                          assembly.default_block_processing_func) -> None:
-    # TODO: error handling.
     block_data_structure = assembly.load_data_blocks(variable_id, periods, label_ids, block_file_structure)
     periods, label_ids, block_data_structure = user_specific_block_processing(periods, label_ids, block_data_structure)
     channel_data, channel_metadata, dataset_indexes = \
@@ -140,7 +156,7 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
     tensor_data = assembly.stack_channel(channel_data_list)
     metadata = du.load_csv_file(channel_metadata_file_path)
 
-    if has_to_shuffle:  # TODO: error handling.
+    if has_to_shuffle:
         tensor_data, metadata = assembly.shuffle_data(tensor_data, metadata)
 
     tensor_data_file_path, tensor_metadata_file_path = \

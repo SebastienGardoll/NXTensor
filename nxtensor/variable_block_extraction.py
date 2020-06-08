@@ -7,8 +7,6 @@ Created on Wed Apr  22 11:14:54 2020
 """
 from typing import Dict, Tuple, List
 
-import nxtensor.utils.naming_utils
-from nxtensor.exceptions import ConfigurationError
 from nxtensor.extraction import ExtractionConfig
 from nxtensor.extractor import ExtractionVisitor
 from nxtensor.utils.db_utils import DBMetadataMapping
@@ -24,20 +22,12 @@ import xarray as xr
 import os.path as path
 
 import nxtensor.utils.db_utils as du
-import nxtensor.utils.file_utils as fu
-
-
-def __load_extraction_conf(extraction_conf_file_path: str):
-    try:
-        return ExtractionConfig.load(extraction_conf_file_path)
-    except Exception as e:
-        msg = f'> [ERROR] unable to load extraction conf file located at {extraction_conf_file_path}'
-        raise ConfigurationError(msg, e)
+import nxtensor.utils.naming_utils as nu
 
 
 # Single process - single thread.
 def preprocess_extraction(extraction_conf_file_path: str) -> None:
-    extraction_conf = __load_extraction_conf(extraction_conf_file_path)
+    extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
     db_metadata_mappings: Dict[LabelId, DBMetadataMapping] = dict()
     extraction_metadata_blocks: Dict[LabelId, pd.DataFrame] = dict()
     for label_id, label in extraction_conf.get_labels().items():
@@ -60,15 +50,12 @@ def preprocess_extraction(extraction_conf_file_path: str) -> None:
                                       inplace=True)
 
 
-def __generate_preprocessing_file_path(extraction_conf: ExtractionConfig):
-    file_name = f'{extraction_conf.str_id}{nxtensor.utils.naming_utils.NAME_SEPARATOR}preprocessing' + \
-                                  f'.{fu.PICKLE_FILE_EXTENSION}'
-    file_path = path.join(extraction_conf.tmp_dir_path, file_name)
-    return file_path
+def __generate_preprocessing_file_path(extraction_conf: ExtractionConfig) -> str:
+    return nu.compute_preprocessing_file_path(extraction_conf.str_id, 'extraction', extraction_conf.tmp_dir_path)
 
 
 def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Dict[str, Dict[str, str]]]:
-    extraction_conf = __load_extraction_conf(extraction_conf_file_path)
+    extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
     variable: Variable = extraction_conf.get_variables()[variable_id]
 
     def process_block(period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]]) \

@@ -67,6 +67,8 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:
         extract_config.label_file_paths = labels
         extract_config.extraction_shape = extraction_shape
         extract_config.blocks_dir_path = path.join(output_parent_dir, 'blocks')
+        extract_config.channels_dir_path = path.join(output_parent_dir, 'channels')
+        extract_config.tensors_dir_path = path.join(output_parent_dir, 'tensors')
         extract_config.tmp_dir_path = path.join(output_parent_dir, 'tmp')
         extract_config.nb_process = nb_process
 
