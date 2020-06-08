@@ -156,7 +156,7 @@ class ClassificationLabel(YamlSerializable):
 
     @staticmethod
     def load(file_path: str) -> 'ClassificationLabel':
-        result = super().load(file_path)
+        result = YamlSerializable.load(file_path)
         if CsvOptName.LINE_TERMINATOR in result.db_open_options:
             line_terminator = result.db_open_options[CsvOptName.LINE_TERMINATOR]
             if line_terminator == '\\n':
