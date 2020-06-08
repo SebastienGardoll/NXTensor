@@ -125,7 +125,7 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
         label_id, data_block, metadata_block = extracted_data_block
         period_str = nu.create_period_str(period)
         data_metadata_parent_dir = path.join(parent_dir_path, f"{period_str}", label_id)
-        os.makedirs(path.dirname(data_metadata_parent_dir), exist_ok=True)
+        os.makedirs(data_metadata_parent_dir, exist_ok=True)
         data_block_file_path, metadata_block_file_path = \
             nu.compute_data_meta_data_file_path(__variable_id, data_metadata_parent_dir)
         if __extraction_metadata_block_csv_save_options is None:
