@@ -106,7 +106,7 @@ def extract(variable_id: str,
         with Pool(processes=nb_workers) as pool:
             tmp_result = pool.map(func=__core_extraction, iterable=merged_structures, chunksize=1)
     else:
-        print("> variable {__variable_id} starting sequential extractions")
+        print(f"> variable {__variable_id} starting sequential extractions")
         for merged_structure in merged_structures:
             tmp_result = __core_extraction(merged_structure)
     print(f"> elapsed time: {tu.display_duration(time.time()-start)}")
