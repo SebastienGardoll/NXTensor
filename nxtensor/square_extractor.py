@@ -26,15 +26,15 @@ class RegionExtractionVisitor(VariableVisitor):
                  half_lat_frame: int, half_lon_frame: int, dask_scheduler: str = 'single-threaded'):
         # Buffer of extracted regions: optimization for computed variables.
         # Computed variables may contain computed variables, recursively !
-        self.__extracted_regions: Dict[VariableId, xr.DataArray] = dict()
-        self.__datasets: Mapping[VariableId, xr.Dataset] = datasets
-        self.__extraction_data: Mapping[Union[Coordinate, TimeResolution], Union[int, float]] = extraction_data
-        self.__half_lat_frame: int = half_lat_frame
-        self.__half_lon_frame: int = half_lon_frame
-        self.__dask_scheduler: str = dask_scheduler
-        self.__recursive_call_count: int = 0
+        self._extracted_regions: Dict[VariableId, xr.DataArray] = dict()
+        self._datasets: Mapping[VariableId, xr.Dataset] = datasets
+        self._extraction_data: Mapping[Union[Coordinate, TimeResolution], Union[int, float]] = extraction_data
+        self._half_lat_frame: int = half_lat_frame
+        self._half_lon_frame: int = half_lon_frame
+        self._dask_scheduler: str = dask_scheduler
+        self._recursive_call_count: int = 0
         # noinspection PyTypeChecker
-        self.result: xr.DataArray = None
+        self._result: xr.DataArray = None
 
 
 class SquareRegionExtractionVisitor(RegionExtractionVisitor):
@@ -42,78 +42,76 @@ class SquareRegionExtractionVisitor(RegionExtractionVisitor):
     def __init__(self, datasets: Mapping[VariableId, xr.Dataset],
                  extraction_data: Mapping[Union[Coordinate, TimeResolution], Union[int, float]], half_lat_frame: int,
                  half_lon_frame: int, dask_scheduler: str = 'single-threaded'):
-        # Buffer of extracted regions: optimization for computed variables.
-        # Computed variables may contain computed variables, recursively !
         super().__init__(datasets, extraction_data, half_lat_frame, half_lon_frame, dask_scheduler)
 
     def __bootstrap(self, var: SingleLevelVariable) -> str:
         # month2d, day2d and hour2d are computed when calling convert_block_to_dict function from module
         # xarray_channel_extraction.
-        formatted_date = var.date_template.format(**self.__extraction_data)
+        formatted_date = var.date_template.format(**self._extraction_data)
         return formatted_date
 
     def visit_single_level_variable(self, var: SingleLevelVariable) -> None:
-        if var.str_id not in self.__extracted_regions:
+        if var.str_id not in self._extracted_regions:
             formatted_date = self.__bootstrap(var)
-            self.result = xtract.extract_square_region(dataset=self.__datasets[var.str_id],
+            self._result = xtract.extract_square_region(dataset=self._datasets[var.str_id],
                                                        variable_netcdf_attr_name=var.netcdf_attr_name,
                                                        formatted_date=formatted_date,
-                                                       lat=self.__extraction_data[Coordinate.LAT],
+                                                       lat=self._extraction_data[Coordinate.LAT],
                                                        lat_resolution=var.lat_resolution,
-                                                       half_lat_frame=self.__half_lat_frame,
-                                                       lon=self.__extraction_data[Coordinate.LON],
+                                                       half_lat_frame=self._half_lat_frame,
+                                                       lon=self._extraction_data[Coordinate.LON],
                                                        lon_resolution=var.lon_resolution,
-                                                       half_lon_frame=self.__half_lon_frame,
+                                                       half_lon_frame=self._half_lon_frame,
                                                        time_netcdf_attr_name=var.time_netcdf_attr_name,
                                                        lat_netcdf_attr_name=var.lat_netcdf_attr_name,
                                                        lon_netcdf_attr_name=var.lon_netcdf_attr_name,
                                                        has_to_round=True, lat_nb_decimal=var.lat_nb_decimal,
                                                        lon_nb_decimal=var.lon_nb_decimal,
-                                                       dask_scheduler=self.__dask_scheduler)
-            self.__extracted_regions[var.str_id] = self.result
+                                                       dask_scheduler=self._dask_scheduler)
+            self._extracted_regions[var.str_id] = self._result
 
     def visit_multi_level_variable(self, var: MultiLevelVariable) -> None:
-        if var.str_id not in self.__extracted_regions:
+        if var.str_id not in self._extracted_regions:
             formatted_date = self.__bootstrap(var)
-            self.result = xtract.extract_square_region(dataset=self.__datasets[var.str_id],
+            self._result = xtract.extract_square_region(dataset=self._datasets[var.str_id],
                                                        variable_netcdf_attr_name=var.netcdf_attr_name,
                                                        formatted_date=formatted_date,
-                                                       lat=self.__extraction_data[Coordinate.LAT],
+                                                       lat=self._extraction_data[Coordinate.LAT],
                                                        lat_resolution=var.lat_resolution,
-                                                       half_lat_frame=self.__half_lat_frame,
-                                                       lon=self.__extraction_data[Coordinate.LON],
+                                                       half_lat_frame=self._half_lat_frame,
+                                                       lon=self._extraction_data[Coordinate.LON],
                                                        lon_resolution=var.lon_resolution,
-                                                       half_lon_frame=self.__half_lon_frame, variable_level=var.level,
+                                                       half_lon_frame=self._half_lon_frame, variable_level=var.level,
                                                        level_netcdf_attr_name=var.level_netcdf_attr_name,
                                                        time_netcdf_attr_name=var.time_netcdf_attr_name,
                                                        lat_netcdf_attr_name=var.lat_netcdf_attr_name,
                                                        lon_netcdf_attr_name=var.lon_netcdf_attr_name,
                                                        has_to_round=True, lat_nb_decimal=var.lat_nb_decimal,
                                                        lon_nb_decimal=var.lon_nb_decimal,
-                                                       dask_scheduler=self.__dask_scheduler)
-            self.__extracted_regions[var.str_id] = self.result
+                                                       dask_scheduler=self._dask_scheduler)
+            self._extracted_regions[var.str_id] = self._result
 
     def visit_computed_variable(self, var: ComputedVariable) -> None:
-        if var.str_id not in self.__extracted_regions:
-            self.__recursive_call_count = self.__recursive_call_count + 1
+        if var.str_id not in self._extracted_regions:
+            self._recursive_call_count = self._recursive_call_count + 1
             for internal_var in var.get_variables().values():
                 internal_var.accept(self)
 
-            calculator = XarrayRpnCalculator(var.computation_expression, self.__extracted_regions,
-                                             self.__dask_scheduler)
-            self.result = calculator.compute()
-            self.__extracted_regions[var.str_id] = self.result
-            self.__recursive_call_count = self.__recursive_call_count - 1
+            calculator = XarrayRpnCalculator(var.computation_expression, self._extracted_regions,
+                                             self._dask_scheduler)
+            self._result = calculator.compute()
+            self._extracted_regions[var.str_id] = self._result
+            self._recursive_call_count = self._recursive_call_count - 1
 
-        if self.__recursive_call_count == 0:
+        if self._recursive_call_count == 0:
             # Flush tmp data from memory. As computed variables may contain computed variables, recursively,
             # dumping tmp data will be under optimized if this call of visit_computed_variable is not the last call
             # on the recursive stack. It's ok to not flush __extracted_regions for simple and multilevel var.
-            self.__extracted_regions.clear()
+            self._extracted_regions.clear()
 
     def get_result(self) -> xr.DataArray:
-        self.__extracted_regions.clear()
-        return self.result
+        self._extracted_regions.clear()
+        return self._result
 
 
 def __test_create_extraction_data(lat: float, lon: float, year: int, month: int, day: int, hour: int) \
@@ -207,7 +205,7 @@ def __test_extraction(str_id, variable_parent_dir_path,
                                               half_lat_frame=half_lat_frame, half_lon_frame=half_lon_frame,
                                               dask_scheduler='single-threaded')
     var.accept(extractor)
-    extracted_region = extractor.result
+    extracted_region = extractor.get_result()
     [dataset.close() for dataset in datasets.values()]
 
     if has_to_plot:
