@@ -99,7 +99,7 @@ def __all_tests():
     __test_preprocess_extraction(extraction_conf_file_path)
 
     # Test a simple, multilevel, computed, recursive computed variables.
-    variable_ids = ('msl', 'ta500', 'wsl10', 'dummy')
+    variable_ids = ['msl', 'tcwv', 'u10', 'v10', 'ta200', 'ta500', 'u850', 'v850', 'wsl10', 'dummy']
     for variable_id in variable_ids:
         print(f"> extraction variable {variable_id}")
         __test_extract(extraction_conf_file_path, variable_id)
