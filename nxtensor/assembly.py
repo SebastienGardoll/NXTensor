@@ -29,7 +29,9 @@ def preprocessing(extraction_conf_file_path: str) -> None:
     metadata_block_has_header = True
     preprocessing_file_path = __generate_preprocessing_file_path(extraction_conf)
     periods, label_ids, block_file_structure = assembly.compute_block_file_structure(extraction_conf.blocks_dir_path)
-    total_number_images, block_file_structure = assembly.count_block_images(metadata_block_has_header,
+    variable_id = next(iter(extraction_conf.get_variables().keys()))
+    total_number_images, block_file_structure = assembly.count_block_images(variable_id,
+                                                                            metadata_block_has_header,
                                                                             block_file_structure)
     os.makedirs(path.dirname(preprocessing_file_path), exist_ok=True)
     try:
@@ -53,8 +55,7 @@ def __load_extraction_conf(extraction_conf_file_path: str):
         raise ConfigurationError(msg, e)
 
 
-def channel_building_batch(extraction_conf_file_path: str, variable_ids: Sequence[VariableId],
-                           ratios: Sequence[Tuple[str, float]], nb_workers: int = 1,
+def channel_building_batch(extraction_conf_file_path: str, ratios: Sequence[Tuple[str, float]], nb_workers: int = 1,
                            user_specific_block_processing:
                                Callable[[Sequence[Period], Sequence[LabelId],
                                          Mapping[Period, Mapping[LabelId, Tuple[np.ndarray, pd.DataFrame, int]]]],
@@ -165,3 +166,17 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
     du.save_to_csv_file(metadata, tensor_metadata_file_path)
     hu.write_ndarray_to_hdf5(tensor_data_file_path, tensor_data)
     return tensor_data_file_path, tensor_metadata_file_path
+
+
+def __test_preprocess(extraction_conf_file_path: str) -> None:
+    preprocessing(extraction_conf_file_path)
+
+
+def __all_tests():
+    config_dir_path = '/home/sgardoll/extraction_config'
+    extraction_conf_file_path = path.join(config_dir_path, '2000_10_extraction_config.yml')
+    __test_preprocess(extraction_conf_file_path)
+
+
+if __name__ == '__main__':
+    __all_tests()

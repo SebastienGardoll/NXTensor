@@ -47,7 +47,8 @@ def compute_block_file_structure(blocks_dir_path: str) -> \
     return tu.sort_periods(periods), nu.sort_labels(label_ids), block_file_structure
 
 
-def count_block_images(metadata_block_has_header: bool,
+def count_block_images(variable_id: VariableId,
+                       metadata_block_has_header: bool,
                        block_file_structure: Mapping[Period, Mapping[LabelId, Tuple[str, str]]])\
                        -> Tuple[int, Mapping[Period, Mapping[LabelId, Tuple[str, str, int]]]]:
     total_number_images = 0
@@ -55,7 +56,7 @@ def count_block_images(metadata_block_has_header: bool,
     for period, label_mapping in block_file_structure.items():
         annotated_block_file_structure[period] = dict()
         for label_id, label_data in label_mapping.items():
-            metadata_file_path = label_data[1]
+            metadata_file_path = label_data[1].format(variable_id)
             number_images = fu.count_lines_text_file(metadata_file_path) - 1 \
                 if metadata_block_has_header else fu.count_lines_text_file(metadata_file_path)
             total_number_images += number_images
