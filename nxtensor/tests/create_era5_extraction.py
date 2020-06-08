@@ -85,14 +85,15 @@ def test_load(config_parent_dir_path: str) -> None:
         conf.get_labels()
 
 
-if __name__ == '__main__':
+def __all_tests():
     config_files_parent_dir_path = '/home/sgardoll/extraction_config'
-
     print("> creating the labels")
     bootstrap_cyclone_labels(config_files_parent_dir_path)
-
     print("> creating the extraction configuration files")
     bootstrap_cyclone_extraction_configs(config_files_parent_dir_path)
-
     print("> loading all created files")
     test_load(config_files_parent_dir_path)
+
+
+if __name__ == '__main__':
+    __all_tests()

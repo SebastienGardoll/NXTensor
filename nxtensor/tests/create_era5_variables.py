@@ -100,7 +100,11 @@ def bootstrap_all(config_file_parent_dir_path: str) -> None:
     create_computed_variables(config_file_parent_dir_path)
 
 
-if __name__ == '__main__':
+def __all_tests():
     config_files_parent_dir_path = '/home/sgardoll/extraction_config'
     bootstrap_all(config_files_parent_dir_path)
     test_load(config_files_parent_dir_path)
+
+
+if __name__ == '__main__':
+    __all_tests()
