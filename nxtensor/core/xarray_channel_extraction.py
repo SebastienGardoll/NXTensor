@@ -5,7 +5,8 @@ Created on Wed Apr  22 09:20:10 2020
 
 @author: sebastien@gardoll.fr
 """
-from typing import Dict, Set, Tuple, Callable, Mapping, Sequence, List
+from abc import abstractmethod, ABC
+from typing import Dict, Set, Tuple, Mapping, Sequence, List
 
 import pandas as pd
 import xarray as xr
@@ -44,12 +45,12 @@ METADATA_TYPES = {TimeResolution.DAY: np.int8,TimeResolution.DAY2D: np.str,
                   TimeResolution.YEAR: np.int16,
                   Coordinate.LAT: float, Coordinate.LON: float}
 
+class BlockProcessor(ABC):
 
-# TODO: get rid of these global variables.
-__extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, MetaDataBlock]]],
-                                                          Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]]
-__extraction_metadata_block_csv_save_options: Mapping[CsvOptName, any]
-__variable_id: VariableId
+    @abstractmethod
+    def process_blocks(self, period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]]) \
+            -> Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]:
+        pass
 
 
 def convert_block_to_dict(extraction_metadata_block: pd.DataFrame) -> MetaDataBlock:
@@ -88,9 +89,7 @@ def preprocess_extraction(preprocessing_output_file_path: str,
 
 def extract(variable_id: str,
             preprocess_input_file_path: str,
-            extraction_metadata_block_processing_function: Callable[[Period, List[Tuple[LabelId, MetaDataBlock]]],
-                                                                    Tuple[str, List[Tuple[LabelId, xr.DataArray,
-                                                                                          MetaDataBlock]]]],
+            block_processor: BlockProcessor,
             extraction_metadata_block_csv_save_options: Mapping[CsvOptName, any] = None,
             nb_workers: int = 1) -> Dict[Period, Dict[str, Dict[str, str]]]:
 
@@ -102,34 +101,36 @@ def extract(variable_id: str,
         msg = f'unable to load extraction preprocessing located at {preprocess_input_file_path}'
         raise Exception(msg, e)
 
-    global __extraction_metadata_block_csv_save_options
-    __extraction_metadata_block_csv_save_options = extraction_metadata_block_csv_save_options
-    global __extraction_metadata_block_processing_function
-    __extraction_metadata_block_processing_function = extraction_metadata_block_processing_function
-    global __variable_id
-    __variable_id = variable_id
-
+    static_parameters = (variable_id, block_processor,
+                         extraction_metadata_block_csv_save_options)
+    parameters_list = [(period, extraction_metadata_blocks, *static_parameters) \
+                       for period, extraction_metadata_blocks in merged_structures]
     start = time.time()
     if nb_workers > 1:
-        print(f"> variable {__variable_id} starting parallel extractions (number of workers: {nb_workers})")
-
+        print(f"> variable {variable_id} starting parallel extractions (number of workers: {nb_workers})")
         with Pool(processes=nb_workers) as pool:
-            tmp_result = pool.map(func=__core_extraction, iterable=merged_structures, chunksize=1)
+            tmp_result = pool.map(func=__map_core_extraction, iterable=parameters_list, chunksize=1)
     else:
-        print(f"> variable {__variable_id} starting sequential extractions")
-        for merged_structure in merged_structures:
-            tmp_result = __core_extraction(merged_structure)
+        print(f"> variable {variable_id} starting sequential extractions")
+        for parameters in parameters_list:
+            tmp_result = __map_core_extraction(parameters)
     print(f"> elapsed time: {tu.display_duration(time.time()-start)}")
     result = dict(tmp_result)
     return result
 
 
-def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]])\
+def __map_core_extraction(parameters):
+    return __core_extraction(*parameters)
+
+
+def __core_extraction(period: Period,
+                      extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]],
+                      variable_id: VariableId,
+                      block_processor: BlockProcessor,
+                      extraction_metadata_block_csv_save_options: Mapping[CsvOptName, any] = None)\
                       -> Tuple[Period, Dict[str, Dict[str, str]]]:
-    period, extraction_metadata_blocks = merged_structure
     result: Dict[str, Dict[str, str]] = dict()
-    parent_dir_path, extracted_data_blocks = \
-        __extraction_metadata_block_processing_function(period, extraction_metadata_blocks)
+    parent_dir_path, extracted_data_blocks = block_processor.process_blocks(period, extraction_metadata_blocks)
 
     for extracted_data_block in extracted_data_blocks:
         label_id, data_block, metadata_block = extracted_data_block
@@ -137,12 +138,12 @@ def __core_extraction(merged_structure: Tuple[Period, List[Tuple[LabelId, MetaDa
         data_metadata_parent_dir = path.join(parent_dir_path, f"{period_str}", label_id)
         os.makedirs(data_metadata_parent_dir, exist_ok=True)
         data_block_file_path, metadata_block_file_path = \
-            nu.compute_data_meta_data_file_path(__variable_id, data_metadata_parent_dir)
-        if __extraction_metadata_block_csv_save_options is None:
+            nu.compute_data_meta_data_file_path(variable_id, data_metadata_parent_dir)
+        if extraction_metadata_block_csv_save_options is None:
             cu.to_csv(data=metadata_block, file_path=metadata_block_file_path)
         else:
             cu.to_csv(data=metadata_block, file_path=metadata_block_file_path,
-                      csv_options=__extraction_metadata_block_csv_save_options)
+                      csv_options=extraction_metadata_block_csv_save_options)
 
         nxtensor.utils.hdf5_utils.write_ndarray_to_hdf5(data_block_file_path, data_block.values)
         print(f'> saved {label_id} data block (shape: {data_block.shape}) for period {period_str}')

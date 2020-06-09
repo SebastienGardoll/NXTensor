@@ -55,33 +55,39 @@ def __generate_preprocessing_file_path(extraction_conf: ExtractionConfig) -> str
     return nu.compute_preprocessing_file_path(extraction_conf.str_id, 'extraction', extraction_conf.tmp_dir_path)
 
 
-def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Dict[str, Dict[str, str]]]:
-    extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
-    variable: Variable = extraction_conf.get_variables()[variable_id]
+class __SquareExtractionProcessor(chan_xtract.BlockProcessor):
 
-    def process_block(period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]]) \
+    def __init__(self, extraction_conf: ExtractionConfig, variable: Variable):
+        self.__extraction_conf = extraction_conf
+        self.__variable = variable
+
+    def process_blocks(self, period: Period, extraction_metadata_blocks: List[Tuple[LabelId, MetaDataBlock]]) \
             -> Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]:
         # Must be a integer !!! TODO: check for that when designing an extraction.
-        half_lat_frame = int((extraction_conf.y_size * variable.lat_resolution)/2)
-        half_lon_frame = int((extraction_conf.y_size * variable.lat_resolution)/2)
+        half_lat_frame = int((self.__extraction_conf.y_size * self.__variable.lat_resolution)/2)
+        half_lon_frame = int((self.__extraction_conf.y_size * self.__variable.lat_resolution)/2)
         extractor: ExtractionVisitor = ExtractionVisitor(period=period,
                                                          extraction_metadata_blocks=extraction_metadata_blocks,
                                                          half_lat_frame=half_lat_frame,
                                                          half_lon_frame=half_lon_frame,
-                                                         dask_scheduler=extraction_conf.dask_scheduler,
-                                                         shape=extraction_conf.extraction_shape)
-        variable.accept(extractor)
+                                                         dask_scheduler=self.__extraction_conf.dask_scheduler,
+                                                         shape=self.__extraction_conf.extraction_shape)
+        self.__variable.accept(extractor)
         result: Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]] = \
-            (extraction_conf.blocks_dir_path, extractor.get_result())
+            (self.__extraction_conf.blocks_dir_path, extractor.get_result())
 
         return result
 
-    preprocess_input_file_path = __generate_preprocessing_file_path(extraction_conf)
 
+def extract(extraction_conf_file_path: str, variable_id: str) -> Dict[Period, Dict[str, Dict[str, str]]]:
+    extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
+    variable: Variable = extraction_conf.get_variables()[variable_id]
+    preprocess_input_file_path = __generate_preprocessing_file_path(extraction_conf)
+    block_processor = __SquareExtractionProcessor(extraction_conf, variable)
     # TODO: save metadata options (csv).
     file_paths = chan_xtract.extract(variable_id=variable_id,
                                      preprocess_input_file_path=preprocess_input_file_path,
-                                     extraction_metadata_block_processing_function=process_block,
+                                     block_processor=block_processor,
                                      nb_workers=extraction_conf.nb_process)
     return file_paths
 
