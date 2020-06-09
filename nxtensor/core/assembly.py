@@ -15,8 +15,6 @@ import nxtensor.utils.db_utils as du
 
 from sklearn.preprocessing import StandardScaler
 
-import random
-
 import os
 
 import os.path as path
@@ -65,14 +63,13 @@ def count_block_images(variable_id: VariableId,
     return total_number_images, annotated_block_file_structure
 
 
-# It shuffles the period and doesn't change the definition of period, label and the associated data and metadata.
+# It doesn't do anything.
 def default_block_processing_func(periods: Sequence[Period],
                                   label_ids: Sequence[LabelId],
                                   block_file_structure: Mapping[Period, Mapping[LabelId,
                                                                                 Tuple[np.ndarray, pd.DataFrame, int]]])\
                     -> Tuple[Sequence[Period], Sequence[LabelId],
                              Mapping[Period, Mapping[LabelId, Tuple[np.ndarray, pd.DataFrame, int]]]]:
-    periods = random.sample(periods, len(periods))
     return periods, label_ids, block_file_structure
 
 

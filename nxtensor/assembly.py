@@ -23,12 +23,18 @@ from nxtensor.exceptions import ConfigurationError
 from nxtensor.extraction import ExtractionConfig
 from nxtensor.utils.tensor_dimensions import TensorDimension
 
+import random
 
-def preprocessing(extraction_conf_file_path: str) -> None:
+
+def preprocessing(extraction_conf_file_path: str, has_to_shuffle_period: bool) -> None:
     extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
     metadata_block_has_header = True
     preprocessing_file_path = __generate_preprocessing_file_path(extraction_conf)
     periods, label_ids, block_file_structure = assembly.compute_block_file_structure(extraction_conf.blocks_dir_path)
+
+    if has_to_shuffle_period:
+        periods = random.sample(periods, len(periods))
+
     variable_id = next(iter(extraction_conf.get_variables().keys()))
     total_number_images, block_file_structure = assembly.count_block_images(variable_id,
                                                                             metadata_block_has_header,
@@ -181,7 +187,7 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
 
 
 def __test_preprocess(extraction_conf_file_path: str) -> None:
-    preprocessing(extraction_conf_file_path)
+    preprocessing(extraction_conf_file_path, has_to_shuffle_period=True)
 
 def __test_channel_building_batch(extraction_conf_file_path: str) -> None:
     ratios = [('validation', 0.1), ('training', 0.9)]
