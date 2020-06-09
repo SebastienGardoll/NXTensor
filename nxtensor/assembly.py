@@ -28,6 +28,7 @@ import random
 
 def preprocessing(extraction_conf_file_path: str, has_to_shuffle_period: bool) -> None:
     extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
+    print(f"> starting pre-process of assemble '{extraction_conf.str_id}'")
     metadata_block_has_header = True
     preprocessing_file_path = __generate_preprocessing_file_path(extraction_conf)
     periods, label_ids, block_file_structure = assembly.compute_block_file_structure(extraction_conf.blocks_dir_path)
@@ -47,6 +48,7 @@ def preprocessing(extraction_conf_file_path: str, has_to_shuffle_period: bool) -
     except Exception as e:
         msg = f'> [ERROR] unable to save assembly preprocessing in {preprocessing_file_path}'
         raise Exception(msg, e)
+    print('> pre-process is completed')
 
 
 def __generate_preprocessing_file_path(extraction_conf: ExtractionConfig) -> str:
@@ -75,7 +77,7 @@ def channel_building_batch(extraction_conf_file_path: str, ratios: Sequence[Tupl
         with open(preprocessing_file_path, 'rb') as file:
             periods, label_ids, total_number_images, block_file_structure = pickle.load(file=file)
     except Exception as e:
-        msg = f'> [ERROR] unable to load assembly preprocessing located at {preprocessing_file_path}'
+        msg = f'> [ERROR] unable to load assembly pre-processing located at {preprocessing_file_path}'
         raise Exception(msg, e)
 
     variable_ids = list(extraction_conf.get_variables().keys())
@@ -166,20 +168,24 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
     channel_data_list = list()
     channel_metadata_file_path = ''
     for variable_id in variable_ids:
+        print(f"> loading the data and metadata of variable '{variable_id}'")
         channel_data_file_path, channel_metadata_file_path = \
             nu.compute_data_meta_data_file_path(variable_id, channels_dir, dataset_name)
         channel_data = hu.read_ndarray_from_hdf5(channel_data_file_path)
         channel_data_list.append(channel_data)
 
+    print("> stacking the channels")
     tensor_data = assembly.stack_channel(channel_data_list)
     metadata = du.load_csv_file(channel_metadata_file_path, assembly.PANDAS_CSV_READ_OPTS)
 
     if has_to_shuffle:
+        print(f"> shuffling the tensor '{dataset_name}'")
         tensor_data, metadata = assembly.shuffle_data(tensor_data, metadata)
 
     tensor_data_file_path, tensor_metadata_file_path = \
         nu.compute_data_meta_data_file_path(tensor_id, tensor_output_dir, dataset_name)
 
+    print(f"> saving the tensor '{dataset_name}' data and metadata")
     os.makedirs(tensor_output_dir, exist_ok=True)
     du.save_to_csv_file(metadata, tensor_metadata_file_path, assembly.PANDAS_CSV_WRITE_OPTS)
     hu.write_ndarray_to_hdf5(tensor_data_file_path, tensor_data)

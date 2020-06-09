@@ -27,6 +27,7 @@ import nxtensor.utils.naming_utils as nu
 # Single process - single thread.
 def preprocess_extraction(extraction_conf_file_path: str) -> None:
     extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
+    print(f"> starting pre-process of extraction '{extraction_conf.str_id}'")
     db_metadata_mappings: Dict[LabelId, DBMetadataMapping] = dict()
     extraction_metadata_blocks: Dict[LabelId, pd.DataFrame] = dict()
     for label_id, label in extraction_conf.get_labels().items():
@@ -47,6 +48,7 @@ def preprocess_extraction(extraction_conf_file_path: str) -> None:
                                       db_metadata_mappings=db_metadata_mappings,
                                       netcdf_file_time_period=netcdf_period_resolution,
                                       inplace=True)
+    print('> pre-process is completed')
 
 
 def __generate_preprocessing_file_path(extraction_conf: ExtractionConfig) -> str:
