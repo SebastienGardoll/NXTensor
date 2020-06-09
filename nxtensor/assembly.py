@@ -198,7 +198,7 @@ def __test_channel_stacking_batch(extraction_conf_file_path: str) -> None:
     tensor_id = '2000_10'
     dataset_names = ('validation', 'training')
     has_to_shuffle = True
-    nb_workers = 1
+    nb_workers = 2
     channel_stacking_batch(tensor_id, extraction_conf_file_path, dataset_names, has_to_shuffle, nb_workers)
 
 
