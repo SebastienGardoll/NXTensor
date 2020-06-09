@@ -1,0 +1,15 @@
+!!python/object:nxtensor.variable.ComputedVariable
+computation_expression: u10 2 pow v10 2 pow + sqrt
+date_template: '{year}-{month2d}-{day}T{hour2d}'
+lat_nb_decimal: 0
+lat_netcdf_attr_name: ''
+lat_resolution: 0.1
+lon_nb_decimal: 0
+lon_netcdf_attr_name: ''
+lon_resolution: 0.1
+netcdf_period_resolution: month
+str_id: wsl10
+time_resolution: hour
+variable_file_paths:
+- ~/tmp/extraction_config/u10_variable.yml
+- ~/tmp/extraction_config/v10_variable.yml
