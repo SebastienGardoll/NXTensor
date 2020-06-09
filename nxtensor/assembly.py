@@ -96,7 +96,7 @@ def channel_building_batch(extraction_conf_file_path: str, ratios: Sequence[Tupl
     else:
         print(f"> assembling the channels '{nu.list_to_string(variable_ids)}' sequentially")
         for parameters in parameters_list:
-            channel_building(*parameters)
+            __map_channel_building(parameters)
 
 
 def __map_channel_building(parameters):
