@@ -124,7 +124,7 @@ def channel_building(variable_id: VariableId, channel_output_dir_path: str,
         dataset_data_file_path, dataset_metadata_file_path = \
             nu.compute_data_meta_data_file_path(variable_id, channel_output_dir_path, dataset_name)
         hu.write_ndarray_to_hdf5(dataset_data_file_path, dataset_data)
-        du.save_to_csv_file(dataset_metadata, dataset_metadata_file_path)
+        du.save_to_csv_file(dataset_metadata, dataset_metadata_file_path, assembly.PANDAS_CSV_WRITE_OPTS)
 
     stat_data = [{TensorDimension.MEAN: mean[0], TensorDimension.STD: scale[0]}]
     stat_file_path = nu.compute_stat_file_path(variable_id, channel_output_dir_path)
@@ -172,7 +172,7 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
         channel_data_list.append(channel_data)
 
     tensor_data = assembly.stack_channel(channel_data_list)
-    metadata = du.load_csv_file(channel_metadata_file_path)
+    metadata = du.load_csv_file(channel_metadata_file_path, assembly.PANDAS_CSV_READ_OPTS)
 
     if has_to_shuffle:
         tensor_data, metadata = assembly.shuffle_data(tensor_data, metadata)
@@ -181,7 +181,7 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
         nu.compute_data_meta_data_file_path(tensor_id, tensor_output_dir, dataset_name)
 
     os.makedirs(tensor_output_dir, exist_ok=True)
-    du.save_to_csv_file(metadata, tensor_metadata_file_path)
+    du.save_to_csv_file(metadata, tensor_metadata_file_path, assembly.PANDAS_CSV_WRITE_OPTS)
     hu.write_ndarray_to_hdf5(tensor_data_file_path, tensor_data)
     return tensor_data_file_path, tensor_metadata_file_path
 

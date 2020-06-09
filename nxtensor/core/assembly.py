@@ -11,6 +11,7 @@ import nxtensor.utils.hdf5_utils as hu
 import nxtensor.utils.file_utils as fu
 import nxtensor.utils.naming_utils as nu
 import nxtensor.utils.time_utils as tu
+import nxtensor.utils.csv_utils as cu
 import nxtensor.utils.db_utils as du
 
 from sklearn.preprocessing import StandardScaler
@@ -18,6 +19,16 @@ from sklearn.preprocessing import StandardScaler
 import os
 
 import os.path as path
+
+import nxtensor.core.xarray_channel_extraction as chan_xtract
+
+PANDAS_CSV_WRITE_OPTS = {k: v for k, v in cu.DEFAULT_CSV_OPTIONS.items()}
+PANDAS_CSV_WRITE_OPTS['header'] = True
+PANDAS_CSV_WRITE_OPTS['index'] = False
+
+
+PANDAS_CSV_READ_OPTS = {k: v for k, v in cu.DEFAULT_CSV_OPTIONS.items()}
+PANDAS_CSV_READ_OPTS['dtype'] = chan_xtract.METADATA_TYPES
 
 
 def compute_block_file_structure(blocks_dir_path: str) -> \
@@ -153,7 +164,7 @@ def load_data_blocks(variable_id: VariableId, periods: Sequence[Period], label_i
                 data_file_template = block_file_structure[period][label_id][0]
                 data = hu.read_ndarray_from_hdf5(data_file_template.format(variable_id))
                 metadata_file_template = block_file_structure[period][label_id][1]
-                metadata = du.load_csv_file(metadata_file_template.format(variable_id))
+                metadata = du.load_csv_file(metadata_file_template.format(variable_id), PANDAS_CSV_READ_OPTS)
                 image_number = block_file_structure[period][label_id][2]
                 label_data_structure[label_id] = (data, metadata, image_number)
         block_data_structure[period] = label_data_structure

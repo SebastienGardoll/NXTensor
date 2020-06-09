@@ -13,6 +13,7 @@ import xarray as xr
 import nxtensor.utils.csv_utils
 import nxtensor.utils.hdf5_utils
 from nxtensor.exceptions import ConfigurationError
+from nxtensor.utils.coordinates import Coordinate
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.db_utils import create_db_metadata_mapping
 from nxtensor.utils.csv_option_names import CsvOptName
@@ -32,7 +33,16 @@ import time
 
 from nxtensor.core.types import VariableId, LabelId, MetaDataBlock, Period, DBMetadataMapping
 
+import numpy as np
+
 INDEX_NAME = 'index'
+
+
+METADATA_TYPES = {TimeResolution.DAY: np.int8,TimeResolution.DAY2D: np.str,
+                  TimeResolution.HOUR: np.int8, TimeResolution.HOUR2D: np.str,
+                  TimeResolution.MONTH: np.int8, TimeResolution.MONTH2D: np.str,
+                  TimeResolution.YEAR: np.int16,
+                  Coordinate.LAT: float, Coordinate.LON: float}
 
 
 # TODO: get rid of these global variables.
