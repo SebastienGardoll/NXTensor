@@ -121,7 +121,10 @@ def concatenate_data_compute_dataset_indexes(periods: Sequence[Period],
     current_dataset = next(dataset_iter)
     dataset_image_counter = 0
     left_index = 0
+    #print(f'total number imgs: {total_number_images}')
+    #print(f'image ratios: {image_ratios}')
     for period in periods:
+        #print(f'period: {period}')
         period_data = block_file_structure[period]
         for label_id in label_ids:
             if label_id in period_data:
@@ -129,6 +132,7 @@ def concatenate_data_compute_dataset_indexes(periods: Sequence[Period],
                 data.append(label_data[0])
                 metadata.append(label_data[1])
                 dataset_image_counter += label_data[2]    # this condition is related to the last dataset
+        #print(f'img counter: {left_index + dataset_image_counter}')
         if dataset_image_counter >= current_dataset[1] or left_index + dataset_image_counter == total_number_images:
             right_index = left_index + dataset_image_counter
             print(f"> dataset '{current_dataset[0]}' real ratio is {dataset_image_counter*100./total_number_images}%")
