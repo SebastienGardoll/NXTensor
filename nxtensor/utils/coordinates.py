@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Mar 28 16:14:08 2019
+
+@author: sebastien@gardoll.fr
+"""
+
 class Coordinate:
 
     LAT = 'lat'

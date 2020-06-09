@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar 26 11:58:46 2019
+
+@author: sebastien@gardoll.fr
+"""
+
 import os.path as path
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.variable import SingleLevelVariable, MultiLevelVariable, Variable, ComputedVariable

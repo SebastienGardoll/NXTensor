@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr  3 13:26:39 2019
+
+@author: sebastien@gardoll.fr
+"""
+
 from os import path
 
 from nxtensor.extraction import ClassificationLabel, ExtractionConfig, ExtractionShape

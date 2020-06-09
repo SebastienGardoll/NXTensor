@@ -5,6 +5,7 @@ Created on Wed Apr  22 09:20:10 2020
 
 @author: sebastien@gardoll.fr
 """
+
 from abc import abstractmethod, ABC
 from typing import Dict, Set, Tuple, Mapping, Sequence, List
 
