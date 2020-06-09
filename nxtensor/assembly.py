@@ -132,15 +132,15 @@ def channel_building(variable_id: VariableId, channel_output_dir_path: str,
 
 
 def channel_stacking_batch(tensor_id: str,
+                           extraction_conf_file_path: str,
                            dataset_names: Sequence[str],
-                           channels_dir: str,
-                           tensor_output_dir: str,
-                           variable_ids: Sequence[VariableId],
                            has_to_shuffle: bool,
                            nb_workers: int = 1) -> None:
 
-    static_parameters = (tensor_id, tensor_output_dir, channels_dir, variable_ids,
-                                 has_to_shuffle)
+    extraction_conf: ExtractionConfig = ExtractionConfig.load(extraction_conf_file_path)
+    variable_ids = list(extraction_conf.get_variables().keys())
+    static_parameters = (tensor_id, extraction_conf.tensors_dir_path, extraction_conf.channels_dir_path,
+                         variable_ids, has_to_shuffle)
     parameters_list = [(dataset_name, *static_parameters) for dataset_name in dataset_names]
 
     if nb_workers > 1:
@@ -193,11 +193,21 @@ def __test_channel_building_batch(extraction_conf_file_path: str) -> None:
     ratios = [('validation', 0.1), ('training', 0.9)]
     channel_building_batch(extraction_conf_file_path, ratios, 10)
 
+
+def __test_channel_stacking_batch(extraction_conf_file_path: str) -> None:
+    tensor_id = '2000_10'
+    dataset_names = ('validation', 'training')
+    has_to_shuffle = True
+    nb_workers = 1
+    channel_stacking_batch(tensor_id, extraction_conf_file_path, dataset_names, has_to_shuffle, nb_workers)
+
+
 def __all_tests():
     config_dir_path = '/home/sgardoll/extraction_config'
     extraction_conf_file_path = path.join(config_dir_path, '2000_10_extraction_config.yml')
     __test_preprocess(extraction_conf_file_path)
     __test_channel_building_batch(extraction_conf_file_path)
+    __test_channel_stacking_batch(extraction_conf_file_path)
 
 if __name__ == '__main__':
     __all_tests()
