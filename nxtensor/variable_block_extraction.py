@@ -5,11 +5,13 @@ Created on Wed Apr  22 11:14:54 2020
 
 @author: sebastien@gardoll.fr
 """
+
+
 from typing import Dict, Tuple, List
 
-from .extraction import ExtractionConfig
-from .extractor import ExtractionVisitor
-from .variable import Variable
+from nxtensor.extraction import ExtractionConfig
+from nxtensor.extractor import ExtractionVisitor
+from nxtensor.variable import Variable
 
 import nxtensor.core.xarray_channel_extraction as chan_xtract
 from nxtensor.core.types import LabelId, MetaDataBlock, Period, DBMetadataMapping

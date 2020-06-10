@@ -51,6 +51,7 @@ class ExtractionConfig(YamlSerializable):
         self.label_file_paths: List[str] = None
         self.extraction_shape: ExtractionShape = ExtractionShape.SQUARE
         # The path of required directories for an extraction and assemble (channel and tensor).
+        self.qsub_log_dir_path: str = None
         self.blocks_dir_path: str = None
         self.channels_dir_path: str = None
         self.tensors_dir_path: str = None
@@ -58,7 +59,13 @@ class ExtractionConfig(YamlSerializable):
 
         # The maximum number of process spawn during the extraction.
         # Each process treats one extraction_metadata_blocks.
-        self.nb_process: int = 4
+        self.nb_process: int = None
+
+        # The maximum walltime for the extraction per variable.
+        self.max_walltime: str = None  # i.e. '01:59:59' hours:mins:seconds
+
+        # The maximum memory foot print per process.
+        self.max_mem_foot_print: str = None  # i.e. 10gb
 
         # The number of processes and the number of extraction_metadata_blocks should be the same so
         # as to speed up the extraction. The less the number of extraction_metadata_blocks is, the greater
@@ -66,6 +73,12 @@ class ExtractionConfig(YamlSerializable):
 
         self.__variables: Dict[VariableId, Variable] = None  # Transient for yaml serialization.
         self.__labels: Dict[LabelId, ClassificationLabel] = None  # Transient for yaml serialization.
+
+        # At the end of the tensor assemble. Has it to be shuffled ?
+        self.has_tensor_to_be_shuffled: bool = None
+
+        # The tensor will be split into the given dataset ratios.
+        self.tensor_dataset_ratios: Mapping[str, float] = None
 
         # TODO: save metadata options (csv).
 
