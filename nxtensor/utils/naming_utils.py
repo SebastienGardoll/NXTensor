@@ -78,6 +78,7 @@ def sort_labels(label_ids: Iterable[LabelId]) -> Sequence[LabelId]:
 def list_to_string(str_list: Sequence[str]) -> str:
     return functools.reduce(lambda x, y: f'{x}, {y}', str_list)
 
+
 def __parts_concatenation(parts: Iterable) -> str:
     return functools.reduce(lambda x, y: f'{x}{NAME_SEPARATOR}{y}', parts)
 

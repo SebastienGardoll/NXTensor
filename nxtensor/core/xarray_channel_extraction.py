@@ -40,11 +40,12 @@ import numpy as np
 INDEX_NAME = 'index'
 
 
-METADATA_TYPES = {TimeResolution.DAY: np.int8,TimeResolution.DAY2D: np.str,
+METADATA_TYPES = {TimeResolution.DAY: np.int8, TimeResolution.DAY2D: np.str,
                   TimeResolution.HOUR: np.int8, TimeResolution.HOUR2D: np.str,
                   TimeResolution.MONTH: np.int8, TimeResolution.MONTH2D: np.str,
                   TimeResolution.YEAR: np.int16,
                   Coordinate.LAT: float, Coordinate.LON: float}
+
 
 class BlockProcessor(ABC):
 
@@ -104,7 +105,7 @@ def extract(variable_id: str,
 
     static_parameters = (variable_id, block_processor,
                          extraction_metadata_block_csv_save_options)
-    parameters_list = [(period, extraction_metadata_blocks, *static_parameters) \
+    parameters_list = [(period, extraction_metadata_blocks, *static_parameters)
                        for period, extraction_metadata_blocks in merged_structures]
     start = time.time()
     if nb_workers > 1:

@@ -23,7 +23,7 @@ def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
     db_filename_template = '{dataset_id}_{label_id}_{filename_postfix}'
     db_format = DBType.CSV
     db_time_resolution = TimeResolution.HOUR
-    db_format_options = cu.create_csv_options(separator=',', header=0, line_terminator='\\n', encoding='utf8',
+    db_format_options = cu.create_csv_options(separator=',', header=0, line_terminator='\n', encoding='utf8',
                                               quote_char='"')
 
     db_meta_data_mapping = dict(lat='lat', lon='lon', year='year', month='month', day='day', hour='hour')
@@ -43,9 +43,9 @@ def bootstrap_cyclone_labels(label_parent_dir: str) -> None:
         label_file_path = path.join(label_parent_dir, label.compute_filename())
         label.save(label_file_path)
 
-    for dataset_id in dataset_ids:
-        create_label(dataset_id, 1.0, 'cyclone')
-        create_label(dataset_id, 0.0, 'no_cyclone')
+    for dataset_idd in dataset_ids:
+        create_label(dataset_idd, 1.0, 'cyclone')
+        create_label(dataset_idd, 0.0, 'no_cyclone')
 
 
 def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:

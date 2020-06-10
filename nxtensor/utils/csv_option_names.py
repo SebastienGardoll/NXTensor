@@ -5,6 +5,7 @@ Created on Fri Apr 24 11:01:15 2020
 @author: sebastien@gardoll.fr
 """
 
+
 class CsvOptName:
 
     SEPARATOR            = 'sep'
