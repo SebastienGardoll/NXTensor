@@ -54,41 +54,41 @@ class SquareRegionExtractionVisitor(RegionExtractionVisitor):
         if var.str_id not in self._extracted_regions:
             formatted_date = self.__bootstrap(var)
             self._result = xtract.extract_square_region(dataset=self._datasets[var.str_id],
-                                                       variable_netcdf_attr_name=var.netcdf_attr_name,
-                                                       formatted_date=formatted_date,
-                                                       lat=self._extraction_data[Coordinate.LAT],
-                                                       lat_resolution=var.lat_resolution,
-                                                       half_lat_frame=self._half_lat_frame,
-                                                       lon=self._extraction_data[Coordinate.LON],
-                                                       lon_resolution=var.lon_resolution,
-                                                       half_lon_frame=self._half_lon_frame,
-                                                       time_netcdf_attr_name=var.time_netcdf_attr_name,
-                                                       lat_netcdf_attr_name=var.lat_netcdf_attr_name,
-                                                       lon_netcdf_attr_name=var.lon_netcdf_attr_name,
-                                                       has_to_round=True, lat_nb_decimal=var.lat_nb_decimal,
-                                                       lon_nb_decimal=var.lon_nb_decimal,
-                                                       dask_scheduler=self._dask_scheduler)
+                                                        variable_netcdf_attr_name=var.netcdf_attr_name,
+                                                        formatted_date=formatted_date,
+                                                        lat=self._extraction_data[Coordinate.LAT],
+                                                        lat_resolution=var.lat_resolution,
+                                                        half_lat_frame=self._half_lat_frame,
+                                                        lon=self._extraction_data[Coordinate.LON],
+                                                        lon_resolution=var.lon_resolution,
+                                                        half_lon_frame=self._half_lon_frame,
+                                                        time_netcdf_attr_name=var.time_netcdf_attr_name,
+                                                        lat_netcdf_attr_name=var.lat_netcdf_attr_name,
+                                                        lon_netcdf_attr_name=var.lon_netcdf_attr_name,
+                                                        has_to_round=True, lat_nb_decimal=var.lat_nb_decimal,
+                                                        lon_nb_decimal=var.lon_nb_decimal,
+                                                        dask_scheduler=self._dask_scheduler)
             self._extracted_regions[var.str_id] = self._result
 
     def visit_multi_level_variable(self, var: MultiLevelVariable) -> None:
         if var.str_id not in self._extracted_regions:
             formatted_date = self.__bootstrap(var)
             self._result = xtract.extract_square_region(dataset=self._datasets[var.str_id],
-                                                       variable_netcdf_attr_name=var.netcdf_attr_name,
-                                                       formatted_date=formatted_date,
-                                                       lat=self._extraction_data[Coordinate.LAT],
-                                                       lat_resolution=var.lat_resolution,
-                                                       half_lat_frame=self._half_lat_frame,
-                                                       lon=self._extraction_data[Coordinate.LON],
-                                                       lon_resolution=var.lon_resolution,
-                                                       half_lon_frame=self._half_lon_frame, variable_level=var.level,
-                                                       level_netcdf_attr_name=var.level_netcdf_attr_name,
-                                                       time_netcdf_attr_name=var.time_netcdf_attr_name,
-                                                       lat_netcdf_attr_name=var.lat_netcdf_attr_name,
-                                                       lon_netcdf_attr_name=var.lon_netcdf_attr_name,
-                                                       has_to_round=True, lat_nb_decimal=var.lat_nb_decimal,
-                                                       lon_nb_decimal=var.lon_nb_decimal,
-                                                       dask_scheduler=self._dask_scheduler)
+                                                        variable_netcdf_attr_name=var.netcdf_attr_name,
+                                                        formatted_date=formatted_date,
+                                                        lat=self._extraction_data[Coordinate.LAT],
+                                                        lat_resolution=var.lat_resolution,
+                                                        half_lat_frame=self._half_lat_frame,
+                                                        lon=self._extraction_data[Coordinate.LON],
+                                                        lon_resolution=var.lon_resolution,
+                                                        half_lon_frame=self._half_lon_frame, variable_level=var.level,
+                                                        level_netcdf_attr_name=var.level_netcdf_attr_name,
+                                                        time_netcdf_attr_name=var.time_netcdf_attr_name,
+                                                        lat_netcdf_attr_name=var.lat_netcdf_attr_name,
+                                                        lon_netcdf_attr_name=var.lon_netcdf_attr_name,
+                                                        has_to_round=True, lat_nb_decimal=var.lat_nb_decimal,
+                                                        lon_nb_decimal=var.lon_nb_decimal,
+                                                        dask_scheduler=self._dask_scheduler)
             self._extracted_regions[var.str_id] = self._result
 
     def visit_computed_variable(self, var: ComputedVariable) -> None:

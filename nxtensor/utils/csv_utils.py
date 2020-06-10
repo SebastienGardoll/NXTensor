@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Apr 24 11:01:15 2020
+
+@author: sebastien@gardoll.fr
+"""
+
 import csv
 from typing import Union, Dict, Mapping, Sequence
 
@@ -31,7 +38,7 @@ def create_csv_options(separator: str = None, header: int = None, line_terminato
 
 DEFAULT_CSV_OPTIONS: Mapping[CsvOptName, any] = {CsvOptName.SEPARATOR: ',',
                                                  CsvOptName.LINE_TERMINATOR: '\n',
-                                                 CsvOptName.HEADER: 0, # The number of the line where the header is.
+                                                 CsvOptName.HEADER: 0,  # The number of the line where the header is.
                                                  CsvOptName.QUOTE_CHAR: '"',
                                                  CsvOptName.QUOTING: csv.QUOTE_NONNUMERIC,
                                                  CsvOptName.ENCODING: 'utf-8'}
@@ -67,7 +74,7 @@ def to_csv(data: Sequence[Mapping[str, any]], file_path: str,
     fieldnames = sorted(data[0].keys())
     csv_writer = csv.DictWriter(file, fieldnames=fieldnames, **csv_options)
 
-    if header >= 0: # The number of the line where the header is.
+    if header >= 0:  # The number of the line where the header is.
         csv_writer.writeheader()
 
     for mapping in data:

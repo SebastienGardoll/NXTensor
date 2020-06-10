@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jun 5 10:00:00 2020
+
+@author: sebastien@gardoll.fr
+"""
+
 from typing import Tuple, Iterable, Sequence
 
 from nxtensor.core.types import LabelId, Period
@@ -69,6 +77,7 @@ def sort_labels(label_ids: Iterable[LabelId]) -> Sequence[LabelId]:
 
 def list_to_string(str_list: Sequence[str]) -> str:
     return functools.reduce(lambda x, y: f'{x}, {y}', str_list)
+
 
 def __parts_concatenation(parts: Iterable) -> str:
     return functools.reduce(lambda x, y: f'{x}{NAME_SEPARATOR}{y}', parts)

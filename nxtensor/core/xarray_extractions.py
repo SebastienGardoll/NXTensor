@@ -12,9 +12,10 @@ import xarray as xr
 import nxtensor.utils.coordinate_utils as coordinate_utils
 from nxtensor.exceptions import ExtractionError
 
-# Ignore 'dataarray.py:1965: FutureWarning: dropping coordinates using `drop` is be deprecated; use drop_vars'
+# Ignore 'DataArray.py:1965: FutureWarning: dropping coordinates using `drop` is be deprecated; use drop_vars'
 import warnings
 warnings.filterwarnings('ignore')
+
 
 def open_netcdf(netcdf_file_path: str, options: Mapping[str, str] = None) -> xr.Dataset:
     if options is None:

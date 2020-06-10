@@ -7,9 +7,9 @@ Created on Wed Apr  22 11:14:54 2020
 """
 from typing import Dict, Tuple, List
 
-from nxtensor.extraction import ExtractionConfig
-from nxtensor.extractor import ExtractionVisitor
-from nxtensor.variable import Variable
+from .extraction import ExtractionConfig
+from .extractor import ExtractionVisitor
+from .variable import Variable
 
 import nxtensor.core.xarray_channel_extraction as chan_xtract
 from nxtensor.core.types import LabelId, MetaDataBlock, Period, DBMetadataMapping

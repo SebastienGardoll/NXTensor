@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jun 5 10:00:00 2020
+
+@author: sebastien@gardoll.fr
+"""
+
 import pickle
 
 import numpy as np
@@ -83,7 +91,7 @@ def channel_building_batch(extraction_conf_file_path: str, ratios: Sequence[Tupl
     variable_ids = list(extraction_conf.get_variables().keys())
 
     static_parameters = (extraction_conf.channels_dir_path, periods, label_ids,
-                                 total_number_images, block_file_structure, ratios, user_specific_block_processing)
+                         total_number_images, block_file_structure, ratios, user_specific_block_processing)
     parameters_list = [(variable_id, *static_parameters) for variable_id in variable_ids]
     if nb_workers > 1:
         len_variable_ids = len(variable_ids)
@@ -195,6 +203,7 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
 def __test_preprocess(extraction_conf_file_path: str) -> None:
     preprocessing(extraction_conf_file_path, has_to_shuffle_period=True)
 
+
 def __test_channel_building_batch(extraction_conf_file_path: str) -> None:
     ratios = [('validation', 0.1), ('training', 0.9)]
     channel_building_batch(extraction_conf_file_path, ratios, 10)
@@ -214,6 +223,7 @@ def __all_tests():
     __test_preprocess(extraction_conf_file_path)
     __test_channel_building_batch(extraction_conf_file_path)
     __test_channel_stacking_batch(extraction_conf_file_path)
+
 
 if __name__ == '__main__':
     __all_tests()

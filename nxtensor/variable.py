@@ -5,6 +5,7 @@ Created on Tue Mar 26 11:58:46 2019
 
 @author: sebastien@gardoll.fr
 """
+
 from typing import Dict, List, Mapping
 
 from nxtensor.core.types import VariableId
