@@ -65,7 +65,8 @@ class ExtractionConfig(YamlSerializable):
         self.max_walltime: str = None  # i.e. '01:59:59' hours:mins:seconds
 
         # The maximum memory foot print per process.
-        self.max_mem_foot_print: str = None  # i.e. 10gb
+        self.extraction_mem_foot_print: str = None  # i.e. 10gb
+        self.assembly_mem_foot_print: str = None  # i.e. 10gb
 
         # The number of processes and the number of extraction_metadata_blocks should be the same so
         # as to speed up the extraction. The less the number of extraction_metadata_blocks is, the greater
