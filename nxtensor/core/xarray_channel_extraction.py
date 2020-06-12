@@ -16,6 +16,7 @@ import nxtensor.utils.csv_utils
 import nxtensor.utils.hdf5_utils
 from nxtensor.exceptions import ConfigurationError
 from nxtensor.utils.coordinates import Coordinate
+from nxtensor.utils.tensor_dimensions import TensorDimension
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.utils.db_utils import create_db_metadata_mapping
 from nxtensor.utils.csv_option_names import CsvOptName
@@ -44,7 +45,8 @@ METADATA_TYPES = {TimeResolution.DAY: np.int8, TimeResolution.DAY2D: np.str,
                   TimeResolution.HOUR: np.int8, TimeResolution.HOUR2D: np.str,
                   TimeResolution.MONTH: np.int8, TimeResolution.MONTH2D: np.str,
                   TimeResolution.YEAR: np.int16,
-                  Coordinate.LAT: float, Coordinate.LON: float}
+                  Coordinate.LAT: float, Coordinate.LON: float,
+                  TensorDimension.LABEL_NUM_ID: float}
 
 
 class BlockProcessor(ABC):
@@ -68,12 +70,15 @@ def preprocess_extraction(preprocessing_output_file_path: str,
                           extraction_metadata_blocks: Mapping[LabelId, pd.DataFrame],
                           db_metadata_mappings: Mapping[LabelId, DBMetadataMapping],
                           netcdf_file_time_period: TimeResolution,
+                          label_num_ids: Mapping[str, float],
                           inplace: bool = False):
     # Compute the extraction_metadata_blocks according to the label for all the period of time.
     structures = dict()
     for label_id, dataframe in extraction_metadata_blocks.items():
         db_metadata_mapping = db_metadata_mappings[label_id]
-        structure = __build_blocks_structure(dataframe, db_metadata_mapping, netcdf_file_time_period, inplace)
+        label_num_id = label_num_ids[label_id]
+        structure = \
+            __build_blocks_structure(dataframe, db_metadata_mapping, netcdf_file_time_period, label_num_id, inplace)
         structures[label_id] = structure
 
     # Merged_structures guarantees the order (following period, label_id and extraction metadata).
@@ -182,8 +187,8 @@ def __merge_block_structures(structures: Mapping[LabelId, Dict[Period, MetaDataB
 
 
 def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMetadataMapping,
-                             netcdf_file_time_period: TimeResolution, inplace=False) \
-                             -> Dict[Period, MetaDataBlock]:
+                             netcdf_file_time_period: TimeResolution, label_num_id: float,
+                             inplace=False) -> Dict[Period, MetaDataBlock]:
     # Return the dataframe grouped by the given period covered by the netcdf file.
     # The result is a dictionary of extraction_metadata_blocks (rows of the given dataframe) mapped with a
     # period (a tuple of time attributes).
@@ -208,6 +213,9 @@ def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMet
         msg = f"'{netcdf_file_time_period}' is not a known time resolution"
         raise ConfigurationError(msg, e)
 
+    # Add the numerical id of the label.
+    dataframe[TensorDimension.LABEL_NUM_ID] = label_num_id
+
     list_keys = TimeResolution.KEYS[0:(resolution_degree + 1)]
     list_column_names = [db_metadata_mapping[key] for key in list_keys]
     indices = dataframe.groupby(list_column_names).indices
@@ -222,7 +230,9 @@ def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMet
 
     renamed_df.index.name = INDEX_NAME
     # Select only the columns of interest (lat, lon, year, etc.).
-    restricted_renamed_df = renamed_df[db_metadata_mapping.keys()]
+    selected_columns = list(db_metadata_mapping.keys())
+    selected_columns.append(TensorDimension.LABEL_NUM_ID)
+    restricted_renamed_df = renamed_df[selected_columns]
 
     # Compute the extraction_metadata_blocks.
     result: Dict[Period, MetaDataBlock] = dict()
@@ -232,22 +242,22 @@ def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMet
     return result
 
 
-def __test_build_blocks_structure(csv_file_path: str, period_resolution: TimeResolution)\
+def __test_build_blocks_structure(csv_file_path: str, period_resolution: TimeResolution, label_num_id: float)\
         -> Dict[Period, MetaDataBlock]:
     dataframe = du.load_csv_file(csv_file_path)
     db_metadata_mapping = create_db_metadata_mapping(year='year', month='month', day='day', hour='hour',
                                                      lat='lat', lon='lon')
-    return __build_blocks_structure(dataframe, db_metadata_mapping, period_resolution, True)
+    return __build_blocks_structure(dataframe, db_metadata_mapping, period_resolution, label_num_id, True)
 
 
 def __test__merge_block_structures():
-    cyclone_csv_file_path = '/Users/seb/tmp/extraction_config/2000_10_cyclone_dataset.csv'
-    no_cyclone_csv_file_path = '/Users/seb/tmp/extraction_config/2000_10_no_cyclone_dataset.csv'
+    cyclone_csv_file_path = '/data/sgardoll/cyclone_data/dataset/2000_10_cyclone_dataset.csv'
+    no_cyclone_csv_file_path = '/data/sgardoll/cyclone_data/dataset/2000_10_no_cyclone_dataset.csv'
     period_resolution = TimeResolution.MONTH
 
     structures = dict()
-    structures['cyclone'] = __test_build_blocks_structure(cyclone_csv_file_path, period_resolution)
-    structures['no_cyclone'] = __test_build_blocks_structure(no_cyclone_csv_file_path, period_resolution)
+    structures['cyclone'] = __test_build_blocks_structure(cyclone_csv_file_path, period_resolution, 1.)
+    structures['no_cyclone'] = __test_build_blocks_structure(no_cyclone_csv_file_path, period_resolution, 0.)
 
     merged_structures: List[Tuple[Period, List[Tuple[LabelId, MetaDataBlock]]]] = __merge_block_structures(structures)
     period1 = merged_structures[0][0]

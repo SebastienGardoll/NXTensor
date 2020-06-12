@@ -32,7 +32,9 @@ def preprocess_extraction(extraction_conf_file_path: str) -> None:
     print(f"> starting pre-process of extraction '{extraction_conf.str_id}'")
     db_metadata_mappings: Dict[LabelId, DBMetadataMapping] = dict()
     extraction_metadata_blocks: Dict[LabelId, pd.DataFrame] = dict()
+    label_num_ids = dict()
     for label_id, label in extraction_conf.get_labels().items():
+        label_num_ids[label_id] = label.num_id
         db_metadata_mappings[label_id] = label.db_meta_data_mapping
         dataframe_load_function = du.get_dataframe_load_function(label.db_format)
         extraction_metadata_block = dataframe_load_function(label.db_file_path, label.db_open_options)
@@ -49,6 +51,7 @@ def preprocess_extraction(extraction_conf_file_path: str) -> None:
                                       extraction_metadata_blocks=extraction_metadata_blocks,
                                       db_metadata_mappings=db_metadata_mappings,
                                       netcdf_file_time_period=netcdf_period_resolution,
+                                      label_num_ids=label_num_ids,
                                       inplace=True)
     print('> pre-process is completed')
 
