@@ -161,6 +161,9 @@ def create_torque_job(script_file_path: str,
     if vmem:
         result.append('-l')
         result.append(f'vmem={vmem}')
+    elif mem:
+        result.append('-l')
+        result.append(f'vmem={mem}')
 
     if node_specs:
         number_nodes = node_specs[0]
