@@ -21,7 +21,7 @@ set -e
 
 function source_conda_env
 {
-  source "${CONDA_HOME}/bin/activate" ""${CONDA_HOME}/envs/${CONDA_ENV_NAME}""
+  source "${CONDA_HOME}/bin/activate" "${CONDA_HOME}/envs/${CONDA_ENV_NAME}"
 }
 
 function check_env_vars

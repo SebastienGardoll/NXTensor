@@ -16,7 +16,8 @@ VariableId = str
 LabelId = str
 
 # A block of extraction metadata (lat, lon, year, month, etc.).
-MetaDataBlock = NewType('MetaDataBlock', Sequence[Mapping[Union[TimeResolution, Coordinate, TensorDimension], Union[int, float, str]]])
+MetaDataBlock = NewType('MetaDataBlock', Sequence[Mapping[Union[TimeResolution, Coordinate, TensorDimension],
+                                                          Union[int, float, str]]])
 
 
 # A Period is a tuple composed of values that correspond to the values of

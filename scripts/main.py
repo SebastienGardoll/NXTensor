@@ -147,8 +147,8 @@ def create_torque_job(script_file_path: str,
         del env_vars_opt_tmp
 
     if job_dependencies:
-        formated_ids = ':'.join(job_dependencies)
-        result.append(f"-W depend=afterok:{formated_ids}")
+        formatted_ids = ':'.join(job_dependencies)
+        result.append(f"-W depend=afterok:{formatted_ids}")
 
     if walltime:
         result.append('-l')
