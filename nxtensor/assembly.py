@@ -71,7 +71,7 @@ def __load_extraction_conf(extraction_conf_file_path: str):
         raise ConfigurationError(msg, e)
 
 
-def channel_building_batch(extraction_conf_file_path: str, ratios: Sequence[Tuple[str, float]], nb_workers: int = 1,
+def channel_building_batch(extraction_conf_file_path: str, ratios: Mapping[str, float], nb_workers: int = 1,
                            user_specific_block_processing:
                                Callable[[Sequence[Period], Sequence[LabelId],
                                          Mapping[Period, Mapping[LabelId, Tuple[np.ndarray, pd.DataFrame, int]]]],
@@ -114,7 +114,7 @@ def __map_channel_building(parameters):
 def channel_building(variable_id: VariableId, channel_output_dir_path: str,
                      periods: Sequence[Period], label_ids: Sequence[LabelId], total_number_images: int,
                      block_file_structure: Mapping[Period, Mapping[LabelId, Tuple[str, str, int]]],
-                     ratios: Sequence[Tuple[str, float]],
+                     ratios: Mapping[str, float],
                      user_specific_block_processing:
                          Callable[[Sequence[Period], Sequence[LabelId],
                                    Mapping[Period, Mapping[LabelId, Tuple[np.ndarray, pd.DataFrame, int]]]],
@@ -205,7 +205,7 @@ def __test_preprocess(extraction_conf_file_path: str) -> None:
 
 
 def __test_channel_building_batch(extraction_conf_file_path: str) -> None:
-    ratios = [('validation', 0.1), ('training', 0.9)]
+    ratios = {'validation': 0.1, 'training': 0.9}
     channel_building_batch(extraction_conf_file_path, ratios, 10)
 
 

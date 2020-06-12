@@ -55,7 +55,7 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:
     x_size = 32
     y_size = 32
     extraction_shape = ExtractionShape.SQUARE
-    nb_process = 4
+    nb_process = 15
 
     variable_file_paths = list()
     for var_str_id in era5_variables:
@@ -79,6 +79,12 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:
         extract_config.tensors_dir_path = path.join(output_parent_dir, 'tensors')
         extract_config.tmp_dir_path = path.join(output_parent_dir, 'tmp')
         extract_config.nb_process = nb_process
+        extract_config.has_tensor_to_be_shuffled = True
+        extract_config.tensor_dataset_ratios = {'test': 0.2, 'validation': 0.2, 'training': 0.6}
+        extract_config.max_walltime = '01:59:59'
+        extract_config.extraction_mem_foot_print = '5gb'
+        extract_config.assembly_mem_foot_print = '30gb'
+        extract_config.qsub_log_dir_path = path.join(output_parent_dir, 'job_logs')
 
         file_path = path.join(config_parent_dir, ExtractionConfig.generate_filename(dataset_id))
         extract_config.save(file_path)

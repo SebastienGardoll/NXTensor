@@ -9,9 +9,10 @@ Created on Tue Mar 26 12:13:52 2019
 
 class TensorDimension:
 
-    IMG     = 'img'
-    MEAN    = 'mean'
-    STD     = 'std'
-    CHANNEL = 'channel'
-    X       = 'x'
-    Y       = 'y'
+    IMG          = 'img'
+    MEAN         = 'mean'
+    STD          = 'std'
+    CHANNEL      = 'channel'
+    X            = 'x'
+    Y            = 'y'
+    LABEL_NUM_ID = 'label_num_id'

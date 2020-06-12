@@ -96,17 +96,17 @@ def concatenate_data_compute_dataset_indexes(periods: Sequence[Period],
                                              total_number_images: int,
                                              block_file_structure: Mapping[Period, Mapping[LabelId,
                                                                            Tuple[np.ndarray, pd.DataFrame, int]]],
-                                             ratios: Sequence[Tuple[str, float]]) \
+                                             ratios: Mapping[str, float]) \
                        -> Tuple[np.ndarray, pd.DataFrame, Sequence[Tuple[str, Sequence[int]]]] :
     # Compute the number of images for each dataset.
     image_ratios = list()
     ratio_sum: float = 0
     image_number_sum: int = 0
-    for ratio in ratios:
-        ratio_sum += ratio[1]
-        number_images: int = round(ratio[1]*total_number_images)
+    for dataset_name, ratio in ratios.items():
+        ratio_sum += ratio
+        number_images: int = round(ratio*total_number_images)
         image_number_sum += number_images
-        image_ratios.append((ratio[0], number_images))
+        image_ratios.append((dataset_name, number_images))
 
     # Check ratio consistency.
     if ratio_sum > 1.:
