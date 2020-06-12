@@ -45,8 +45,8 @@ METADATA_TYPES = {TimeResolution.DAY: np.int8, TimeResolution.DAY2D: np.str,
                   TimeResolution.HOUR: np.int8, TimeResolution.HOUR2D: np.str,
                   TimeResolution.MONTH: np.int8, TimeResolution.MONTH2D: np.str,
                   TimeResolution.YEAR: np.int16,
-                  Coordinate.LAT: float, Coordinate.LON: float,
-                  TensorDimension.LABEL_NUM_ID: float}
+                  Coordinate.LAT: np.float64, Coordinate.LON: np.float64,
+                  TensorDimension.LABEL_NUM_ID: np.float64}
 
 
 class BlockProcessor(ABC):
