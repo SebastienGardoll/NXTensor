@@ -236,8 +236,8 @@ def __build_blocks_structure(dataframe: pd.DataFrame, db_metadata_mapping: DBMet
 
     # Compute the extraction_metadata_blocks.
     result: Dict[Period, MetaDataBlock] = dict()
-    for index in indices.keys():
-        result[index] = convert_block_to_dict(restricted_renamed_df.loc[indices[index]])
+    for index, value in indices.items():
+        result[index] = convert_block_to_dict(restricted_renamed_df.loc[value])
 
     return result
 
