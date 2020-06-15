@@ -48,7 +48,7 @@ class YamlSerializable(yaml.YAMLObject):
             raise e
 
         try:
-            return yaml.load(yml_content)
+            return yaml.load(yml_content, Loader=yaml.FullLoader)
         except Exception as e:
             logging.error(f"cannot deserialize: {str(e)}")
             raise e
