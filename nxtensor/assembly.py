@@ -71,7 +71,8 @@ def __load_extraction_conf(extraction_conf_file_path: str):
         raise ConfigurationError(msg, e)
 
 
-def channel_building_batch(extraction_conf_file_path: str, nb_workers: int = None, user_specific_block_processing:
+def channel_building_batch(extraction_conf_file_path: str, nb_workers: int = None,
+                           user_specific_block_processing:
                                Callable[[Sequence[Period], Sequence[LabelId],
                                          Mapping[Period, Mapping[LabelId, Tuple[np.ndarray, pd.DataFrame, int]]]],
                                         Tuple[Sequence[Period], Sequence[LabelId],
