@@ -12,6 +12,8 @@ class TensorDimension:
     IMG          = 'img'
     MEAN         = 'mean'
     STD          = 'std'
+    MIN          = 'min'
+    MAX          = 'max'
     CHANNEL      = 'channel'
     X            = 'x'
     Y            = 'y'
