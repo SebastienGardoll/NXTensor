@@ -34,14 +34,14 @@ from nxtensor.utils.tensor_dimensions import TensorDimension
 import random
 
 
-def preprocessing(extraction_conf_file_path: str, has_to_shuffle_period: bool) -> None:
+def preprocessing(extraction_conf_file_path: str) -> None:
     extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
     print(f"> starting pre-process of assemble '{extraction_conf.str_id}'")
     metadata_block_has_header = True
     preprocessing_file_path = __generate_preprocessing_file_path(extraction_conf)
     periods, label_ids, block_file_structure = assembly.compute_block_file_structure(extraction_conf.blocks_dir_path)
 
-    if has_to_shuffle_period:
+    if extraction_conf.has_tensor_to_be_shuffled:
         periods = random.sample(periods, len(periods))
 
     variable_id = next(iter(extraction_conf.get_variables().keys()))
@@ -71,8 +71,7 @@ def __load_extraction_conf(extraction_conf_file_path: str):
         raise ConfigurationError(msg, e)
 
 
-def channel_building_batch(extraction_conf_file_path: str, ratios: Mapping[str, float], nb_workers: int = 1,
-                           user_specific_block_processing:
+def channel_building_batch(extraction_conf_file_path: str, nb_workers: int = None, user_specific_block_processing:
                                Callable[[Sequence[Period], Sequence[LabelId],
                                          Mapping[Period, Mapping[LabelId, Tuple[np.ndarray, pd.DataFrame, int]]]],
                                         Tuple[Sequence[Period], Sequence[LabelId],
@@ -91,13 +90,17 @@ def channel_building_batch(extraction_conf_file_path: str, ratios: Mapping[str, 
     variable_ids = list(extraction_conf.get_variables().keys())
 
     static_parameters = (extraction_conf.channels_dir_path, periods, label_ids,
-                         total_number_images, block_file_structure, ratios, user_specific_block_processing)
+                         total_number_images, block_file_structure, extraction_conf.tensor_dataset_ratios,
+                         user_specific_block_processing)
     parameters_list = [(variable_id, *static_parameters) for variable_id in variable_ids]
+
+    len_variable_ids = len(variable_ids)
+    if not nb_workers:
+        nb_workers = len_variable_ids
+
     if nb_workers > 1:
-        len_variable_ids = len(variable_ids)
         if nb_workers > len_variable_ids:
             nb_workers = len_variable_ids
-
         print(f"> assembling the channels '{nu.list_to_string(variable_ids)}' in parallel (nb worker: {nb_workers})")
         with Pool(processes=nb_workers) as pool:
             pool.map(func=__map_channel_building, iterable=parameters_list, chunksize=1)
@@ -143,18 +146,20 @@ def channel_building(variable_id: VariableId, channel_output_dir_path: str,
 
 def channel_stacking_batch(tensor_id: str,
                            extraction_conf_file_path: str,
-                           dataset_names: Sequence[str],
-                           has_to_shuffle: bool,
-                           nb_workers: int = 1) -> None:
+                           nb_workers: int = None) -> None:
 
     extraction_conf: ExtractionConfig = ExtractionConfig.load(extraction_conf_file_path)
+    dataset_names = extraction_conf.tensor_dataset_ratios.keys()
     variable_ids = list(extraction_conf.get_variables().keys())
     static_parameters = (tensor_id, extraction_conf.tensors_dir_path, extraction_conf.channels_dir_path,
-                         variable_ids, has_to_shuffle)
+                         variable_ids, extraction_conf.has_tensor_to_be_shuffled)
     parameters_list = [(dataset_name, *static_parameters) for dataset_name in dataset_names]
 
+    len_dataset_types = len(dataset_names)
+    if not nb_workers:
+        nb_workers = len_dataset_types
+
     if nb_workers > 1:
-        len_dataset_types = len(dataset_names)
         if nb_workers > len_dataset_types:
             nb_workers = len_dataset_types
 
@@ -201,20 +206,16 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
 
 
 def __test_preprocess(extraction_conf_file_path: str) -> None:
-    preprocessing(extraction_conf_file_path, has_to_shuffle_period=True)
+    preprocessing(extraction_conf_file_path)
 
 
 def __test_channel_building_batch(extraction_conf_file_path: str) -> None:
-    ratios = {'validation': 0.1, 'training': 0.9}
-    channel_building_batch(extraction_conf_file_path, ratios, 10)
+    channel_building_batch(extraction_conf_file_path)
 
 
 def __test_channel_stacking_batch(extraction_conf_file_path: str) -> None:
     tensor_id = '2000_10'
-    dataset_names = ('validation', 'training')
-    has_to_shuffle = True
-    nb_workers = 2
-    channel_stacking_batch(tensor_id, extraction_conf_file_path, dataset_names, has_to_shuffle, nb_workers)
+    channel_stacking_batch(tensor_id, extraction_conf_file_path)
 
 
 def __all_tests():

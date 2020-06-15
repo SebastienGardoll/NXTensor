@@ -75,7 +75,7 @@ def sort_labels(label_ids: Iterable[LabelId]) -> Sequence[LabelId]:
     return sorted(label_ids)
 
 
-def list_to_string(str_list: Sequence[str]) -> str:
+def list_to_string(str_list: Iterable[str]) -> str:
     return functools.reduce(lambda x, y: f'{x}, {y}', str_list)
 
 

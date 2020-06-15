@@ -86,12 +86,10 @@ def extraction(extraction_conf_file_path: str) -> None:
 def assemble(extraction_conf_file_path: str) -> None:
     extraction_conf = ExtractionConfig.load(extraction_conf_file_path)
     nb_workers = len(extraction_conf.variable_file_paths)
-    chan_assembly.preprocessing(extraction_conf_file_path, extraction_conf.has_tensor_to_be_shuffled)
-    chan_assembly.channel_building_batch(extraction_conf_file_path, extraction_conf.tensor_dataset_ratios, nb_workers)
-    chan_assembly.channel_stacking_batch(extraction_conf.str_id, extraction_conf_file_path,
-                                         extraction_conf.tensor_dataset_ratios.keys(),
-                                         extraction_conf.has_tensor_to_be_shuffled,
-                                         len(extraction_conf.tensor_dataset_ratios))
+    chan_assembly.preprocessing(extraction_conf_file_path)
+    chan_assembly.channel_building_batch(extraction_conf_file_path, nb_workers)
+    nb_workers = len(extraction_conf.tensor_dataset_ratios)
+    chan_assembly.channel_stacking_batch(extraction_conf.str_id, extraction_conf_file_path, nb_workers)
 
 
 def handle_torque_job(job_name: str, args: Sequence[any]) -> str:
