@@ -139,11 +139,12 @@ def channel_building(variable_id: VariableId, channel_output_dir_path: str,
             nu.compute_data_meta_data_file_path(variable_id, channel_output_dir_path, dataset_name)
         hu.write_ndarray_to_hdf5(dataset_data_file_path, dataset_data)
         du.save_to_csv_file(dataset_metadata, dataset_metadata_file_path, assembly.PANDAS_CSV_WRITE_OPTS)
-    
-    min = channel_data.min()
-    max = channel_data.max()
-    stat_data = [{TensorDimension.MEAN: mean[0], TensorDimension.STD: scale[0], TensorDimension.MIN: min,
-                  TensorDimension.MAX: max}]
+
+    # Cast into 64 bits otherwise the value is trunked.
+    min = float(channel_data.min())
+    max = float(channel_data.max())
+    stat_data = [{TensorDimension.MIN: min, TensorDimension.MAX: max, TensorDimension.MEAN: mean[0],
+                  TensorDimension.STD: scale[0]}]
     stat_file_path = nu.compute_stat_file_path(variable_id, channel_output_dir_path)
     cu.to_csv(data=stat_data, file_path=stat_file_path)
 
