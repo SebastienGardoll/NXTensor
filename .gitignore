@@ -3,3 +3,6 @@ nohup.out
 .spyproject
 .idea
 .DS_Store
+build
+dist
+NXTensor.egg-info
