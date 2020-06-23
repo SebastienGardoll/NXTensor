@@ -1,5 +1,14 @@
 # NXTensor
 
+NXTensor is a tensor making framework based on Xarray.
+It automates the extraction of multichannel images (tensors) from NetCDF time series of geolocated data. 
+
+## Author
+
+Sébastien Gardoll
+Software Engineer at [IPSL](https://www.ipsl.fr/en/)
+sebastien@gardoll.fr
+
 ## Requirements
 
 - netcdf data files (all variables):
