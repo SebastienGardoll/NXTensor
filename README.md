@@ -7,7 +7,8 @@ It automates the extraction of multichannel images (tensors) from NetCDF time se
 
 Sébastien Gardoll
 Software Engineer at [IPSL](https://www.ipsl.fr/en/)
-sebastien@gardoll.fr
+
+contact: sebastien@gardoll.fr
 
 ## Requirements
 
