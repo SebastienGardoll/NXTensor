@@ -33,7 +33,7 @@ def create_period(period_str: str) -> Period:
 def build_date_dictionary(date: datetime.datetime) -> Mapping[str, Union[str, int]]:
     if type(date) is datetime.datetime:
         return {'year': date.year, 'month': date.month, 'month2d': f"{date.month:02d}",
-                'day': date.day, 'hour': date.hour, 'minute': date.minute,
+                'day': date.day, 'day2d': f"{date.day:02d}",'hour': date.hour, 'minute': date.minute,
                 'second': date.second, 'microsecond': date.microsecond}
     else:
         msg = f"the given date '{date}', is not an instance of datetime"

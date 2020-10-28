@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="NXTensor",
-    version="0.3.3.1",
+    version="0.3.3.2",
     author="Sébastien Gardoll",
     author_email="sebastien@gardoll.fr",
     description="NXTensor is a tensor making framework based on Xarray. It automates the extraction " +

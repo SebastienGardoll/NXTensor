@@ -119,8 +119,9 @@ def extract(variable_id: str,
             tmp_result = pool.map(func=__map_core_extraction, iterable=parameters_list, chunksize=1)
     else:
         print(f"> variable {variable_id} starting sequential extractions")
+        tmp_result = list()
         for parameters in parameters_list:
-            tmp_result = __map_core_extraction(parameters)
+            tmp_result.append(__map_core_extraction(parameters))
     print(f"> elapsed time: {tu.display_duration(time.time()-start)}")
     result = dict(tmp_result)
     return result
