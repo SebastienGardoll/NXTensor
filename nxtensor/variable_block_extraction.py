@@ -70,7 +70,8 @@ class __SquareExtractionProcessor(chan_xtract.BlockProcessor):
             -> Tuple[str, List[Tuple[LabelId, xr.DataArray, MetaDataBlock]]]:
         # Must be a integer !!! TODO: check for that when designing an extraction.
         half_lat_frame = int((self.__extraction_conf.y_size * self.__variable.lat_resolution)/2)
-        half_lon_frame = int((self.__extraction_conf.y_size * self.__variable.lat_resolution)/2)
+        half_lon_frame = int((self.__extraction_conf.y_size * self.__variable.lon_resolution)/2)
+
         extractor: ExtractionVisitor = ExtractionVisitor(period=period,
                                                          extraction_metadata_blocks=extraction_metadata_blocks,
                                                          half_lat_frame=half_lat_frame,
