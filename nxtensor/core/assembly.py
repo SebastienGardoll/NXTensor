@@ -213,8 +213,11 @@ def split_channel(channel_data: np.ndarray, channel_metadata: pd.DataFrame, data
     return channel_data[dataset_indexes], channel_metadata.iloc[dataset_indexes]
 
 
-def stack_channel(channel_data_list: Sequence[np.ndarray]) -> np.ndarray:
-    tensor = np.stack(channel_data_list, axis=3)
+def stack_channel(channel_data_list: Sequence[np.ndarray], is_channels_last: bool) -> np.ndarray:
+    if is_channels_last:
+        tensor = np.stack(channel_data_list, axis=3)
+    else:
+        tensor = np.stack(channel_data_list)
     return tensor
 
 

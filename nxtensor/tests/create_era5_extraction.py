@@ -80,6 +80,7 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir: str) -> None:
         extract_config.tmp_dir_path = path.join(output_parent_dir, 'tmp')
         extract_config.nb_process = nb_process
         extract_config.has_tensor_to_be_shuffled = True
+        extract_config.is_channels_last = True
         extract_config.tensor_dataset_ratios = {'test': 0.2, 'validation': 0.2, 'training': 0.6}
         extract_config.max_walltime = '01:59:59'
         extract_config.extraction_mem_foot_print = '5gb'

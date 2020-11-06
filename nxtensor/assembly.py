@@ -156,8 +156,10 @@ def channel_stacking_batch(tensor_id: str,
     extraction_conf: ExtractionConfig = ExtractionConfig.load(extraction_conf_file_path)
     dataset_names = extraction_conf.tensor_dataset_ratios.keys()
     variable_ids = list(extraction_conf.get_variables().keys())
-    static_parameters = (tensor_id, extraction_conf.tensors_dir_path, extraction_conf.channels_dir_path,
-                         variable_ids, extraction_conf.has_tensor_to_be_shuffled)
+    static_parameters = (tensor_id, extraction_conf.tensors_dir_path,
+                         extraction_conf.channels_dir_path, variable_ids,
+                         extraction_conf.has_tensor_to_be_shuffled,
+                         extraction_conf.is_channels_last)
     parameters_list = [(dataset_name, *static_parameters) for dataset_name in dataset_names]
 
     len_dataset_types = len(dataset_names)
@@ -182,7 +184,8 @@ def __map_channel_stacking(parameters):
 
 
 def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
-                     channels_dir: str, variable_ids: Sequence[VariableId], has_to_shuffle: bool) -> Tuple[str, str]:
+                     channels_dir: str, variable_ids: Sequence[VariableId],
+                     has_to_shuffle: bool, is_channels_last: bool) -> Tuple[str, str]:
     channel_data_list = list()
     channel_metadata_file_path = ''
     for variable_id in variable_ids:
@@ -193,7 +196,7 @@ def channel_stacking(dataset_name: str, tensor_id: str, tensor_output_dir: str,
         channel_data_list.append(channel_data)
 
     print("> stacking the channels")
-    tensor_data = assembly.stack_channel(channel_data_list)
+    tensor_data = assembly.stack_channel(channel_data_list, is_channels_last)
     metadata = du.load_csv_file(channel_metadata_file_path, assembly.PANDAS_CSV_READ_OPTS)
 
     if has_to_shuffle:
