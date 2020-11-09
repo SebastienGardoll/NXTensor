@@ -124,9 +124,7 @@ def __all_tests():
     import nxtensor.utils.time_utils as tu
     import nxtensor.utils.image_utils as iu
 
-    # tensor_file_path = '/data/sgardoll/merra2_extractions/2010_extraction/tensors/training_2010_data.h5'
-    # DEBUG
-    tensor_file_path = '/home_local/sgardoll/tmp_cyclone/tensors/training_2010_data.h5'
+    tensor_file_path = '/data/sgardoll/merra2_extractions/2010_extraction/tensors/training_2010_data.h5'
     tensor = hu.read_ndarray_from_hdf5(tensor_file_path)
     src_x_resolution = 0.5
     src_y_resolution = 0.625
@@ -138,6 +136,7 @@ def __all_tests():
     nb_threads = 4
     is_channels_last = True
     has_to_flip = True
+
     start = time.time()
 
     if has_to_flip:
@@ -147,7 +146,10 @@ def __all_tests():
                                              dest_y_size, dest_y_resolution, method, is_channels_last, nb_threads)
     tensor_parent_dir_path = path.dirname(tensor_file_path)
     tensor_filename = path.basename(tensor_file_path)
-    interpolated_tensor_file_path = path.join(tensor_parent_dir_path, f'interpolated_{tensor_filename}')
+
+    interpolated_tensor_filename = \
+        f'interpolated_{dest_x_size}px_{dest_y_size}px_at_{dest_y_resolution}_{tensor_filename}'
+    interpolated_tensor_file_path = path.join(tensor_parent_dir_path, interpolated_tensor_filename)
     hu.write_ndarray_to_hdf5(interpolated_tensor_file_path, interpolated_tensor)
     stop = time.time()
     print(f'> elapsed time: {tu.display_duration(stop-start)}')
