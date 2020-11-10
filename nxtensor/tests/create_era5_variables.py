@@ -7,6 +7,8 @@ Created on Tue Mar 26 11:58:46 2019
 """
 
 import os.path as path
+from typing import Dict
+
 from nxtensor.utils.time_resolutions import TimeResolution
 from nxtensor.variable import SingleLevelVariable, MultiLevelVariable, Variable, ComputedVariable
 
@@ -19,8 +21,9 @@ def bootstrap_era5_variables(variable_parent_dir_path: str) -> None:
     for str_id in era5_single_level_variables:
         netcdf_path_template = '/bdd/ERA5/NETCDF/GLOBAL_025/hourly/AN_SF/{year}/%s.{year}{month2d}.as1e5.GLOBAL_025.nc'\
                                % str_id
-        __bootstrap_era5_variable(str_id, str_id, netcdf_path_template, time_resolution, netcdf_period_resolution,
-                                  variable_parent_dir_path)
+        netcdf_path_template_periods = {'1979_01': netcdf_path_template}
+        __bootstrap_era5_variable(str_id, str_id, netcdf_path_template_periods, time_resolution,
+                                  netcdf_period_resolution, variable_parent_dir_path)
 
     era5_multi_level_variables = [('ta200', 'ta', 200), ('ta500', 'ta', 500),
                                   ('u850', 'u', 850), ('v850', 'v', 850)]
@@ -28,11 +31,12 @@ def bootstrap_era5_variables(variable_parent_dir_path: str) -> None:
     for str_id, attr_name, level in era5_multi_level_variables:
         netcdf_path_template = '/bdd/ERA5/NETCDF/GLOBAL_025/4xdaily/AN_PL/{year}/%s.{year}{month2d}' % attr_name + \
                                '.aphe5.GLOBAL_025.nc'
-        __bootstrap_era5_variable(str_id, attr_name, netcdf_path_template, time_resolution, netcdf_period_resolution,
-                                  variable_parent_dir_path, level, 'level')
+        netcdf_path_template_periods = {'1979_01': netcdf_path_template}
+        __bootstrap_era5_variable(str_id, attr_name, netcdf_path_template_periods, time_resolution,
+                                  netcdf_period_resolution, variable_parent_dir_path, level, 'level')
 
 
-def __bootstrap_era5_variable(str_id: str, attribute_name: str, netcdf_path_template: str,
+def __bootstrap_era5_variable(str_id: str, attribute_name: str, netcdf_path_template_periods: Dict[str, str],
                               time_resolution: TimeResolution, netcdf_period_resolution: TimeResolution,
                               variable_parent_dir_path: str, level: int = None, level_netcdf_attr_name: str = None)\
                               -> None:
@@ -48,7 +52,7 @@ def __bootstrap_era5_variable(str_id: str, attribute_name: str, netcdf_path_temp
     variable.time_netcdf_attr_name = 'time'
     variable.netcdf_period_resolution = netcdf_period_resolution
     variable.date_template = '{year}-{month2d}-{day}T{hour2d}'
-    variable.netcdf_path_template = netcdf_path_template
+    variable.netcdf_path_template_periods = netcdf_path_template_periods
     variable.lat_resolution = 0.25
     variable.lat_nb_decimal = 2
     variable.lat_netcdf_attr_name = 'latitude'

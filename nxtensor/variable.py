@@ -51,20 +51,90 @@ class Variable(YamlSerializable):
 
 class SingleLevelVariable(Variable):
 
+    from datetime import datetime
+    import re
+
     yaml_tag = u'SingleLevelVariable'
+
+    __DATE_PATTERN = re.compile('(\d{4})_(\d{2})')
+    __NOW = datetime.now()
+    __now_year = int(__NOW.year)
+    __now_month = int(__NOW.month)
 
     def __init__(self, str_id: str):
         super().__init__(str_id)
         # noinspection PyTypeChecker
         self.netcdf_attr_name: str = None
         # noinspection PyTypeChecker
-        self.netcdf_path_template: str = None
+        self.netcdf_path_template_periods: Dict[str, str] = None
+        # noinspection PyTypeChecker
+        self.__netcdf_path_template_mapping: Dict[int, Dict[int, str]] = None
 
     def compute_netcdf_file_path(self, time_dict: Mapping[TimeResolution, any]) -> str:
-        return self.netcdf_path_template.format(**time_dict)
+        if self.__netcdf_path_template_mapping is None:
+            self.__netcdf_path_template_mapping = \
+                SingleLevelVariable.__build_pattern_mapping(self.netcdf_path_template_periods)
+        netcdf_path_template = \
+            self.__netcdf_path_template_mapping[time_dict[TimeResolution.YEAR]][time_dict[TimeResolution.MONTH]]
+        return netcdf_path_template.format(**time_dict)
 
     def accept(self, visitor: 'VariableVisitor') -> None:
         visitor.visit_single_level_variable(self)
+
+    def save(self, file_path: str) -> None:
+        netcdf_path_template_mapping = self.__netcdf_path_template_mapping
+        del self.__netcdf_path_template_mapping
+        super().save(file_path)
+        self.__netcdf_path_template_mapping = netcdf_path_template_mapping
+
+    # Insertion order is preserved from Python version 3.6
+    # Insertion order must be aligned with chronological order.
+    @staticmethod
+    def __build_pattern_mapping(pattern_periods: Dict[str, str]) -> Dict[int, Dict[int, str]]:
+        result = dict()
+        dates = list(pattern_periods.keys())
+        max_index = len(dates) - 1
+        for date_index in range(0, max_index+1):
+            date = dates[date_index]
+            match = SingleLevelVariable.__DATE_PATTERN.match(date)
+            start_year = int(match.group(1))
+            start_month = int(match.group(2))
+            if date_index == max_index:
+                end_year = SingleLevelVariable.__now_year
+                end_month = SingleLevelVariable.__now_month
+            else:
+                end_date = dates[date_index+1]
+                match = SingleLevelVariable.__DATE_PATTERN.match(end_date)
+                end_year = int(match.group(1))
+                end_month = int(match.group(2))
+                if end_month == 1:
+                    end_month = 12
+                    end_year = end_year - 1
+                else:
+                    end_month = end_month - 1
+            SingleLevelVariable.__add_pattern(result, start_year, start_month, end_year, end_month,
+                                              pattern_periods[date])
+        return result
+
+    @staticmethod
+    def __add_pattern(dictionary: dict, start_year: int, start_month: int, end_year: int, end_month: int, pattern: str)\
+            -> None:
+        for current_year in range(start_year, end_year+1):
+            if current_year == start_year:
+                month_down_limit = start_month
+            else:
+                month_down_limit = 1
+            if current_year in dictionary:
+                current_dict = dictionary[current_year]
+            else:
+                current_dict = dict()
+            if current_year == end_year:
+                month_up_limit = end_month
+            else:
+                month_up_limit = 12
+            for current_month in range(month_down_limit, month_up_limit+1):
+                current_dict[current_month] = pattern
+            dictionary[current_year] = current_dict
 
 
 class MultiLevelVariable(SingleLevelVariable):
