@@ -122,7 +122,6 @@ def __all_tests():
     import time
     import os.path as path
     import nxtensor.utils.time_utils as tu
-    import nxtensor.utils.image_utils as iu
 
     tensor_file_path = '/data/sgardoll/merra2_extractions/2010_extraction/tensors/training_2010_data.h5'
     tensor = hu.read_ndarray_from_hdf5(tensor_file_path)
@@ -135,7 +134,7 @@ def __all_tests():
     method = 'linear'
     nb_threads = 4
     is_channels_last = True
-    has_to_flip = True
+    has_to_flip = False
 
     start = time.time()
 
@@ -155,7 +154,6 @@ def __all_tests():
     print(f'> elapsed time: {tu.display_duration(stop-start)}')
     merra2_variable_names = ('slp', 'tqv', 'u10m', 'v10m', 't200', 't500', 'u850', 'v850')
     print(f'> interpolated tensor shape: {interpolated_tensor.shape}')
-    iu.display_channels(interpolated_tensor[0], merra2_variable_names, 'title', is_channels_last)
 
 
 if __name__ == '__main__':
