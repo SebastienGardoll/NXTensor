@@ -67,11 +67,13 @@ class SingleLevelVariable(Variable):
         self.netcdf_attr_name: str = None
         # noinspection PyTypeChecker
         self.netcdf_path_template_periods: Dict[str, str] = None
+        # Transient for yaml serialization.
         # noinspection PyTypeChecker
         self.__netcdf_path_template_mapping: Dict[int, Dict[int, str]] = None
 
     def compute_netcdf_file_path(self, time_dict: Mapping[TimeResolution, any]) -> str:
-        if self.__netcdf_path_template_mapping is None:
+        netcdf_path_template_mapping_value = getattr(self, '__netcdf_path_template_mapping', None)
+        if netcdf_path_template_mapping_value is None:
             self.__netcdf_path_template_mapping = \
                 SingleLevelVariable.__build_pattern_mapping(self.netcdf_path_template_periods)
         netcdf_path_template = \
