@@ -85,7 +85,7 @@ def bootstrap_cyclone_extraction_configs(config_parent_dir: str,
         extract_config.is_channels_last = True
         extract_config.tensor_dataset_ratios = {'test': 0.2, 'validation': 0.2, 'training': 0.6}
         extract_config.max_walltime = '01:59:59'
-        extract_config.extraction_mem_foot_print = '5gb'
+        extract_config.extraction_mem_foot_print = '10gb'
         extract_config.assembly_mem_foot_print = '30gb'
         extract_config.qsub_log_dir_path = path.join(output_parent_dir, 'job_logs')
 
