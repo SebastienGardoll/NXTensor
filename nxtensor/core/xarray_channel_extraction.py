@@ -252,8 +252,8 @@ def __test_build_blocks_structure(csv_file_path: str, period_resolution: TimeRes
 
 
 def __test__merge_block_structures():
-    cyclone_csv_file_path = '/data/sgardoll/cyclone_data/dataset/2000_10_cyclone_dataset.csv'
-    no_cyclone_csv_file_path = '/data/sgardoll/cyclone_data/dataset/2000_10_no_cyclone_dataset.csv'
+    cyclone_csv_file_path = '/data/sgardoll/cyclone_data/era5_dataset/2000_10_cyclone_dataset.csv'
+    no_cyclone_csv_file_path = '/data/sgardoll/cyclone_data/era5_dataset/2000_10_no_cyclone_dataset.csv'
     period_resolution = TimeResolution.MONTH
 
     structures = dict()

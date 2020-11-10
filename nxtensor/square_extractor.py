@@ -125,7 +125,7 @@ def __test_create_extraction_data(lat: float, lon: float, year: int, month: int,
 def __test_computed_variable() -> None:
     half_lat_frame = 4
     half_lon_frame = 4
-    variable_parent_dir_path = '/home/sgardoll/extraction_config'
+    variable_parent_dir_path = '/home/sgardoll/era5_extraction_config'
 
     str_id    = 'wsl10'
     year      = 2000
@@ -153,7 +153,7 @@ def __test_computed_variable() -> None:
 def __test_single_multi_level() -> None:
     half_lat_frame = 8
     half_lon_frame = 8
-    variable_parent_dir_path = '/home/sgardoll/extraction_config'
+    variable_parent_dir_path = '/home/sgardoll/era5_extraction_config'
 
     str_id = 'msl'
     year   = 2000

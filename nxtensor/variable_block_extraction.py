@@ -107,7 +107,7 @@ def __test_extract(extraction_conf_file_path: str, variable_id: str) -> None:
 
 
 def __all_tests():
-    config_dir_path = '/home/sgardoll/extraction_config'
+    config_dir_path = '/home/sgardoll/era5_extraction_config'
     extraction_conf_file_path = path.join(config_dir_path, '2000_10_extraction_config.yml')
 
     __test_preprocess_extraction(extraction_conf_file_path)

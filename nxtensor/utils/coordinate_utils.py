@@ -117,7 +117,7 @@ def __test_reformat_coordinates(dataframe_file_path: str):
 
 def __all_tests():
     import os.path as path
-    dataframes_dir_path = '/data/sgardoll/cyclone_data/dataset'
+    dataframes_dir_path = '/data/sgardoll/cyclone_data/era5_dataset'
 
     dataframe_file_names = ('2000_10_cyclone_dataset.csv', '2000_10_no_cyclone_dataset.csv',
                             '2000_cyclone_dataset.csv', '2000_no_cyclone_dataset.csv',

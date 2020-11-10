@@ -113,7 +113,7 @@ def bootstrap_all(config_file_parent_dir_path: str) -> None:
 
 
 def __all_tests():
-    config_files_parent_dir_path = '/home/sgardoll/extraction_config'
+    config_files_parent_dir_path = '/home/sgardoll/era5_extraction_config'
     bootstrap_all(config_files_parent_dir_path)
     test_load(config_files_parent_dir_path)
 
