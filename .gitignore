@@ -6,3 +6,4 @@ nohup.out
 build
 dist
 NXTensor.egg-info
+*.pyc
