@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="NXTensor",
-    version="0.3.3.3",
+    version="0.3.3.4",
     author="Sébastien Gardoll",
     author_email="sebastien@gardoll.fr",
     description="NXTensor is a tensor making framework based on Xarray. It automates the extraction " +
@@ -32,6 +32,7 @@ setuptools.setup(
         'pandas>=1.0.3',
         'pyyaml>=5.3.1',
         'scikit-learn>=0.22.1',
-        'xarray>=0.15.1'
+        'xarray>=0.15.1',
+        'matplotlib>=3.3.2'
     ],
 )
