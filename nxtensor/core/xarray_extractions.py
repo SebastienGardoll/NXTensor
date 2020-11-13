@@ -11,6 +11,7 @@ import dask
 import xarray as xr
 import nxtensor.utils.coordinate_utils as coordinate_utils
 from nxtensor.exceptions import ExtractionError
+import numpy as np
 
 # Ignore 'DataArray.py:1965: FutureWarning: dropping coordinates using `drop` is be deprecated; use drop_vars'
 import warnings
@@ -65,6 +66,11 @@ def extract_square_region(dataset: xr.Dataset, variable_netcdf_attr_name: str, f
             indexers[level_netcdf_attr_name] = variable_level
 
         result = dataset[variable_netcdf_attr_name].sel(indexers=indexers).compute()
+
+        if np.isnan(result.values).max():
+            print(f"> [WARNING] extracted region contains NaN (variable '{variable_netcdf_attr_name}' "
+                  f"for indexers '{indexers}')")
+
         # Drop the coordinates (time, latitude and longitude) so as to concatenate
         # the extracted region so as to stack several of them and make a channel.
         result = result.drop(result.coords)
